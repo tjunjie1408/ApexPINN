@@ -13,9 +13,11 @@ wheels/
 .venv/
 
 # Data, caches, checkpoints (kept locally / Drive / S3)
-data/
+# Leading "/" anchors to the repo root; plain "data/" would also ignore src/apexpinn/data/.
+/data/
+/checkpoints/
+# FastF1 caches are never source, so ignore them at any depth.
 .fastf1_cache/
-checkpoints/
 
 # Secrets
 *.pem
