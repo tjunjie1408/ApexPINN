@@ -110,7 +110,8 @@ MISSPEC_VARIANTS: dict[str, Misspecification] = {
 def default_theta_true() -> PhysicsParams:
     """Ground-truth Theta for C1..C5: softer compounds warm up faster, wear faster, and peak at lower h.
 
-    With these values most stints have their fastest lap between stint laps 2 and 8 (the early dip of S4).
+    With these values most stints have their fastest lap between stint laps 2 and 8, more than 0.1 s faster
+    than stint lap 1 (the early dip of S4).
     """
     return PhysicsParams.from_constrained(
         k=[0.22, 0.28, 0.35, 0.43, 0.52],
@@ -150,7 +151,12 @@ class SyntheticDataset(eqx.Module):
 def _solve_stint(
     params: PhysicsParams, compound_idx: jax.Array, q_knots: jax.Array
 ) -> tuple[jax.Array, jax.Array]:
-    """Solve the true thermal and wear ODEs on tau in [0, MAX_LAPS] and return (h, w) at tau = 1..MAX_LAPS."""
+    """Solve the true thermal and wear ODEs on tau in [0, MAX_LAPS] and return (h, w) at tau = 1..MAX_LAPS.
+
+    q has a slope change at every knot, so the interior knots are jump times: no Tsit5 step spans one.
+    Steps across kinks make the embedded error estimate unreliable. Without jump times, this solve and
+    ODEModel.solve disagreed by up to 3.5e-4 in h at rtol = atol = 1e-6.
+    """
     knots = jnp.arange(MAX_LAPS + 1, dtype=q_knots.dtype)
     q_of_tau = diffrax.LinearInterpolation(ts=knots, ys=q_knots)
 
@@ -168,7 +174,9 @@ def _solve_stint(
         dt0=0.1,
         y0=(zero, zero),
         saveat=diffrax.SaveAt(ts=knots[1:]),
-        stepsize_controller=diffrax.PIDController(rtol=1e-6, atol=1e-6),
+        stepsize_controller=diffrax.ClipStepSizeController(
+            diffrax.PIDController(rtol=1e-6, atol=1e-6), jump_ts=knots[1:-1]
+        ),
         max_steps=8192,
     )
     h, w = sol.ys

@@ -1,14 +1,17 @@
 """FastF1 data probe for PLAN T6: availability, missingness, download size, load time, O2 proxy comparison.
 
-Needs network access (run it in Colab or Kaggle, see notebooks/colab/probe_fastf1.ipynb). Example:
+Runs locally and needs network access. FastF1 downloads about 100 MB per race into .fastf1_cache/. Example:
 
-    python scripts/probe_fastf1.py --cache-dir /content/drive/MyDrive/apexpinn/.fastf1_cache \
-        --json-out /content/drive/MyDrive/apexpinn/experiments/data_probe/probe_results.json \
-        --report-out /content/drive/MyDrive/apexpinn/reports/data_probe.md
+    uv run python scripts/probe_fastf1.py
+    uv run python scripts/probe_fastf1.py --preset extended
+
+By default it writes experiments/data_probe/probe_results.json and reports/data_probe.md.
 
 Races are given as SEASON:GRAND_PRIX:CIRCUIT_ID, where GRAND_PRIX is any name FastF1's event lookup accepts
-and CIRCUIT_ID is the id used in configs/decisions_v1.yaml. The O2 comparison uses development-season events
-only; holdout-season races contribute availability numbers but never proxy or lap-time statistics.
+and CIRCUIT_ID is the id used in configs/decisions_v1.yaml. ``--preset default`` probes three races (one per
+season); ``--preset extended`` adds eight dry 2023-2024 development races that cover every fold and several
+track types, for a tighter O2 comparison. The O2 comparison uses development-season events only;
+holdout-season races contribute availability numbers but never proxy or lap-time statistics.
 """
 
 from __future__ import annotations
@@ -33,6 +36,20 @@ from apexpinn.data import probe
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_RACES = ("2023:Spain:barcelona", "2024:Bahrain:bahrain", "2025:Japan:suzuka")
+# Extra development races for --preset extended: dry 2023-2024 races only (never the 2025 holdout), at least
+# one per fold, spread over track character. Known wet races (2023 Zandvoort, 2024 Interlagos, 2024 Montreal,
+# 2023 Monaco, 2024 Silverstone) are left out; the probe flags wet races anyway.
+EXTENDED_EXTRA_RACES = (
+    "2024:Japanese Grand Prix:suzuka",  # F1, high-energy
+    "2024:Miami Grand Prix:miami",  # F2, hot, semi-street
+    "2023:British Grand Prix:silverstone",  # F3, high-energy, fast corners
+    "2024:Austrian Grand Prix:spielberg",  # F3, short lap, traction and braking
+    "2023:Italian Grand Prix:monza",  # F4, low downforce
+    "2023:Hungarian Grand Prix:budapest",  # F4, low grip, slow corners
+    "2023:Singapore Grand Prix:singapore",  # F5, street, hot and humid
+    "2023:Abu Dhabi Grand Prix:yas_marina",  # F6, dusk race, mixed corners
+)
+PRESETS = {"default": DEFAULT_RACES, "extended": (*DEFAULT_RACES, *EXTENDED_EXTRA_RACES)}
 O1_MAX_TELEMETRY_MISSING = 0.20  # PRD section 9, O1
 
 LAP_COLUMNS = (
@@ -298,13 +315,16 @@ def build_records(result: dict[str, Any]) -> list[dict[str, Any]]:
             warm = race["warmup_visibility"]
             warm_population = f"{race['event_id']} scored laps, stints with at least 3 scored laps"
             warm_conditions = (
-                f"phi={phi}, y = lap_time - phi*(L - race_lap); dip = fastest scored lap at stint lap 2-8 "
-                "and last scored lap slower; stint lap = position in stint"
+                f"phi={phi}, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the "
+                f"first scored lap, at stint lap 2-8, more than {warm['min_gain_s']} s faster than the first "
+                "scored lap, and last scored lap slower; stint lap = position in stint"
             )
             for quantity, value in (
                 ("Share of stints with an early corrected-pace dip (S4 on real data)", warm["dip_share"]),
                 ("Median gain in s of the fastest lap over the first scored lap, dip stints",
                  warm["dip_gain_s"]["median"]),
+                ("Median gain in s of the fastest lap over the first scored lap, all stints",
+                 warm["gain_all_s"]["median"]),
             ):
                 records.append(
                     MetricRecord(
@@ -318,9 +338,18 @@ def build_records(result: dict[str, Any]) -> list[dict[str, Any]]:
                 )
     cmp_cfg = result["proxy_comparison"]
     population = f"scored laps of dev events {cmp_cfg['events']}"
-    cmp_conditions = f"phi={cmp_cfg['phi']}, traffic_gap_threshold_s={cmp_cfg['traffic_gap_threshold_s']}"
+    cmp_conditions = (
+        f"phi={cmp_cfg['phi']}, traffic_gap_threshold_s={cmp_cfg['traffic_gap_threshold_s']}, "
+        f"position smoothing window={cmp_cfg['smooth_window']} samples"
+    )
     for proxy, stats in cmp_cfg["by_proxy"].items():
-        for name in ("l2_ratio", "corr_y_within_stint"):
+        for name in (
+            "between_event_share",
+            "l2_ratio",
+            "noise_std",
+            "corr_y_within_stint",
+            "partial_corr_y_given_lap",
+        ):
             if stats.get(name) is None:
                 continue
             records.append(
@@ -415,6 +444,7 @@ def render_report(result: dict[str, Any]) -> str:
         lines.append(line)
     warm_races = [r for r in ok if "warmup_visibility" in r]
     if warm_races:
+        margin = warm_races[0]["warmup_visibility"]["min_gain_s"]
         lines += [
             "",
             "## Warm-up visibility (S4 on real stints)",
@@ -422,21 +452,26 @@ def render_report(result: dict[str, Any]) -> str:
             "Development races only, scored laps after all exclusions, stints with at least 3 scored laps. "
             "`y = lap_time - phi_mid * (L - race_lap)`. Stint lap is the 1-based position in the stint over "
             "all laps before exclusions, so stint lap 1 is the out-lap (or race lap 1) and is normally "
-            "excluded. A dip means the fastest scored lap is at stint lap 2-8 and the last scored lap is "
-            "slower (PRD S4, PLAN T3 test 3). Gain is `y` of the first scored lap minus the minimum `y`; "
-            "it is 0 when the first scored lap is itself the fastest.",
+            "excluded. Gain is `y` of the first scored lap minus the minimum `y` of the stint. A dip means "
+            "the fastest scored lap comes strictly after the first scored lap, at stint lap 2-8, with a gain "
+            f"above {_fmt(margin, 2)} s, and the last scored lap is slower (PRD S4, PLAN T3 test 3). A stint "
+            "whose first scored lap is its fastest is plain wear and never counts as a dip. The all-stint "
+            "gain columns show how much early improvement exists regardless of the dip rule.",
             "",
-            "| Event | Stints | Dip stints | Dip share | Gain median s | Gain IQR s "
+            "| Event | Stints | Dip stints | Dip share | Dip gain median s | Dip gain IQR s "
+            f"| All-stint gain median s | All-stint gain IQR s | Share gain > {_fmt(margin, 2)} s "
             "| First scored stint lap (median; counts) | First scored TyreLife median |",
-            "| :--- | ---: | ---: | ---: | ---: | :--- | :--- | ---: |",
+            "| :--- | ---: | ---: | ---: | ---: | :--- | ---: | :--- | ---: | :--- | ---: |",
         ]
         for r in warm_races:
             w = r["warmup_visibility"]
-            gain, first = w["dip_gain_s"], w["first_scored_stint_lap"]
+            gain, every, first = w["dip_gain_s"], w["gain_all_s"], w["first_scored_stint_lap"]
             counts = ", ".join(f"{k}: {v}" for k, v in first["counts"].items()) or "none"
             lines.append(
                 f"| {r['event_id']} | {w['n_stints']} | {w['n_dip']} | {_fmt(w['dip_share'])} "
                 f"| {_fmt(gain['median'])} | [{_fmt(gain['q25'])}, {_fmt(gain['q75'])}] "
+                f"| {_fmt(every['median'])} | [{_fmt(every['q25'])}, {_fmt(every['q75'])}] "
+                f"| {_fmt(every['share_above_min_gain'])} "
                 f"| {_fmt(first['median'], 1)}; {counts} | {_fmt(w['first_scored_tyre_life_median'], 1)} |"
             )
     cmp_cfg = result["proxy_comparison"]
@@ -446,23 +481,44 @@ def render_report(result: dict[str, Any]) -> str:
         "",
         f"Scored laps of development events {cmp_cfg['events']} only (holdout races excluded), "
         f"`phi = {cmp_cfg['phi']}`, traffic threshold {cmp_cfg['traffic_gap_threshold_s']} s. "
-        "`l2_ratio` = mean within-stint std / std of per-event means (limit L2 is refuted above 0.1). "
-        "`corr` = Pearson correlation of stint-centered proxy and stint-centered `y`.",
+        "`energy_index` uses positions smoothed within each lap (Savitzky-Golay, "
+        f"{cmp_cfg['smooth_window']} samples, cubic) and drops samples above {_fmt(probe.MAX_ACCEL_MS2, 0)} "
+        "m/s^2 as glitches.",
         "",
-        "| Proxy | Laps | Stints | Within-stint std | Across-event std | l2_ratio | corr |",
-        "| :--- | ---: | ---: | ---: | ---: | ---: | ---: |",
+        "Columns, all over stints with at least 3 scored laps:",
+        "",
+        "- `between share`: share of the proxy's variance over laps that lies between event means (an "
+        "ICC-like ratio, 0 to 1). A circuit-level heat index should be high here.",
+        "- `within std`, `across std`, `l2_ratio`: mean within-stint std, std of per-event means, and their "
+        "ratio (limit L2 is refuted above 0.1).",
+        "- `noise std`: mean within-stint std after removing a linear race-lap trend. `drift/lap`: pooled "
+        "within-stint slope per race lap.",
+        "- `corr`: Pearson correlation of stint-centered proxy and stint-centered `y`. `partial corr`: the "
+        "same after removing a linear race-lap trend from both. These are leakage warnings, not reasons to "
+        "pick a proxy: a proxy that moves with lap time (trap speed is higher on faster laps, a slow lap "
+        "holds more braking time) feeds the target back into the model input. `leak?` is set when |corr| "
+        f"or |partial corr| is above {probe.LEAK_WARNING_ABS_CORR}.",
+        "",
+        "| Proxy | Laps | Stints | Events | between share | within std | across std | l2_ratio "
+        "| noise std | drift/lap | corr | partial corr | leak? | score |",
+        "| :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | :--- | ---: |",
     ]
     for proxy, s in cmp_cfg["by_proxy"].items():
         lines.append(
-            f"| `{proxy}` | {s.get('n_laps', 0)} | {s.get('n_stints', 0)} "
-            f"| {_fmt(s.get('within_stint_std'))} | {_fmt(s.get('across_event_std'))} "
-            f"| {_fmt(s.get('l2_ratio'))} | {_fmt(s.get('corr_y_within_stint'))} |"
+            f"| `{proxy}` | {s.get('n_laps', 0)} | {s.get('n_stints', 0)} | {s.get('n_events', 0)} "
+            f"| {_fmt(s.get('between_event_share'))} | {_fmt(s.get('within_stint_std'))} "
+            f"| {_fmt(s.get('across_event_std'))} | {_fmt(s.get('l2_ratio'))} "
+            f"| {_fmt(s.get('noise_std'))} | {_fmt(s.get('drift_per_lap'), 4)} "
+            f"| {_fmt(s.get('corr_y_within_stint'))} | {_fmt(s.get('partial_corr_y_given_lap'))} "
+            f"| {'yes' if s.get('leak_warning') else 'no'} | {_fmt(s.get('suggest_score'))} |"
         )
     lines += [
         "",
-        f"Mechanical suggestion (largest |corr|, then largest l2_ratio): `{cmp_cfg['suggested']}`. "
-        "This is input to the O2 decision, not the decision. With few dev events the across-event std "
-        "rests on very few means; add `--race` entries for more development circuits to tighten it.",
+        f"Mechanical suggestion: `{cmp_cfg['suggested']}`. Rule: largest `score = between share x (1 - "
+        "|corr|)`, so proxies are ranked by circuit-level separation and discounted for tracking lap time. "
+        "This is input to the O2 decision, not the decision. With few dev events the between-event "
+        "statistics rest on very few means; run `--preset extended` (or add `--race` entries) to tighten "
+        "them.",
         "",
         "## Next steps",
         "",
@@ -481,7 +537,16 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
-    parser.add_argument("--race", action="append", type=parse_race, help="SEASON:GRAND_PRIX:CIRCUIT_ID")
+    races_group = parser.add_mutually_exclusive_group()
+    races_group.add_argument(
+        "--race", action="append", type=parse_race, help="SEASON:GRAND_PRIX:CIRCUIT_ID (repeatable)"
+    )
+    races_group.add_argument(
+        "--preset",
+        choices=sorted(PRESETS),
+        default="default",
+        help="named race list: default (3 races) or extended (default plus 8 dev races)",
+    )
     parser.add_argument("--cache-dir", type=Path, default=REPO_ROOT / ".fastf1_cache")
     parser.add_argument("--config", type=Path, default=REPO_ROOT / "configs" / "decisions_v1.yaml")
     parser.add_argument(
@@ -489,7 +554,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--report-out", type=Path, default=REPO_ROOT / "reports" / "data_probe.md")
     args = parser.parse_args(argv)
-    races = args.race or [parse_race(s) for s in DEFAULT_RACES]
+    races = args.race or [parse_race(s) for s in PRESETS[args.preset]]
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
     import fastf1
@@ -523,6 +588,7 @@ def main(argv: list[str] | None = None) -> int:
         "generated_utc": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "environment": environment(),
         "config": str(args.config),
+        "preset": "custom" if args.race else args.preset,
         "races": summaries,
         "projection": {
             "n_config_events": n_config,
@@ -535,6 +601,7 @@ def main(argv: list[str] | None = None) -> int:
             "events": sorted(scored_all["event_id"].unique().tolist()) if len(scored_all) else [],
             "phi": decisions.phi_mid,
             "traffic_gap_threshold_s": decisions.traffic_gap_threshold_s,
+            "smooth_window": probe.SMOOTH_WINDOW,
             "by_proxy": by_proxy,
             "suggested": probe.suggest_proxy(by_proxy),
         },

@@ -57,10 +57,19 @@ def test_true_w_is_nondecreasing(default_dataset):
 
 
 # Acceptance test 3 (S4)
+DIP_MIN_GAIN_S = 0.1  # same default margin as apexpinn.data.probe.warmup_visibility
+
+
 def test_most_default_stints_show_an_early_dip(default_dataset):
+    # A dip: the minimum of clean y - b comes strictly after stint lap 1, at stint lap 2-8, is more than
+    # DIP_MIN_GAIN_S below lap 1, and the last lap is slower than it. A stint whose lap 1 is fastest is
+    # plain wear and does not count.
     ds = default_dataset
     shapes = [y - b for y, b in zip(_valid(ds, "y_clean"), np.asarray(ds.b), strict=True)]
-    dips = [2 <= int(np.argmin(g)) + 1 <= 8 and g[-1] > g.min() for g in shapes]
+    dips = []
+    for g in shapes:
+        i_min = int(np.argmin(g))  # stint lap i_min + 1
+        dips.append(1 <= i_min <= 7 and g[0] - g[i_min] > DIP_MIN_GAIN_S and g[-1] > g[i_min])
     assert np.mean(dips) >= 0.5
 
 

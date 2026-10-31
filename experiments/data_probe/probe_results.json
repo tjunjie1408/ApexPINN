@@ -1,0 +1,3166 @@
+{
+  "schema": "apexpinn.data_probe/v1",
+  "generated_utc": "2026-10-31T16:56:48Z",
+  "environment": {
+    "runtime": "local",
+    "python": "3.12.13",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "fastf1": "3.9.0",
+    "pandas": "2.3.3",
+    "numpy": "2.5.4"
+  },
+  "config": "D:\\self-learning\\portfolio\\apexpinn\\configs\\decisions_v1.yaml",
+  "preset": "extended",
+  "races": [
+    {
+      "event_id": "2023_barcelona",
+      "season": 2023,
+      "grand_prix_query": "Spain",
+      "circuit": "barcelona",
+      "fold": "F3",
+      "role": "dev",
+      "load_time_s": 5.3010762000049,
+      "download_mb": 0.004096,
+      "cache_dir_mb_after": 307.126939,
+      "event_name": "Spanish Grand Prix",
+      "event_date": "2023-06-04 00:00:00",
+      "location": "Barcelona",
+      "total_laps": 66,
+      "n_drivers": 20,
+      "n_laps": 1312,
+      "columns": {
+        "laps": {
+          "Driver": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "DriverNumber": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "LapTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "LapNumber": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Stint": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Compound": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TyreLife": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "FreshTyre": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TrackStatus": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "IsAccurate": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "PitInTime": {
+            "present": true,
+            "nan_fraction": 0.9672256097560976
+          },
+          "PitOutTime": {
+            "present": true,
+            "nan_fraction": 0.9657012195121951
+          },
+          "Deleted": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "LapStartTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Time": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "SpeedI1": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "SpeedI2": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "SpeedFL": {
+            "present": true,
+            "nan_fraction": 0.03277439024390244
+          },
+          "SpeedST": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        },
+        "car": {
+          "SessionTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Speed": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Throttle": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Brake": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        },
+        "pos": {
+          "SessionTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "X": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Y": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        },
+        "weather": {
+          "Time": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "AirTemp": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TrackTemp": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Rainfall": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        }
+      },
+      "drivers_without_car_data": [],
+      "drivers_without_pos_data": [],
+      "rainfall_any": false,
+      "tracktemp_c": {
+        "min": 26.8,
+        "mean": 33.838961038961045,
+        "max": 42.5
+      },
+      "airtemp_c": {
+        "min": 21.5,
+        "mean": 22.674025974025977,
+        "max": 24.7
+      },
+      "wet_lap_fraction": 0.0,
+      "is_dry": true,
+      "telemetry_missing_fraction": 0.0,
+      "o1_keep": true,
+      "exclusion_counts": {
+        "scored": 1021,
+        "traffic": 177,
+        "out_lap": 43,
+        "in_lap": 42,
+        "race_lap_1": 20,
+        "deleted": 9
+      },
+      "traffic_share_green_laps": {
+        "0.5": 0.06326219512195122,
+        "1.0": 0.16539634146341464,
+        "1.5": 0.27210365853658536,
+        "2.0": 0.37271341463414637
+      },
+      "pit_lane_time_s": {
+        "n": 43,
+        "median": 22.576999999999316,
+        "q25": 22.24200000000019,
+        "q75": 23.366999999999734
+      },
+      "raw_stint_slope_s_per_lap": {
+        "n_stints": 56,
+        "median": 0.012751106498812635
+      },
+      "warmup_visibility": {
+        "n_stints": 58,
+        "n_dip": 18,
+        "dip_share": 0.3103448275862069,
+        "min_gain_s": 0.1,
+        "dip_gain_s": {
+          "n": 18,
+          "median": 0.31099999999999284,
+          "q25": 0.17750000000000554,
+          "q75": 0.5215000000000103
+        },
+        "gain_all_s": {
+          "n": 58,
+          "median": 0.0,
+          "q25": 0.0,
+          "q75": 0.3269999999999982,
+          "share_above_min_gain": 0.43103448275862066
+        },
+        "first_scored_stint_lap": {
+          "median": 2.0,
+          "counts": {
+            "2": 40,
+            "3": 6,
+            "4": 5,
+            "5": 2,
+            "6": 2,
+            "7": 1,
+            "8": 1,
+            "11": 1
+          }
+        },
+        "first_scored_tyre_life_median": 2.0
+      }
+    },
+    {
+      "event_id": "2024_bahrain",
+      "season": 2024,
+      "grand_prix_query": "Bahrain",
+      "circuit": "bahrain",
+      "fold": "F1",
+      "role": "dev",
+      "load_time_s": 4.4917386999950395,
+      "download_mb": 0.008192,
+      "cache_dir_mb_after": 307.135131,
+      "event_name": "Bahrain Grand Prix",
+      "event_date": "2024-03-02 00:00:00",
+      "location": "Sakhir",
+      "total_laps": 57,
+      "n_drivers": 20,
+      "n_laps": 1129,
+      "columns": {
+        "laps": {
+          "Driver": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "DriverNumber": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "LapTime": {
+            "present": true,
+            "nan_fraction": 0.0008857395925597874
+          },
+          "LapNumber": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Stint": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Compound": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TyreLife": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "FreshTyre": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TrackStatus": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "IsAccurate": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "PitInTime": {
+            "present": true,
+            "nan_fraction": 0.9619131975199291
+          },
+          "PitOutTime": {
+            "present": true,
+            "nan_fraction": 0.9619131975199291
+          },
+          "Deleted": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "LapStartTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Time": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "SpeedI1": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "SpeedI2": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "SpeedFL": {
+            "present": true,
+            "nan_fraction": 0.03808680248007086
+          },
+          "SpeedST": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        },
+        "car": {
+          "SessionTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Speed": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Throttle": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Brake": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        },
+        "pos": {
+          "SessionTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "X": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Y": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        },
+        "weather": {
+          "Time": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "AirTemp": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TrackTemp": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Rainfall": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        }
+      },
+      "drivers_without_car_data": [],
+      "drivers_without_pos_data": [],
+      "rainfall_any": false,
+      "tracktemp_c": {
+        "min": 21.9,
+        "mean": 23.652866242038222,
+        "max": 26.5
+      },
+      "airtemp_c": {
+        "min": 17.6,
+        "mean": 18.22738853503185,
+        "max": 18.9
+      },
+      "wet_lap_fraction": 0.0,
+      "is_dry": true,
+      "telemetry_missing_fraction": 0.0,
+      "o1_keep": true,
+      "exclusion_counts": {
+        "scored": 818,
+        "traffic": 170,
+        "out_lap": 42,
+        "in_lap": 42,
+        "race_lap_1": 20,
+        "not_green": 18,
+        "deleted": 18,
+        "no_lap_time": 1
+      },
+      "traffic_share_green_laps": {
+        "0.5": 0.03406998158379374,
+        "1.0": 0.17495395948434622,
+        "1.5": 0.26703499079189685,
+        "2.0": 0.3416206261510129
+      },
+      "pit_lane_time_s": {
+        "n": 42,
+        "median": 24.773999999999887,
+        "q25": 24.509000000000242,
+        "q75": 25.124249999999392
+      },
+      "raw_stint_slope_s_per_lap": {
+        "n_stints": 50,
+        "median": 0.04066174473236002
+      },
+      "warmup_visibility": {
+        "n_stints": 56,
+        "n_dip": 19,
+        "dip_share": 0.3392857142857143,
+        "min_gain_s": 0.1,
+        "dip_gain_s": {
+          "n": 19,
+          "median": 0.472999999999999,
+          "q25": 0.2189999999999941,
+          "q75": 0.5480000000000018
+        },
+        "gain_all_s": {
+          "n": 56,
+          "median": 0.0,
+          "q25": 0.0,
+          "q75": 0.25824999999999676,
+          "share_above_min_gain": 0.375
+        },
+        "first_scored_stint_lap": {
+          "median": 2.0,
+          "counts": {
+            "2": 39,
+            "3": 7,
+            "4": 2,
+            "5": 2,
+            "6": 3,
+            "7": 2,
+            "8": 1
+          }
+        },
+        "first_scored_tyre_life_median": 2.0
+      }
+    },
+    {
+      "event_id": "2025_suzuka",
+      "season": 2025,
+      "grand_prix_query": "Japan",
+      "circuit": "suzuka",
+      "fold": "F1",
+      "role": "holdout",
+      "load_time_s": 4.371246200003952,
+      "download_mb": 0.004096,
+      "cache_dir_mb_after": 307.139227,
+      "event_name": "Japanese Grand Prix",
+      "event_date": "2025-04-06 00:00:00",
+      "location": "Suzuka",
+      "total_laps": 53,
+      "n_drivers": 20,
+      "n_laps": 1059,
+      "columns": {
+        "laps": {
+          "Driver": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "DriverNumber": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "LapTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "LapNumber": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Stint": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Compound": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TyreLife": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "FreshTyre": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TrackStatus": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "IsAccurate": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "PitInTime": {
+            "present": true,
+            "nan_fraction": 0.9801699716713881
+          },
+          "PitOutTime": {
+            "present": true,
+            "nan_fraction": 0.9801699716713881
+          },
+          "Deleted": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "LapStartTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Time": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "SpeedI1": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "SpeedI2": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "SpeedFL": {
+            "present": true,
+            "nan_fraction": 0.019830028328611898
+          },
+          "SpeedST": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        },
+        "car": {
+          "SessionTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Speed": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Throttle": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Brake": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        },
+        "pos": {
+          "SessionTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "X": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Y": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        },
+        "weather": {
+          "Time": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "AirTemp": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TrackTemp": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Rainfall": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        }
+      },
+      "drivers_without_car_data": [],
+      "drivers_without_pos_data": [],
+      "rainfall_any": false,
+      "tracktemp_c": {
+        "min": 19.0,
+        "mean": 20.514285714285716,
+        "max": 23.0
+      },
+      "airtemp_c": {
+        "min": 14.2,
+        "mean": 14.429999999999998,
+        "max": 14.7
+      },
+      "wet_lap_fraction": 0.0,
+      "is_dry": true,
+      "telemetry_missing_fraction": 0.0,
+      "o1_keep": true,
+      "exclusion_counts": {
+        "scored": 800,
+        "traffic": 189,
+        "out_lap": 21,
+        "in_lap": 21,
+        "race_lap_1": 20,
+        "deleted": 8
+      }
+    },
+    {
+      "event_id": "2024_suzuka",
+      "season": 2024,
+      "grand_prix_query": "Japanese Grand Prix",
+      "circuit": "suzuka",
+      "fold": "F1",
+      "role": "dev",
+      "load_time_s": 28.574922400002833,
+      "download_mb": 118.388343,
+      "cache_dir_mb_after": 425.52757,
+      "event_name": "Japanese Grand Prix",
+      "event_date": "2024-04-07 00:00:00",
+      "location": "Suzuka",
+      "total_laps": 53,
+      "n_drivers": 20,
+      "n_laps": 907,
+      "columns": {
+        "laps": {
+          "Driver": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "DriverNumber": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "LapTime": {
+            "present": true,
+            "nan_fraction": 0.02866593164277839
+          },
+          "LapNumber": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Stint": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Compound": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TyreLife": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "FreshTyre": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TrackStatus": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "IsAccurate": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "PitInTime": {
+            "present": true,
+            "nan_fraction": 0.9393605292171996
+          },
+          "PitOutTime": {
+            "present": true,
+            "nan_fraction": 0.9404630650496141
+          },
+          "Deleted": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "LapStartTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Time": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "SpeedI1": {
+            "present": true,
+            "nan_fraction": 0.002205071664829107
+          },
+          "SpeedI2": {
+            "present": true,
+            "nan_fraction": 0.002205071664829107
+          },
+          "SpeedFL": {
+            "present": true,
+            "nan_fraction": 0.06284454244762955
+          },
+          "SpeedST": {
+            "present": true,
+            "nan_fraction": 0.002205071664829107
+          }
+        },
+        "car": {
+          "SessionTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Speed": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Throttle": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Brake": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        },
+        "pos": {
+          "SessionTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "X": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Y": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        },
+        "weather": {
+          "Time": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "AirTemp": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TrackTemp": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Rainfall": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        }
+      },
+      "drivers_without_car_data": [],
+      "drivers_without_pos_data": [],
+      "rainfall_any": false,
+      "tracktemp_c": {
+        "min": 31.3,
+        "mean": 37.50110497237569,
+        "max": 40.5
+      },
+      "airtemp_c": {
+        "min": 19.5,
+        "mean": 21.691160220994476,
+        "max": 22.7
+      },
+      "wet_lap_fraction": 0.0,
+      "is_dry": true,
+      "telemetry_missing_fraction": 0.0,
+      "o1_keep": true,
+      "exclusion_counts": {
+        "scored": 613,
+        "traffic": 148,
+        "in_lap": 37,
+        "out_lap": 35,
+        "no_lap_time": 26,
+        "not_green": 21,
+        "race_lap_1": 18,
+        "deleted": 8,
+        "inaccurate": 1
+      },
+      "traffic_share_green_laps": {
+        "0.5": 0.07847800237812129,
+        "1.0": 0.20214030915576695,
+        "1.5": 0.3091557669441142,
+        "2.0": 0.3995243757431629
+      },
+      "pit_lane_time_s": {
+        "n": 36,
+        "median": 23.320000000000164,
+        "q25": 23.1087500000001,
+        "q75": 23.814499999998816
+      },
+      "raw_stint_slope_s_per_lap": {
+        "n_stints": 45,
+        "median": 0.05238112745098002
+      },
+      "warmup_visibility": {
+        "n_stints": 47,
+        "n_dip": 10,
+        "dip_share": 0.2127659574468085,
+        "min_gain_s": 0.1,
+        "dip_gain_s": {
+          "n": 10,
+          "median": 0.5719999999999956,
+          "q25": 0.3922500000000042,
+          "q75": 1.0377500000000026
+        },
+        "gain_all_s": {
+          "n": 47,
+          "median": 0.0,
+          "q25": 0.0,
+          "q75": 0.05799999999999983,
+          "share_above_min_gain": 0.23404255319148937
+        },
+        "first_scored_stint_lap": {
+          "median": 2.0,
+          "counts": {
+            "2": 29,
+            "3": 9,
+            "4": 4,
+            "5": 3,
+            "6": 1,
+            "7": 1
+          }
+        },
+        "first_scored_tyre_life_median": 2.0
+      }
+    },
+    {
+      "event_id": "2024_miami",
+      "season": 2024,
+      "grand_prix_query": "Miami Grand Prix",
+      "circuit": "miami",
+      "fold": "F2",
+      "role": "dev",
+      "load_time_s": 31.073449399998935,
+      "download_mb": 107.902719,
+      "cache_dir_mb_after": 533.430289,
+      "event_name": "Miami Grand Prix",
+      "event_date": "2024-05-05 00:00:00",
+      "location": "Miami",
+      "total_laps": 57,
+      "n_drivers": 20,
+      "n_laps": 1111,
+      "columns": {
+        "laps": {
+          "Driver": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "DriverNumber": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "LapTime": {
+            "present": true,
+            "nan_fraction": 0.0009000900090009
+          },
+          "LapNumber": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Stint": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Compound": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TyreLife": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "FreshTyre": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TrackStatus": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "IsAccurate": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "PitInTime": {
+            "present": true,
+            "nan_fraction": 0.9747974797479748
+          },
+          "PitOutTime": {
+            "present": true,
+            "nan_fraction": 0.9747974797479748
+          },
+          "Deleted": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "LapStartTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Time": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "SpeedI1": {
+            "present": true,
+            "nan_fraction": 0.0009000900090009
+          },
+          "SpeedI2": {
+            "present": true,
+            "nan_fraction": 0.0009000900090009
+          },
+          "SpeedFL": {
+            "present": true,
+            "nan_fraction": 0.026102610261026102
+          },
+          "SpeedST": {
+            "present": true,
+            "nan_fraction": 0.0009000900090009
+          }
+        },
+        "car": {
+          "SessionTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Speed": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Throttle": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Brake": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        },
+        "pos": {
+          "SessionTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "X": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Y": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        },
+        "weather": {
+          "Time": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "AirTemp": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TrackTemp": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Rainfall": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        }
+      },
+      "drivers_without_car_data": [],
+      "drivers_without_pos_data": [],
+      "rainfall_any": false,
+      "tracktemp_c": {
+        "min": 39.3,
+        "mean": 44.664,
+        "max": 49.1
+      },
+      "airtemp_c": {
+        "min": 27.9,
+        "mean": 28.521999999999995,
+        "max": 29.0
+      },
+      "wet_lap_fraction": 0.0,
+      "is_dry": true,
+      "telemetry_missing_fraction": 0.0,
+      "o1_keep": true,
+      "exclusion_counts": {
+        "scored": 605,
+        "traffic": 310,
+        "not_green": 100,
+        "in_lap": 28,
+        "out_lap": 28,
+        "race_lap_1": 20,
+        "deleted": 19,
+        "no_lap_time": 1
+      },
+      "traffic_share_green_laps": {
+        "0.5": 0.09480122324159021,
+        "1.0": 0.3506625891946993,
+        "1.5": 0.4689092762487258,
+        "2.0": 0.5902140672782875
+      },
+      "pit_lane_time_s": {
+        "n": 28,
+        "median": 22.64800000000014,
+        "q25": 22.33075000000008,
+        "q75": 23.03874999999971
+      },
+      "raw_stint_slope_s_per_lap": {
+        "n_stints": 39,
+        "median": -0.029380898187866294
+      },
+      "warmup_visibility": {
+        "n_stints": 42,
+        "n_dip": 13,
+        "dip_share": 0.30952380952380953,
+        "min_gain_s": 0.1,
+        "dip_gain_s": {
+          "n": 13,
+          "median": 0.34499999999998465,
+          "q25": 0.2360000000000042,
+          "q75": 0.51400000000001
+        },
+        "gain_all_s": {
+          "n": 42,
+          "median": 0.32800000000000296,
+          "q25": 0.06699999999999307,
+          "q75": 0.7417500000000068,
+          "share_above_min_gain": 0.6904761904761905
+        },
+        "first_scored_stint_lap": {
+          "median": 4.0,
+          "counts": {
+            "2": 16,
+            "3": 3,
+            "4": 5,
+            "5": 3,
+            "7": 3,
+            "8": 1,
+            "9": 1,
+            "10": 2,
+            "12": 4,
+            "13": 1,
+            "14": 1,
+            "15": 1,
+            "17": 1
+          }
+        },
+        "first_scored_tyre_life_median": 4.0
+      }
+    },
+    {
+      "event_id": "2023_silverstone",
+      "season": 2023,
+      "grand_prix_query": "British Grand Prix",
+      "circuit": "silverstone",
+      "fold": "F3",
+      "role": "dev",
+      "load_time_s": 27.4144438000003,
+      "download_mb": 139.990127,
+      "cache_dir_mb_after": 673.420416,
+      "event_name": "British Grand Prix",
+      "event_date": "2023-07-09 00:00:00",
+      "location": "Silverstone",
+      "total_laps": 52,
+      "n_drivers": 20,
+      "n_laps": 971,
+      "columns": {
+        "laps": {
+          "Driver": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "DriverNumber": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "LapTime": {
+            "present": true,
+            "nan_fraction": 0.0010298661174047373
+          },
+          "LapNumber": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Stint": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Compound": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TyreLife": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "FreshTyre": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TrackStatus": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "IsAccurate": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "PitInTime": {
+            "present": true,
+            "nan_fraction": 0.9732234809474768
+          },
+          "PitOutTime": {
+            "present": true,
+            "nan_fraction": 0.9752832131822863
+          },
+          "Deleted": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "LapStartTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Time": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "SpeedI1": {
+            "present": true,
+            "nan_fraction": 0.0010298661174047373
+          },
+          "SpeedI2": {
+            "present": true,
+            "nan_fraction": 0.0010298661174047373
+          },
+          "SpeedFL": {
+            "present": true,
+            "nan_fraction": 0.027806385169927908
+          },
+          "SpeedST": {
+            "present": true,
+            "nan_fraction": 0.0010298661174047373
+          }
+        },
+        "car": {
+          "SessionTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Speed": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Throttle": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Brake": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        },
+        "pos": {
+          "SessionTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "X": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Y": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        },
+        "weather": {
+          "Time": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "AirTemp": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TrackTemp": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Rainfall": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        }
+      },
+      "drivers_without_car_data": [],
+      "drivers_without_pos_data": [],
+      "rainfall_any": false,
+      "tracktemp_c": {
+        "min": 27.7,
+        "mean": 30.94105960264901,
+        "max": 38.2
+      },
+      "airtemp_c": {
+        "min": 20.0,
+        "mean": 21.473509933774835,
+        "max": 22.5
+      },
+      "wet_lap_fraction": 0.0,
+      "is_dry": true,
+      "telemetry_missing_fraction": 0.0,
+      "o1_keep": true,
+      "exclusion_counts": {
+        "scored": 542,
+        "traffic": 245,
+        "not_green": 98,
+        "in_lap": 26,
+        "out_lap": 24,
+        "race_lap_1": 20,
+        "deleted": 15,
+        "no_lap_time": 1
+      },
+      "traffic_share_green_laps": {
+        "0.5": 0.05555555555555555,
+        "1.0": 0.3215130023640662,
+        "1.5": 0.4562647754137116,
+        "2.0": 0.5567375886524822
+      },
+      "pit_lane_time_s": {
+        "n": 24,
+        "median": 28.757000000000062,
+        "q25": 28.491999999999962,
+        "q75": 29.253000000000156
+      },
+      "raw_stint_slope_s_per_lap": {
+        "n_stints": 35,
+        "median": -0.027214886497243778
+      },
+      "warmup_visibility": {
+        "n_stints": 40,
+        "n_dip": 3,
+        "dip_share": 0.075,
+        "min_gain_s": 0.1,
+        "dip_gain_s": {
+          "n": 3,
+          "median": 0.15399999999999636,
+          "q25": 0.14499999999999602,
+          "q75": 0.4125000000000014
+        },
+        "gain_all_s": {
+          "n": 40,
+          "median": 0.05649999999999977,
+          "q25": 0.0,
+          "q75": 0.23850000000000193,
+          "share_above_min_gain": 0.425
+        },
+        "first_scored_stint_lap": {
+          "median": 5.5,
+          "counts": {
+            "2": 12,
+            "3": 3,
+            "4": 3,
+            "5": 2,
+            "6": 5,
+            "7": 2,
+            "8": 2,
+            "9": 2,
+            "10": 3,
+            "11": 3,
+            "12": 1,
+            "13": 1,
+            "18": 1
+          }
+        },
+        "first_scored_tyre_life_median": 5.5
+      }
+    },
+    {
+      "event_id": "2024_spielberg",
+      "season": 2024,
+      "grand_prix_query": "Austrian Grand Prix",
+      "circuit": "spielberg",
+      "fold": "F3",
+      "role": "dev",
+      "load_time_s": 28.188609899996663,
+      "download_mb": 102.613034,
+      "cache_dir_mb_after": 776.03345,
+      "event_name": "Austrian Grand Prix",
+      "event_date": "2024-06-30 00:00:00",
+      "location": "Spielberg",
+      "total_laps": 71,
+      "n_drivers": 20,
+      "n_laps": 1405,
+      "columns": {
+        "laps": {
+          "Driver": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "DriverNumber": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "LapTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "LapNumber": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Stint": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Compound": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TyreLife": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "FreshTyre": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TrackStatus": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "IsAccurate": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "PitInTime": {
+            "present": true,
+            "nan_fraction": 0.9672597864768683
+          },
+          "PitOutTime": {
+            "present": true,
+            "nan_fraction": 0.9672597864768683
+          },
+          "Deleted": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "LapStartTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Time": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "SpeedI1": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "SpeedI2": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "SpeedFL": {
+            "present": true,
+            "nan_fraction": 0.03202846975088968
+          },
+          "SpeedST": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        },
+        "car": {
+          "SessionTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Speed": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Throttle": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Brake": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        },
+        "pos": {
+          "SessionTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "X": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Y": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        },
+        "weather": {
+          "Time": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "AirTemp": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TrackTemp": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Rainfall": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        }
+      },
+      "drivers_without_car_data": [],
+      "drivers_without_pos_data": [],
+      "rainfall_any": true,
+      "tracktemp_c": {
+        "min": 43.4,
+        "mean": 46.420979020979026,
+        "max": 49.0
+      },
+      "airtemp_c": {
+        "min": 28.6,
+        "mean": 29.42587412587413,
+        "max": 30.6
+      },
+      "wet_lap_fraction": 0.0,
+      "is_dry": false,
+      "telemetry_missing_fraction": 0.0,
+      "o1_keep": false,
+      "exclusion_counts": {
+        "scored": 1008,
+        "traffic": 232,
+        "not_green": 46,
+        "out_lap": 45,
+        "in_lap": 44,
+        "race_lap_1": 20,
+        "deleted": 10
+      },
+      "traffic_share_green_laps": {
+        "0.5": 0.04129793510324484,
+        "1.0": 0.19985250737463126,
+        "1.5": 0.2831858407079646,
+        "2.0": 0.37831858407079644
+      },
+      "pit_lane_time_s": {
+        "n": 45,
+        "median": 21.667999999999665,
+        "q25": 21.430999999999585,
+        "q75": 22.36700000000019
+      },
+      "raw_stint_slope_s_per_lap": {
+        "n_stints": 57,
+        "median": 0.049244097807755884
+      },
+      "warmup_visibility": {
+        "n_stints": 57,
+        "n_dip": 17,
+        "dip_share": 0.2982456140350877,
+        "min_gain_s": 0.1,
+        "dip_gain_s": {
+          "n": 17,
+          "median": 0.21099999999999852,
+          "q25": 0.19599999999999795,
+          "q75": 0.35200000000000387
+        },
+        "gain_all_s": {
+          "n": 57,
+          "median": 0.0,
+          "q25": 0.0,
+          "q75": 0.19599999999999795,
+          "share_above_min_gain": 0.3333333333333333
+        },
+        "first_scored_stint_lap": {
+          "median": 2.0,
+          "counts": {
+            "2": 42,
+            "3": 3,
+            "4": 2,
+            "5": 3,
+            "6": 4,
+            "7": 1,
+            "10": 1,
+            "12": 1
+          }
+        },
+        "first_scored_tyre_life_median": 2.0
+      }
+    },
+    {
+      "event_id": "2023_monza",
+      "season": 2023,
+      "grand_prix_query": "Italian Grand Prix",
+      "circuit": "monza",
+      "fold": "F4",
+      "role": "dev",
+      "load_time_s": 32.699662799997895,
+      "download_mb": 106.070875,
+      "cache_dir_mb_after": 882.104325,
+      "event_name": "Italian Grand Prix",
+      "event_date": "2023-09-03 00:00:00",
+      "location": "Monza",
+      "total_laps": 51,
+      "n_drivers": 19,
+      "n_laps": 957,
+      "columns": {
+        "laps": {
+          "Driver": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "DriverNumber": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "LapTime": {
+            "present": true,
+            "nan_fraction": 0.009404388714733543
+          },
+          "LapNumber": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Stint": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Compound": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TyreLife": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "FreshTyre": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TrackStatus": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "IsAccurate": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "PitInTime": {
+            "present": true,
+            "nan_fraction": 0.9728317659352143
+          },
+          "PitOutTime": {
+            "present": true,
+            "nan_fraction": 0.9738766980146291
+          },
+          "Deleted": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "LapStartTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Time": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "SpeedI1": {
+            "present": true,
+            "nan_fraction": 0.009404388714733543
+          },
+          "SpeedI2": {
+            "present": true,
+            "nan_fraction": 0.009404388714733543
+          },
+          "SpeedFL": {
+            "present": true,
+            "nan_fraction": 0.03657262277951933
+          },
+          "SpeedST": {
+            "present": true,
+            "nan_fraction": 0.009404388714733543
+          }
+        },
+        "car": {
+          "SessionTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Speed": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Throttle": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Brake": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        },
+        "pos": {
+          "SessionTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "X": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Y": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        },
+        "weather": {
+          "Time": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "AirTemp": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TrackTemp": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Rainfall": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        }
+      },
+      "drivers_without_car_data": [],
+      "drivers_without_pos_data": [],
+      "rainfall_any": false,
+      "tracktemp_c": {
+        "min": 39.3,
+        "mean": 42.928205128205136,
+        "max": 44.4
+      },
+      "airtemp_c": {
+        "min": 28.4,
+        "mean": 29.330128205128204,
+        "max": 30.3
+      },
+      "wet_lap_fraction": 0.0,
+      "is_dry": true,
+      "telemetry_missing_fraction": 0.0,
+      "o1_keep": true,
+      "exclusion_counts": {
+        "scored": 586,
+        "traffic": 278,
+        "in_lap": 26,
+        "out_lap": 25,
+        "race_lap_1": 19,
+        "deleted": 14,
+        "no_lap_time": 9
+      },
+      "traffic_share_green_laps": {
+        "0.5": 0.0938818565400844,
+        "1.0": 0.33016877637130804,
+        "1.5": 0.42510548523206754,
+        "2.0": 0.4957805907172996
+      },
+      "pit_lane_time_s": {
+        "n": 25,
+        "median": 24.40599999999995,
+        "q25": 24.234999999999673,
+        "q75": 24.82800000000043
+      },
+      "raw_stint_slope_s_per_lap": {
+        "n_stints": 34,
+        "median": 0.022415515951884662
+      },
+      "warmup_visibility": {
+        "n_stints": 37,
+        "n_dip": 8,
+        "dip_share": 0.21621621621621623,
+        "min_gain_s": 0.1,
+        "dip_gain_s": {
+          "n": 8,
+          "median": 0.4369999999999976,
+          "q25": 0.24274999999999736,
+          "q75": 0.5477499999999935
+        },
+        "gain_all_s": {
+          "n": 37,
+          "median": 0.0,
+          "q25": 0.0,
+          "q75": 0.10299999999999443,
+          "share_above_min_gain": 0.2702702702702703
+        },
+        "first_scored_stint_lap": {
+          "median": 2.0,
+          "counts": {
+            "2": 23,
+            "3": 4,
+            "4": 3,
+            "6": 1,
+            "8": 1,
+            "10": 1,
+            "11": 1,
+            "13": 1,
+            "15": 1,
+            "16": 1
+          }
+        },
+        "first_scored_tyre_life_median": 5.0
+      }
+    },
+    {
+      "event_id": "2023_budapest",
+      "season": 2023,
+      "grand_prix_query": "Hungarian Grand Prix",
+      "circuit": "budapest",
+      "fold": "F4",
+      "role": "dev",
+      "load_time_s": 28.408883299998706,
+      "download_mb": 109.638826,
+      "cache_dir_mb_after": 991.743151,
+      "event_name": "Hungarian Grand Prix",
+      "event_date": "2023-07-23 00:00:00",
+      "location": "Budapest",
+      "total_laps": 70,
+      "n_drivers": 20,
+      "n_laps": 1252,
+      "columns": {
+        "laps": {
+          "Driver": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "DriverNumber": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "LapTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "LapNumber": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Stint": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Compound": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TyreLife": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "FreshTyre": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TrackStatus": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "IsAccurate": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "PitInTime": {
+            "present": true,
+            "nan_fraction": 0.9688498402555911
+          },
+          "PitOutTime": {
+            "present": true,
+            "nan_fraction": 0.9712460063897763
+          },
+          "Deleted": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "LapStartTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Time": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "SpeedI1": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "SpeedI2": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "SpeedFL": {
+            "present": true,
+            "nan_fraction": 0.031150159744408944
+          },
+          "SpeedST": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        },
+        "car": {
+          "SessionTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Speed": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Throttle": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Brake": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        },
+        "pos": {
+          "SessionTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "X": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Y": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        },
+        "weather": {
+          "Time": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "AirTemp": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TrackTemp": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Rainfall": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        }
+      },
+      "drivers_without_car_data": [],
+      "drivers_without_pos_data": [],
+      "rainfall_any": false,
+      "tracktemp_c": {
+        "min": 45.5,
+        "mean": 48.579268292682926,
+        "max": 51.4
+      },
+      "airtemp_c": {
+        "min": 27.7,
+        "mean": 28.808536585365857,
+        "max": 29.6
+      },
+      "wet_lap_fraction": 0.0,
+      "is_dry": true,
+      "telemetry_missing_fraction": 0.0,
+      "o1_keep": true,
+      "exclusion_counts": {
+        "scored": 976,
+        "traffic": 148,
+        "in_lap": 38,
+        "out_lap": 36,
+        "race_lap_1": 20,
+        "not_green": 18,
+        "deleted": 16
+      },
+      "traffic_share_green_laps": {
+        "0.5": 0.0247320692497939,
+        "1.0": 0.13437757625721353,
+        "1.5": 0.2110469909315746,
+        "2.0": 0.30667765869744434
+      },
+      "pit_lane_time_s": {
+        "n": 36,
+        "median": 21.98400000000038,
+        "q25": 21.636000000000195,
+        "q75": 22.745499999999765
+      },
+      "raw_stint_slope_s_per_lap": {
+        "n_stints": 48,
+        "median": 0.01900071606475593
+      },
+      "warmup_visibility": {
+        "n_stints": 49,
+        "n_dip": 19,
+        "dip_share": 0.3877551020408163,
+        "min_gain_s": 0.1,
+        "dip_gain_s": {
+          "n": 19,
+          "median": 0.6119999999999948,
+          "q25": 0.27949999999999875,
+          "q75": 0.867999999999995
+        },
+        "gain_all_s": {
+          "n": 49,
+          "median": 0.06599999999998829,
+          "q25": 0.0,
+          "q75": 0.49499999999999034,
+          "share_above_min_gain": 0.46938775510204084
+        },
+        "first_scored_stint_lap": {
+          "median": 2.0,
+          "counts": {
+            "2": 37,
+            "3": 3,
+            "4": 2,
+            "6": 2,
+            "7": 2,
+            "8": 1,
+            "9": 1,
+            "11": 1
+          }
+        },
+        "first_scored_tyre_life_median": 5.0
+      }
+    },
+    {
+      "event_id": "2023_singapore",
+      "season": 2023,
+      "grand_prix_query": "Singapore Grand Prix",
+      "circuit": "singapore",
+      "fold": "F5",
+      "role": "dev",
+      "load_time_s": 37.367923499994504,
+      "download_mb": 122.36258,
+      "cache_dir_mb_after": 1114.105731,
+      "event_name": "Singapore Grand Prix",
+      "event_date": "2023-09-17 00:00:00",
+      "location": "Marina Bay",
+      "total_laps": 62,
+      "n_drivers": 19,
+      "n_laps": 1088,
+      "columns": {
+        "laps": {
+          "Driver": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "DriverNumber": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "LapTime": {
+            "present": true,
+            "nan_fraction": 0.004595588235294118
+          },
+          "LapNumber": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Stint": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Compound": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TyreLife": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "FreshTyre": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TrackStatus": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "IsAccurate": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "PitInTime": {
+            "present": true,
+            "nan_fraction": 0.9770220588235294
+          },
+          "PitOutTime": {
+            "present": true,
+            "nan_fraction": 0.9761029411764706
+          },
+          "Deleted": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "LapStartTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Time": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "SpeedI1": {
+            "present": true,
+            "nan_fraction": 0.003676470588235294
+          },
+          "SpeedI2": {
+            "present": true,
+            "nan_fraction": 0.003676470588235294
+          },
+          "SpeedFL": {
+            "present": true,
+            "nan_fraction": 0.02665441176470588
+          },
+          "SpeedST": {
+            "present": true,
+            "nan_fraction": 0.004595588235294118
+          }
+        },
+        "car": {
+          "SessionTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Speed": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Throttle": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Brake": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        },
+        "pos": {
+          "SessionTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "X": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Y": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        },
+        "weather": {
+          "Time": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "AirTemp": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TrackTemp": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Rainfall": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        }
+      },
+      "drivers_without_car_data": [],
+      "drivers_without_pos_data": [],
+      "rainfall_any": false,
+      "tracktemp_c": {
+        "min": 34.6,
+        "mean": 36.42215909090909,
+        "max": 38.6
+      },
+      "airtemp_c": {
+        "min": 29.4,
+        "mean": 29.844318181818185,
+        "max": 30.2
+      },
+      "wet_lap_fraction": 0.0,
+      "is_dry": true,
+      "telemetry_missing_fraction": 0.0,
+      "o1_keep": true,
+      "exclusion_counts": {
+        "scored": 554,
+        "traffic": 275,
+        "not_green": 178,
+        "in_lap": 25,
+        "out_lap": 24,
+        "race_lap_1": 18,
+        "deleted": 9,
+        "no_lap_time": 5
+      },
+      "traffic_share_green_laps": {
+        "0.5": 0.06627218934911243,
+        "1.0": 0.3301775147928994,
+        "1.5": 0.5124260355029586,
+        "2.0": 0.6106508875739645
+      },
+      "pit_lane_time_s": {
+        "n": 24,
+        "median": 30.56999999999971,
+        "q25": 29.769249999999374,
+        "q75": 32.398249999999734
+      },
+      "raw_stint_slope_s_per_lap": {
+        "n_stints": 38,
+        "median": -0.018727147113012856
+      },
+      "warmup_visibility": {
+        "n_stints": 40,
+        "n_dip": 8,
+        "dip_share": 0.2,
+        "min_gain_s": 0.1,
+        "dip_gain_s": {
+          "n": 8,
+          "median": 1.2580000000000027,
+          "q25": 0.9147499999999873,
+          "q75": 1.5709999999999908
+        },
+        "gain_all_s": {
+          "n": 40,
+          "median": 0.7055000000000078,
+          "q25": 0.20874999999999488,
+          "q75": 1.3185000000000002,
+          "share_above_min_gain": 0.775
+        },
+        "first_scored_stint_lap": {
+          "median": 4.0,
+          "counts": {
+            "2": 6,
+            "3": 9,
+            "4": 6,
+            "5": 5,
+            "6": 3,
+            "7": 3,
+            "8": 3,
+            "10": 1,
+            "14": 1,
+            "15": 1,
+            "16": 1,
+            "19": 1
+          }
+        },
+        "first_scored_tyre_life_median": 5.0
+      }
+    },
+    {
+      "event_id": "2023_yas_marina",
+      "season": 2023,
+      "grand_prix_query": "Abu Dhabi Grand Prix",
+      "circuit": "yas_marina",
+      "fold": "F6",
+      "role": "dev",
+      "load_time_s": 27.845236699999077,
+      "download_mb": 104.997403,
+      "cache_dir_mb_after": 1219.103134,
+      "event_name": "Abu Dhabi Grand Prix",
+      "event_date": "2023-11-26 00:00:00",
+      "location": "Yas Island",
+      "total_laps": 58,
+      "n_drivers": 20,
+      "n_laps": 1157,
+      "columns": {
+        "laps": {
+          "Driver": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "DriverNumber": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "LapTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "LapNumber": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Stint": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Compound": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TyreLife": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "FreshTyre": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TrackStatus": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "IsAccurate": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "PitInTime": {
+            "present": true,
+            "nan_fraction": 0.9671564390665515
+          },
+          "PitOutTime": {
+            "present": true,
+            "nan_fraction": 0.9680207433016422
+          },
+          "Deleted": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "LapStartTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Time": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "SpeedI1": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "SpeedI2": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "SpeedFL": {
+            "present": true,
+            "nan_fraction": 0.032843560933448576
+          },
+          "SpeedST": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        },
+        "car": {
+          "SessionTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Speed": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Throttle": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Brake": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        },
+        "pos": {
+          "SessionTime": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "X": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Y": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        },
+        "weather": {
+          "Time": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "AirTemp": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "TrackTemp": {
+            "present": true,
+            "nan_fraction": 0.0
+          },
+          "Rainfall": {
+            "present": true,
+            "nan_fraction": 0.0
+          }
+        }
+      },
+      "drivers_without_car_data": [],
+      "drivers_without_pos_data": [],
+      "rainfall_any": false,
+      "tracktemp_c": {
+        "min": 30.5,
+        "mean": 33.46089743589744,
+        "max": 38.2
+      },
+      "airtemp_c": {
+        "min": 26.3,
+        "mean": 26.962820512820517,
+        "max": 27.7
+      },
+      "wet_lap_fraction": 0.0,
+      "is_dry": true,
+      "telemetry_missing_fraction": 0.0,
+      "o1_keep": true,
+      "exclusion_counts": {
+        "scored": 811,
+        "traffic": 221,
+        "in_lap": 38,
+        "out_lap": 36,
+        "deleted": 31,
+        "race_lap_1": 20
+      },
+      "traffic_share_green_laps": {
+        "0.5": 0.03802938634399308,
+        "1.0": 0.23163353500432152,
+        "1.5": 0.3509075194468453,
+        "2.0": 0.46672428694900603
+      },
+      "pit_lane_time_s": {
+        "n": 37,
+        "median": 21.90599999999995,
+        "q25": 21.60899999999856,
+        "q75": 22.186999999999898
+      },
+      "raw_stint_slope_s_per_lap": {
+        "n_stints": 47,
+        "median": 0.00219700511680436
+      },
+      "warmup_visibility": {
+        "n_stints": 50,
+        "n_dip": 16,
+        "dip_share": 0.32,
+        "min_gain_s": 0.1,
+        "dip_gain_s": {
+          "n": 16,
+          "median": 0.4409999999999954,
+          "q25": 0.2540000000000049,
+          "q75": 0.8795000000000073
+        },
+        "gain_all_s": {
+          "n": 50,
+          "median": 0.03049999999999642,
+          "q25": 0.0,
+          "q75": 0.2540000000000049,
+          "share_above_min_gain": 0.42
+        },
+        "first_scored_stint_lap": {
+          "median": 2.0,
+          "counts": {
+            "2": 29,
+            "3": 8,
+            "4": 2,
+            "5": 1,
+            "6": 2,
+            "7": 1,
+            "8": 1,
+            "9": 2,
+            "11": 1,
+            "12": 1,
+            "13": 1,
+            "15": 1
+          }
+        },
+        "first_scored_tyre_life_median": 2.0
+      }
+    }
+  ],
+  "projection": {
+    "n_config_events": 70,
+    "mean_download_mb": 82.90729918181817,
+    "mean_load_time_s": 23.248835718181166,
+    "projected_total_gb": 5.8035109427272715,
+    "projected_total_h": 0.4520606945201893
+  },
+  "proxy_comparison": {
+    "events": [
+      "2023_barcelona",
+      "2023_budapest",
+      "2023_monza",
+      "2023_silverstone",
+      "2023_singapore",
+      "2023_yas_marina",
+      "2024_bahrain",
+      "2024_miami",
+      "2024_spielberg",
+      "2024_suzuka"
+    ],
+    "phi": 0.06,
+    "traffic_gap_threshold_s": 1.0,
+    "smooth_window": 7,
+    "by_proxy": {
+      "speed_trap": {
+        "available": true,
+        "n_laps": 7501,
+        "n_stints": 476,
+        "n_events": 10,
+        "between_event_share": 0.9345468588327883,
+        "within_stint_std": 2.2872481068474593,
+        "across_event_std": 16.637066336393598,
+        "l2_ratio": 0.13747905193141546,
+        "noise_std": 1.9405391215232493,
+        "drift_per_lap": 0.05740760820205338,
+        "corr_y_within_stint": -0.07449593660094675,
+        "partial_corr_y_given_lap": -0.22995718950594163,
+        "leak_warning": false,
+        "suggest_score": 0.864926915286567,
+        "event_means": {
+          "2023_barcelona": 281.2620215897939,
+          "2023_budapest": 262.60857289527723,
+          "2023_monza": 312.19741379310346,
+          "2023_silverstone": 274.23564814814813,
+          "2023_singapore": 270.003616636528,
+          "2023_yas_marina": 274.89215080346105,
+          "2024_bahrain": 267.13544226044223,
+          "2024_miami": 247.11916666666667,
+          "2024_spielberg": 272.37250996015933,
+          "2024_suzuka": 281.859375
+        }
+      },
+      "energy_index": {
+        "available": true,
+        "n_laps": 7501,
+        "n_stints": 476,
+        "n_events": 10,
+        "between_event_share": 0.9200450790831195,
+        "within_stint_std": 0.5291454508591192,
+        "across_event_std": 2.461344966072187,
+        "l2_ratio": 0.2149822386349725,
+        "noise_std": 0.4937983976363807,
+        "drift_per_lap": -0.0004857375389988619,
+        "corr_y_within_stint": -0.20378710516178994,
+        "partial_corr_y_given_lap": -0.2207635607651929,
+        "leak_warning": false,
+        "suggest_score": 0.7325517557984206,
+        "event_means": {
+          "2023_barcelona": 24.181265016615818,
+          "2023_budapest": 23.60663176099257,
+          "2023_monza": 16.48307183496423,
+          "2023_silverstone": 23.317880417377157,
+          "2023_singapore": 20.208178266630163,
+          "2023_yas_marina": 21.369037985862747,
+          "2024_bahrain": 19.28018454287097,
+          "2024_miami": 21.318324835106434,
+          "2024_spielberg": 19.65318864144937,
+          "2024_suzuka": 23.674685385324214
+        }
+      },
+      "brake_fraction_weighted": {
+        "available": true,
+        "n_laps": 7501,
+        "n_stints": 476,
+        "n_events": 10,
+        "between_event_share": 0.7644086405996231,
+        "within_stint_std": 0.010807522347626549,
+        "across_event_std": 0.032521779435799654,
+        "l2_ratio": 0.3323164517784576,
+        "noise_std": 0.00978781854016297,
+        "drift_per_lap": -8.04338851717375e-05,
+        "corr_y_within_stint": 0.1431038937722431,
+        "partial_corr_y_given_lap": 0.1906429879653549,
+        "leak_warning": false,
+        "suggest_score": 0.6550187876966699,
+        "event_means": {
+          "2023_barcelona": 0.1287312873554124,
+          "2023_budapest": 0.19308344866170998,
+          "2023_monza": 0.09756074509129489,
+          "2023_silverstone": 0.10128709057555561,
+          "2023_singapore": 0.18475521302686387,
+          "2023_yas_marina": 0.11851430345436524,
+          "2024_bahrain": 0.14603927422340415,
+          "2024_miami": 0.11385844244737157,
+          "2024_spielberg": 0.14868906318853775,
+          "2024_suzuka": 0.12649699548256124
+        }
+      }
+    },
+    "suggested": "speed_trap"
+  },
+  "records": [
+    {
+      "quantity": "FastF1 download size in MB (laps, telemetry, weather, messages); cache-dir size delta",
+      "population": "2023_barcelona race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 0.004096,
+      "status": "Observed"
+    },
+    {
+      "quantity": "FastF1 session.load wall time in s",
+      "population": "2023_barcelona race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 5.3010762000049,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Share of timed laps with telemetry coverage below 0.5 on car or position stream",
+      "population": "2023_barcelona race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 0.0,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Share of stints with an early corrected-pace dip (S4 on real data)",
+      "population": "2023_barcelona scored laps, stints with at least 3 scored laps",
+      "conditions": "phi=0.06, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the first scored lap, at stint lap 2-8, more than 0.1 s faster than the first scored lap, and last scored lap slower; stint lap = position in stint",
+      "instrument": "apexpinn.data.probe.warmup_visibility",
+      "value": 0.3103448275862069,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Median gain in s of the fastest lap over the first scored lap, dip stints",
+      "population": "2023_barcelona scored laps, stints with at least 3 scored laps",
+      "conditions": "phi=0.06, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the first scored lap, at stint lap 2-8, more than 0.1 s faster than the first scored lap, and last scored lap slower; stint lap = position in stint",
+      "instrument": "apexpinn.data.probe.warmup_visibility",
+      "value": 0.31099999999999284,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Median gain in s of the fastest lap over the first scored lap, all stints",
+      "population": "2023_barcelona scored laps, stints with at least 3 scored laps",
+      "conditions": "phi=0.06, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the first scored lap, at stint lap 2-8, more than 0.1 s faster than the first scored lap, and last scored lap slower; stint lap = position in stint",
+      "instrument": "apexpinn.data.probe.warmup_visibility",
+      "value": 0.0,
+      "status": "Observed"
+    },
+    {
+      "quantity": "FastF1 download size in MB (laps, telemetry, weather, messages); cache-dir size delta",
+      "population": "2024_bahrain race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 0.008192,
+      "status": "Observed"
+    },
+    {
+      "quantity": "FastF1 session.load wall time in s",
+      "population": "2024_bahrain race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 4.4917386999950395,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Share of timed laps with telemetry coverage below 0.5 on car or position stream",
+      "population": "2024_bahrain race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 0.0,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Share of stints with an early corrected-pace dip (S4 on real data)",
+      "population": "2024_bahrain scored laps, stints with at least 3 scored laps",
+      "conditions": "phi=0.06, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the first scored lap, at stint lap 2-8, more than 0.1 s faster than the first scored lap, and last scored lap slower; stint lap = position in stint",
+      "instrument": "apexpinn.data.probe.warmup_visibility",
+      "value": 0.3392857142857143,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Median gain in s of the fastest lap over the first scored lap, dip stints",
+      "population": "2024_bahrain scored laps, stints with at least 3 scored laps",
+      "conditions": "phi=0.06, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the first scored lap, at stint lap 2-8, more than 0.1 s faster than the first scored lap, and last scored lap slower; stint lap = position in stint",
+      "instrument": "apexpinn.data.probe.warmup_visibility",
+      "value": 0.472999999999999,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Median gain in s of the fastest lap over the first scored lap, all stints",
+      "population": "2024_bahrain scored laps, stints with at least 3 scored laps",
+      "conditions": "phi=0.06, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the first scored lap, at stint lap 2-8, more than 0.1 s faster than the first scored lap, and last scored lap slower; stint lap = position in stint",
+      "instrument": "apexpinn.data.probe.warmup_visibility",
+      "value": 0.0,
+      "status": "Observed"
+    },
+    {
+      "quantity": "FastF1 download size in MB (laps, telemetry, weather, messages); cache-dir size delta",
+      "population": "2025_suzuka race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 0.004096,
+      "status": "Observed"
+    },
+    {
+      "quantity": "FastF1 session.load wall time in s",
+      "population": "2025_suzuka race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 4.371246200003952,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Share of timed laps with telemetry coverage below 0.5 on car or position stream",
+      "population": "2025_suzuka race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 0.0,
+      "status": "Observed"
+    },
+    {
+      "quantity": "FastF1 download size in MB (laps, telemetry, weather, messages); cache-dir size delta",
+      "population": "2024_suzuka race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 118.388343,
+      "status": "Observed"
+    },
+    {
+      "quantity": "FastF1 session.load wall time in s",
+      "population": "2024_suzuka race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 28.574922400002833,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Share of timed laps with telemetry coverage below 0.5 on car or position stream",
+      "population": "2024_suzuka race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 0.0,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Share of stints with an early corrected-pace dip (S4 on real data)",
+      "population": "2024_suzuka scored laps, stints with at least 3 scored laps",
+      "conditions": "phi=0.06, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the first scored lap, at stint lap 2-8, more than 0.1 s faster than the first scored lap, and last scored lap slower; stint lap = position in stint",
+      "instrument": "apexpinn.data.probe.warmup_visibility",
+      "value": 0.2127659574468085,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Median gain in s of the fastest lap over the first scored lap, dip stints",
+      "population": "2024_suzuka scored laps, stints with at least 3 scored laps",
+      "conditions": "phi=0.06, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the first scored lap, at stint lap 2-8, more than 0.1 s faster than the first scored lap, and last scored lap slower; stint lap = position in stint",
+      "instrument": "apexpinn.data.probe.warmup_visibility",
+      "value": 0.5719999999999956,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Median gain in s of the fastest lap over the first scored lap, all stints",
+      "population": "2024_suzuka scored laps, stints with at least 3 scored laps",
+      "conditions": "phi=0.06, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the first scored lap, at stint lap 2-8, more than 0.1 s faster than the first scored lap, and last scored lap slower; stint lap = position in stint",
+      "instrument": "apexpinn.data.probe.warmup_visibility",
+      "value": 0.0,
+      "status": "Observed"
+    },
+    {
+      "quantity": "FastF1 download size in MB (laps, telemetry, weather, messages); cache-dir size delta",
+      "population": "2024_miami race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 107.902719,
+      "status": "Observed"
+    },
+    {
+      "quantity": "FastF1 session.load wall time in s",
+      "population": "2024_miami race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 31.073449399998935,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Share of timed laps with telemetry coverage below 0.5 on car or position stream",
+      "population": "2024_miami race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 0.0,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Share of stints with an early corrected-pace dip (S4 on real data)",
+      "population": "2024_miami scored laps, stints with at least 3 scored laps",
+      "conditions": "phi=0.06, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the first scored lap, at stint lap 2-8, more than 0.1 s faster than the first scored lap, and last scored lap slower; stint lap = position in stint",
+      "instrument": "apexpinn.data.probe.warmup_visibility",
+      "value": 0.30952380952380953,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Median gain in s of the fastest lap over the first scored lap, dip stints",
+      "population": "2024_miami scored laps, stints with at least 3 scored laps",
+      "conditions": "phi=0.06, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the first scored lap, at stint lap 2-8, more than 0.1 s faster than the first scored lap, and last scored lap slower; stint lap = position in stint",
+      "instrument": "apexpinn.data.probe.warmup_visibility",
+      "value": 0.34499999999998465,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Median gain in s of the fastest lap over the first scored lap, all stints",
+      "population": "2024_miami scored laps, stints with at least 3 scored laps",
+      "conditions": "phi=0.06, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the first scored lap, at stint lap 2-8, more than 0.1 s faster than the first scored lap, and last scored lap slower; stint lap = position in stint",
+      "instrument": "apexpinn.data.probe.warmup_visibility",
+      "value": 0.32800000000000296,
+      "status": "Observed"
+    },
+    {
+      "quantity": "FastF1 download size in MB (laps, telemetry, weather, messages); cache-dir size delta",
+      "population": "2023_silverstone race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 139.990127,
+      "status": "Observed"
+    },
+    {
+      "quantity": "FastF1 session.load wall time in s",
+      "population": "2023_silverstone race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 27.4144438000003,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Share of timed laps with telemetry coverage below 0.5 on car or position stream",
+      "population": "2023_silverstone race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 0.0,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Share of stints with an early corrected-pace dip (S4 on real data)",
+      "population": "2023_silverstone scored laps, stints with at least 3 scored laps",
+      "conditions": "phi=0.06, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the first scored lap, at stint lap 2-8, more than 0.1 s faster than the first scored lap, and last scored lap slower; stint lap = position in stint",
+      "instrument": "apexpinn.data.probe.warmup_visibility",
+      "value": 0.075,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Median gain in s of the fastest lap over the first scored lap, dip stints",
+      "population": "2023_silverstone scored laps, stints with at least 3 scored laps",
+      "conditions": "phi=0.06, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the first scored lap, at stint lap 2-8, more than 0.1 s faster than the first scored lap, and last scored lap slower; stint lap = position in stint",
+      "instrument": "apexpinn.data.probe.warmup_visibility",
+      "value": 0.15399999999999636,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Median gain in s of the fastest lap over the first scored lap, all stints",
+      "population": "2023_silverstone scored laps, stints with at least 3 scored laps",
+      "conditions": "phi=0.06, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the first scored lap, at stint lap 2-8, more than 0.1 s faster than the first scored lap, and last scored lap slower; stint lap = position in stint",
+      "instrument": "apexpinn.data.probe.warmup_visibility",
+      "value": 0.05649999999999977,
+      "status": "Observed"
+    },
+    {
+      "quantity": "FastF1 download size in MB (laps, telemetry, weather, messages); cache-dir size delta",
+      "population": "2024_spielberg race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 102.613034,
+      "status": "Observed"
+    },
+    {
+      "quantity": "FastF1 session.load wall time in s",
+      "population": "2024_spielberg race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 28.188609899996663,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Share of timed laps with telemetry coverage below 0.5 on car or position stream",
+      "population": "2024_spielberg race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 0.0,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Share of stints with an early corrected-pace dip (S4 on real data)",
+      "population": "2024_spielberg scored laps, stints with at least 3 scored laps",
+      "conditions": "phi=0.06, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the first scored lap, at stint lap 2-8, more than 0.1 s faster than the first scored lap, and last scored lap slower; stint lap = position in stint",
+      "instrument": "apexpinn.data.probe.warmup_visibility",
+      "value": 0.2982456140350877,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Median gain in s of the fastest lap over the first scored lap, dip stints",
+      "population": "2024_spielberg scored laps, stints with at least 3 scored laps",
+      "conditions": "phi=0.06, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the first scored lap, at stint lap 2-8, more than 0.1 s faster than the first scored lap, and last scored lap slower; stint lap = position in stint",
+      "instrument": "apexpinn.data.probe.warmup_visibility",
+      "value": 0.21099999999999852,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Median gain in s of the fastest lap over the first scored lap, all stints",
+      "population": "2024_spielberg scored laps, stints with at least 3 scored laps",
+      "conditions": "phi=0.06, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the first scored lap, at stint lap 2-8, more than 0.1 s faster than the first scored lap, and last scored lap slower; stint lap = position in stint",
+      "instrument": "apexpinn.data.probe.warmup_visibility",
+      "value": 0.0,
+      "status": "Observed"
+    },
+    {
+      "quantity": "FastF1 download size in MB (laps, telemetry, weather, messages); cache-dir size delta",
+      "population": "2023_monza race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 106.070875,
+      "status": "Observed"
+    },
+    {
+      "quantity": "FastF1 session.load wall time in s",
+      "population": "2023_monza race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 32.699662799997895,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Share of timed laps with telemetry coverage below 0.5 on car or position stream",
+      "population": "2023_monza race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 0.0,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Share of stints with an early corrected-pace dip (S4 on real data)",
+      "population": "2023_monza scored laps, stints with at least 3 scored laps",
+      "conditions": "phi=0.06, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the first scored lap, at stint lap 2-8, more than 0.1 s faster than the first scored lap, and last scored lap slower; stint lap = position in stint",
+      "instrument": "apexpinn.data.probe.warmup_visibility",
+      "value": 0.21621621621621623,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Median gain in s of the fastest lap over the first scored lap, dip stints",
+      "population": "2023_monza scored laps, stints with at least 3 scored laps",
+      "conditions": "phi=0.06, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the first scored lap, at stint lap 2-8, more than 0.1 s faster than the first scored lap, and last scored lap slower; stint lap = position in stint",
+      "instrument": "apexpinn.data.probe.warmup_visibility",
+      "value": 0.4369999999999976,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Median gain in s of the fastest lap over the first scored lap, all stints",
+      "population": "2023_monza scored laps, stints with at least 3 scored laps",
+      "conditions": "phi=0.06, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the first scored lap, at stint lap 2-8, more than 0.1 s faster than the first scored lap, and last scored lap slower; stint lap = position in stint",
+      "instrument": "apexpinn.data.probe.warmup_visibility",
+      "value": 0.0,
+      "status": "Observed"
+    },
+    {
+      "quantity": "FastF1 download size in MB (laps, telemetry, weather, messages); cache-dir size delta",
+      "population": "2023_budapest race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 109.638826,
+      "status": "Observed"
+    },
+    {
+      "quantity": "FastF1 session.load wall time in s",
+      "population": "2023_budapest race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 28.408883299998706,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Share of timed laps with telemetry coverage below 0.5 on car or position stream",
+      "population": "2023_budapest race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 0.0,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Share of stints with an early corrected-pace dip (S4 on real data)",
+      "population": "2023_budapest scored laps, stints with at least 3 scored laps",
+      "conditions": "phi=0.06, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the first scored lap, at stint lap 2-8, more than 0.1 s faster than the first scored lap, and last scored lap slower; stint lap = position in stint",
+      "instrument": "apexpinn.data.probe.warmup_visibility",
+      "value": 0.3877551020408163,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Median gain in s of the fastest lap over the first scored lap, dip stints",
+      "population": "2023_budapest scored laps, stints with at least 3 scored laps",
+      "conditions": "phi=0.06, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the first scored lap, at stint lap 2-8, more than 0.1 s faster than the first scored lap, and last scored lap slower; stint lap = position in stint",
+      "instrument": "apexpinn.data.probe.warmup_visibility",
+      "value": 0.6119999999999948,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Median gain in s of the fastest lap over the first scored lap, all stints",
+      "population": "2023_budapest scored laps, stints with at least 3 scored laps",
+      "conditions": "phi=0.06, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the first scored lap, at stint lap 2-8, more than 0.1 s faster than the first scored lap, and last scored lap slower; stint lap = position in stint",
+      "instrument": "apexpinn.data.probe.warmup_visibility",
+      "value": 0.06599999999998829,
+      "status": "Observed"
+    },
+    {
+      "quantity": "FastF1 download size in MB (laps, telemetry, weather, messages); cache-dir size delta",
+      "population": "2023_singapore race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 122.36258,
+      "status": "Observed"
+    },
+    {
+      "quantity": "FastF1 session.load wall time in s",
+      "population": "2023_singapore race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 37.367923499994504,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Share of timed laps with telemetry coverage below 0.5 on car or position stream",
+      "population": "2023_singapore race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 0.0,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Share of stints with an early corrected-pace dip (S4 on real data)",
+      "population": "2023_singapore scored laps, stints with at least 3 scored laps",
+      "conditions": "phi=0.06, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the first scored lap, at stint lap 2-8, more than 0.1 s faster than the first scored lap, and last scored lap slower; stint lap = position in stint",
+      "instrument": "apexpinn.data.probe.warmup_visibility",
+      "value": 0.2,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Median gain in s of the fastest lap over the first scored lap, dip stints",
+      "population": "2023_singapore scored laps, stints with at least 3 scored laps",
+      "conditions": "phi=0.06, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the first scored lap, at stint lap 2-8, more than 0.1 s faster than the first scored lap, and last scored lap slower; stint lap = position in stint",
+      "instrument": "apexpinn.data.probe.warmup_visibility",
+      "value": 1.2580000000000027,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Median gain in s of the fastest lap over the first scored lap, all stints",
+      "population": "2023_singapore scored laps, stints with at least 3 scored laps",
+      "conditions": "phi=0.06, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the first scored lap, at stint lap 2-8, more than 0.1 s faster than the first scored lap, and last scored lap slower; stint lap = position in stint",
+      "instrument": "apexpinn.data.probe.warmup_visibility",
+      "value": 0.7055000000000078,
+      "status": "Observed"
+    },
+    {
+      "quantity": "FastF1 download size in MB (laps, telemetry, weather, messages); cache-dir size delta",
+      "population": "2023_yas_marina race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 104.997403,
+      "status": "Observed"
+    },
+    {
+      "quantity": "FastF1 session.load wall time in s",
+      "population": "2023_yas_marina race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 27.845236699999077,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Share of timed laps with telemetry coverage below 0.5 on car or position stream",
+      "population": "2023_yas_marina race session",
+      "conditions": "runtime=local, fastf1=3.9.0; download is the cache-dir size delta, so 0 MB means the cache was already warm",
+      "instrument": "scripts/probe_fastf1.py",
+      "value": 0.0,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Share of stints with an early corrected-pace dip (S4 on real data)",
+      "population": "2023_yas_marina scored laps, stints with at least 3 scored laps",
+      "conditions": "phi=0.06, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the first scored lap, at stint lap 2-8, more than 0.1 s faster than the first scored lap, and last scored lap slower; stint lap = position in stint",
+      "instrument": "apexpinn.data.probe.warmup_visibility",
+      "value": 0.32,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Median gain in s of the fastest lap over the first scored lap, dip stints",
+      "population": "2023_yas_marina scored laps, stints with at least 3 scored laps",
+      "conditions": "phi=0.06, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the first scored lap, at stint lap 2-8, more than 0.1 s faster than the first scored lap, and last scored lap slower; stint lap = position in stint",
+      "instrument": "apexpinn.data.probe.warmup_visibility",
+      "value": 0.4409999999999954,
+      "status": "Observed"
+    },
+    {
+      "quantity": "Median gain in s of the fastest lap over the first scored lap, all stints",
+      "population": "2023_yas_marina scored laps, stints with at least 3 scored laps",
+      "conditions": "phi=0.06, y = lap_time - phi*(L - race_lap); dip = fastest scored lap strictly after the first scored lap, at stint lap 2-8, more than 0.1 s faster than the first scored lap, and last scored lap slower; stint lap = position in stint",
+      "instrument": "apexpinn.data.probe.warmup_visibility",
+      "value": 0.03049999999999642,
+      "status": "Observed"
+    },
+    {
+      "quantity": "speed_trap between_event_share",
+      "population": "scored laps of dev events ['2023_barcelona', '2023_budapest', '2023_monza', '2023_silverstone', '2023_singapore', '2023_yas_marina', '2024_bahrain', '2024_miami', '2024_spielberg', '2024_suzuka']",
+      "conditions": "phi=0.06, traffic_gap_threshold_s=1.0, position smoothing window=7 samples",
+      "instrument": "apexpinn.data.probe.compare_proxies",
+      "value": 0.9345468588327883,
+      "status": "Observed"
+    },
+    {
+      "quantity": "speed_trap l2_ratio",
+      "population": "scored laps of dev events ['2023_barcelona', '2023_budapest', '2023_monza', '2023_silverstone', '2023_singapore', '2023_yas_marina', '2024_bahrain', '2024_miami', '2024_spielberg', '2024_suzuka']",
+      "conditions": "phi=0.06, traffic_gap_threshold_s=1.0, position smoothing window=7 samples",
+      "instrument": "apexpinn.data.probe.compare_proxies",
+      "value": 0.13747905193141546,
+      "status": "Observed"
+    },
+    {
+      "quantity": "speed_trap noise_std",
+      "population": "scored laps of dev events ['2023_barcelona', '2023_budapest', '2023_monza', '2023_silverstone', '2023_singapore', '2023_yas_marina', '2024_bahrain', '2024_miami', '2024_spielberg', '2024_suzuka']",
+      "conditions": "phi=0.06, traffic_gap_threshold_s=1.0, position smoothing window=7 samples",
+      "instrument": "apexpinn.data.probe.compare_proxies",
+      "value": 1.9405391215232493,
+      "status": "Observed"
+    },
+    {
+      "quantity": "speed_trap corr_y_within_stint",
+      "population": "scored laps of dev events ['2023_barcelona', '2023_budapest', '2023_monza', '2023_silverstone', '2023_singapore', '2023_yas_marina', '2024_bahrain', '2024_miami', '2024_spielberg', '2024_suzuka']",
+      "conditions": "phi=0.06, traffic_gap_threshold_s=1.0, position smoothing window=7 samples",
+      "instrument": "apexpinn.data.probe.compare_proxies",
+      "value": -0.07449593660094675,
+      "status": "Observed"
+    },
+    {
+      "quantity": "speed_trap partial_corr_y_given_lap",
+      "population": "scored laps of dev events ['2023_barcelona', '2023_budapest', '2023_monza', '2023_silverstone', '2023_singapore', '2023_yas_marina', '2024_bahrain', '2024_miami', '2024_spielberg', '2024_suzuka']",
+      "conditions": "phi=0.06, traffic_gap_threshold_s=1.0, position smoothing window=7 samples",
+      "instrument": "apexpinn.data.probe.compare_proxies",
+      "value": -0.22995718950594163,
+      "status": "Observed"
+    },
+    {
+      "quantity": "energy_index between_event_share",
+      "population": "scored laps of dev events ['2023_barcelona', '2023_budapest', '2023_monza', '2023_silverstone', '2023_singapore', '2023_yas_marina', '2024_bahrain', '2024_miami', '2024_spielberg', '2024_suzuka']",
+      "conditions": "phi=0.06, traffic_gap_threshold_s=1.0, position smoothing window=7 samples",
+      "instrument": "apexpinn.data.probe.compare_proxies",
+      "value": 0.9200450790831195,
+      "status": "Observed"
+    },
+    {
+      "quantity": "energy_index l2_ratio",
+      "population": "scored laps of dev events ['2023_barcelona', '2023_budapest', '2023_monza', '2023_silverstone', '2023_singapore', '2023_yas_marina', '2024_bahrain', '2024_miami', '2024_spielberg', '2024_suzuka']",
+      "conditions": "phi=0.06, traffic_gap_threshold_s=1.0, position smoothing window=7 samples",
+      "instrument": "apexpinn.data.probe.compare_proxies",
+      "value": 0.2149822386349725,
+      "status": "Observed"
+    },
+    {
+      "quantity": "energy_index noise_std",
+      "population": "scored laps of dev events ['2023_barcelona', '2023_budapest', '2023_monza', '2023_silverstone', '2023_singapore', '2023_yas_marina', '2024_bahrain', '2024_miami', '2024_spielberg', '2024_suzuka']",
+      "conditions": "phi=0.06, traffic_gap_threshold_s=1.0, position smoothing window=7 samples",
+      "instrument": "apexpinn.data.probe.compare_proxies",
+      "value": 0.4937983976363807,
+      "status": "Observed"
+    },
+    {
+      "quantity": "energy_index corr_y_within_stint",
+      "population": "scored laps of dev events ['2023_barcelona', '2023_budapest', '2023_monza', '2023_silverstone', '2023_singapore', '2023_yas_marina', '2024_bahrain', '2024_miami', '2024_spielberg', '2024_suzuka']",
+      "conditions": "phi=0.06, traffic_gap_threshold_s=1.0, position smoothing window=7 samples",
+      "instrument": "apexpinn.data.probe.compare_proxies",
+      "value": -0.20378710516178994,
+      "status": "Observed"
+    },
+    {
+      "quantity": "energy_index partial_corr_y_given_lap",
+      "population": "scored laps of dev events ['2023_barcelona', '2023_budapest', '2023_monza', '2023_silverstone', '2023_singapore', '2023_yas_marina', '2024_bahrain', '2024_miami', '2024_spielberg', '2024_suzuka']",
+      "conditions": "phi=0.06, traffic_gap_threshold_s=1.0, position smoothing window=7 samples",
+      "instrument": "apexpinn.data.probe.compare_proxies",
+      "value": -0.2207635607651929,
+      "status": "Observed"
+    },
+    {
+      "quantity": "brake_fraction_weighted between_event_share",
+      "population": "scored laps of dev events ['2023_barcelona', '2023_budapest', '2023_monza', '2023_silverstone', '2023_singapore', '2023_yas_marina', '2024_bahrain', '2024_miami', '2024_spielberg', '2024_suzuka']",
+      "conditions": "phi=0.06, traffic_gap_threshold_s=1.0, position smoothing window=7 samples",
+      "instrument": "apexpinn.data.probe.compare_proxies",
+      "value": 0.7644086405996231,
+      "status": "Observed"
+    },
+    {
+      "quantity": "brake_fraction_weighted l2_ratio",
+      "population": "scored laps of dev events ['2023_barcelona', '2023_budapest', '2023_monza', '2023_silverstone', '2023_singapore', '2023_yas_marina', '2024_bahrain', '2024_miami', '2024_spielberg', '2024_suzuka']",
+      "conditions": "phi=0.06, traffic_gap_threshold_s=1.0, position smoothing window=7 samples",
+      "instrument": "apexpinn.data.probe.compare_proxies",
+      "value": 0.3323164517784576,
+      "status": "Observed"
+    },
+    {
+      "quantity": "brake_fraction_weighted noise_std",
+      "population": "scored laps of dev events ['2023_barcelona', '2023_budapest', '2023_monza', '2023_silverstone', '2023_singapore', '2023_yas_marina', '2024_bahrain', '2024_miami', '2024_spielberg', '2024_suzuka']",
+      "conditions": "phi=0.06, traffic_gap_threshold_s=1.0, position smoothing window=7 samples",
+      "instrument": "apexpinn.data.probe.compare_proxies",
+      "value": 0.00978781854016297,
+      "status": "Observed"
+    },
+    {
+      "quantity": "brake_fraction_weighted corr_y_within_stint",
+      "population": "scored laps of dev events ['2023_barcelona', '2023_budapest', '2023_monza', '2023_silverstone', '2023_singapore', '2023_yas_marina', '2024_bahrain', '2024_miami', '2024_spielberg', '2024_suzuka']",
+      "conditions": "phi=0.06, traffic_gap_threshold_s=1.0, position smoothing window=7 samples",
+      "instrument": "apexpinn.data.probe.compare_proxies",
+      "value": 0.1431038937722431,
+      "status": "Observed"
+    },
+    {
+      "quantity": "brake_fraction_weighted partial_corr_y_given_lap",
+      "population": "scored laps of dev events ['2023_barcelona', '2023_budapest', '2023_monza', '2023_silverstone', '2023_singapore', '2023_yas_marina', '2024_bahrain', '2024_miami', '2024_spielberg', '2024_suzuka']",
+      "conditions": "phi=0.06, traffic_gap_threshold_s=1.0, position smoothing window=7 samples",
+      "instrument": "apexpinn.data.probe.compare_proxies",
+      "value": 0.1906429879653549,
+      "status": "Observed"
+    }
+  ]
+}
