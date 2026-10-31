@@ -113,6 +113,34 @@ def test_per_lap_telemetry_uses_only_samples_inside_the_lap():
     np.testing.assert_allclose(out["speed_mean_kmh"], 180.0)
 
 
+def test_per_lap_telemetry_ignores_samples_after_the_lap():
+    # PROJECT section 5.1: no proxy for lap k uses telemetry from laps > k. Perturb every sample from the
+    # first sample of lap 2 on (t = 10.0, exactly the end of lap 1) and lap 1 must be bitwise unchanged.
+    laps = pd.DataFrame({"lap_start_s": [0.0, 10.0, 20.0], "lap_end_s": [10.0, 20.0, 30.0]})
+    t = np.arange(-5.0, 35.0, 0.25)
+    r, v = 100.0, 50.0
+    angle = v / r * t
+    v_kmh = 180.0 + 20.0 * np.sin(0.3 * t)  # varying speed, so |a_lon| is not zero
+    car = pd.DataFrame({"t_s": t, "speed_kmh": v_kmh, "brake": np.sin(t) > 0.5})
+    pos = pd.DataFrame({"t_s": t, "x_m": r * np.cos(angle), "y_m": r * np.sin(angle)})
+    base = probe.per_lap_telemetry(laps, car, pos)
+
+    later = t >= laps.loc[1, "lap_start_s"]
+    n_later = int(later.sum())
+    rng = np.random.default_rng(0)
+    car_p, pos_p = car.copy(), pos.copy()
+    car_p.loc[later, "speed_kmh"] = car_p.loc[later, "speed_kmh"] * rng.uniform(0.5, 1.5, n_later)
+    car_p.loc[later, "brake"] = True
+    for col in ("x_m", "y_m"):
+        pos_p.loc[later, col] = pos_p.loc[later, col] * rng.uniform(0.5, 1.5, n_later)
+    perturbed = probe.per_lap_telemetry(laps, car_p, pos_p)
+
+    pd.testing.assert_frame_equal(perturbed.loc[[0]], base.loc[[0]], check_exact=True)
+    assert np.isfinite(base.loc[0, "energy_index"])
+    assert perturbed.loc[1, "brake_fraction"] == 1.0  # the perturbation does reach the later laps
+    assert perturbed.loc[1, "energy_index"] != base.loc[1, "energy_index"]
+
+
 def test_per_lap_telemetry_flags_missing_streams():
     laps = pd.DataFrame({"lap_start_s": [0.0, 10.0], "lap_end_s": [10.0, 20.0]})
     t = np.arange(0.0, 10.0, 0.25)  # no samples in lap 2
@@ -154,6 +182,51 @@ def test_compare_proxies_statistics():
     assert probe.suggest_proxy(result) == "good"
 
 
+def _warmup_frame(phi: float, total: float = 50.0) -> pd.DataFrame:
+    shapes = {
+        "dip": (2, [92.0, 91.0, 90.5, 90.8, 91.2]),  # min at stint lap 4, gain 1.5 s
+        "dip_at_first_scored": (2, [90.0, 90.2, 90.4, 90.6]),  # min at stint lap 2, gain 0
+        "min_at_lap_1": (1, [89.0, 90.0, 90.1, 90.2, 90.3]),
+        "still_improving": (2, [92.0, 91.5, 91.0, 90.5, 90.0]),  # last lap is the minimum
+        "too_short": (2, [92.0, 90.0]),
+        "min_too_late": (2, [95.0 - 0.5 * k for k in range(9)] + [91.5, 92.0]),  # min at stint lap 10
+    }
+    rows = []
+    for stint, (first, ys) in shapes.items():
+        for k, y in enumerate(ys):
+            lap = first + k
+            race_lap = 10.0 + lap
+            rows.append(
+                {
+                    "stint_key": stint,
+                    "stint_lap": float(lap),
+                    "TyreLife": float(lap + 3),
+                    "race_lap": race_lap,
+                    "total_laps": total,
+                    "lap_time_s": y + phi * (total - race_lap),
+                }
+            )
+    return pd.DataFrame(rows).sample(frac=1.0, random_state=0)  # order must not matter
+
+
+def test_warmup_visibility_counts_early_dips_on_corrected_time():
+    phi = 0.1
+    out = probe.warmup_visibility(_warmup_frame(phi), phi)
+    assert out["n_stints"] == 5 and out["n_dip"] == 2
+    assert out["dip_share"] == pytest.approx(0.4)
+    gain = out["dip_gain_s"]
+    assert gain["n"] == 2
+    assert (gain["median"], gain["q25"], gain["q75"]) == pytest.approx((0.75, 0.375, 1.125))
+    assert out["first_scored_stint_lap"] == {"median": 2.0, "counts": {"1": 1, "2": 4}}
+    assert out["first_scored_tyre_life_median"] == pytest.approx(5.0)
+
+
+def test_warmup_visibility_empty_frame():
+    cols = ["stint_key", "stint_lap", "race_lap", "total_laps", "lap_time_s"]
+    out = probe.warmup_visibility(pd.DataFrame(columns=cols), 0.06)
+    assert out["n_stints"] == 0 and out["dip_share"] is None and out["dip_gain_s"]["median"] is None
+
+
 def test_to_jsonable_handles_numpy_and_nan():
     value = {
         "a": np.float64(1.5),
@@ -177,18 +250,19 @@ class _FakeSession:
         rows, self.car_data, self.pos_data = [], {}, {}
         for i, (driver, number) in enumerate((("AAA", "1"), ("BBB", "2"))):
             start0 = 100.0 + 3.0 * i  # BBB crosses the line 3 s behind AAA: no traffic exclusion
+            # Lap time is 1 s slower on stint lap 2 (race laps 2 and 7), so most stints show an early dip.
             for lap in range(1, n_laps + 1):
                 ls, le = start0 + (lap - 1) * lap_s, start0 + lap * lap_s
-                pit_in = pd.Timedelta(seconds=le - 5.0) if (i == 0 and lap == 5) else pd.NaT
-                pit_out = pd.Timedelta(seconds=ls + 20.0) if (i == 0 and lap == 6) else pd.NaT
+                pit_in = pd.Timedelta(le - 5.0, unit="s") if (i == 0 and lap == 5) else pd.NaT
+                pit_out = pd.Timedelta(ls + 20.0, unit="s") if (i == 0 and lap == 6) else pd.NaT
                 rows.append(
                     {
                         "Driver": driver,
                         "DriverNumber": number,
                         "LapNumber": float(lap),
-                        "LapTime": pd.Timedelta(seconds=lap_s),
-                        "LapStartTime": pd.Timedelta(seconds=ls),
-                        "Time": pd.Timedelta(seconds=le),
+                        "LapTime": pd.Timedelta(lap_s + (1.0 if lap in (2, 7) else 0.0), unit="s"),
+                        "LapStartTime": pd.Timedelta(ls, unit="s"),
+                        "Time": pd.Timedelta(le, unit="s"),
                         "Stint": 1.0 if lap <= 5 else 2.0,
                         "Compound": "MEDIUM" if lap <= 5 else "HARD",
                         "TyreLife": float(lap if lap <= 5 else lap - 5),
@@ -268,6 +342,17 @@ def test_cli_end_to_end_with_fake_sessions(tmp_path, monkeypatch):
     assert counts == {"scored": 16, "race_lap_1": 2, "in_lap": 1, "out_lap": 1}
     assert races["2023_barcelona"]["pit_lane_time_s"]["median"] == pytest.approx(25.0)
 
+    # Stints: AAA 1 (stint laps 2-4 scored), AAA 2 (2-5), BBB 1 (2-5) dip at stint lap 3; BBB 2 has no
+    # out-lap exclusion, so its stint lap 1 is scored and fastest. Gain = 1 s - phi_mid.
+    phi = result["proxy_comparison"]["phi"]
+    for event_id in ("2023_barcelona", "2024_bahrain"):
+        warm = races[event_id]["warmup_visibility"]
+        assert (warm["n_stints"], warm["n_dip"]) == (4, 3)
+        assert warm["dip_gain_s"]["median"] == pytest.approx(1.0 - phi)
+        assert warm["first_scored_stint_lap"] == {"median": 2.0, "counts": {"1": 1, "2": 3}}
+        assert warm["first_scored_tyre_life_median"] == pytest.approx(2.0)
+    assert "warmup_visibility" not in races["2025_suzuka"]
+
     comparison = result["proxy_comparison"]
     assert comparison["events"] == ["2023_barcelona", "2024_bahrain"]  # holdout never feeds O2
     energy = comparison["by_proxy"]["energy_index"]["event_means"]
@@ -276,3 +361,8 @@ def test_cli_end_to_end_with_fake_sessions(tmp_path, monkeypatch):
     assert result["records"] and all(r["quantity"] and r["instrument"] for r in result["records"])
     report = report_out.read_text(encoding="utf-8")
     assert "## O2 heat-load proxy candidates" in report and "2025_suzuka" in report
+    warm_section = report.split("## Warm-up visibility (S4 on real stints)")[1].split("## O2")[0]
+    assert "2023_barcelona" in warm_section and "2025_suzuka" not in warm_section
+    warm_records = [r for r in result["records"] if "early corrected-pace dip" in r["quantity"]]
+    assert sorted(r["population"].split()[0] for r in warm_records) == ["2023_barcelona", "2024_bahrain"]
+    assert all(r["value"] == pytest.approx(0.75) for r in warm_records)

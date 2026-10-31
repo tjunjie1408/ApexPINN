@@ -229,6 +229,11 @@ def probe_race(
         "q75": float(np.percentile(pit, 75)) if pit.size else None,
     }
 
+    # Stint lap = 1-based position in the driver's stint over all laps before exclusions, so the out-lap
+    # (or race lap 1) is stint lap 1, as in the synthetic generator. TyreLife is kept for comparison; it
+    # starts above 1 on sets used earlier in the weekend.
+    stint_start = laps.groupby(["Driver", "Stint"])["LapNumber"].transform("min")
+    laps["stint_lap"] = laps["LapNumber"] - stint_start + 1
     scored = laps[(laps["exclusion_reason"] == "") & ~laps["telemetry_missing"]].copy()
     scored["event_id"] = event_id
     scored["stint_key"] = event_id + "/" + scored["Driver"].astype(str) + "/" + scored["Stint"].astype(str)
@@ -240,8 +245,18 @@ def probe_race(
         "n_stints": int(slopes.size),
         "median": float(np.median(slopes)) if slopes.size else None,
     }
-    keep = ["event_id", "stint_key", "race_lap", "total_laps", "lap_time_s", *probe.PROXY_COLUMNS]
-    return summary, scored[keep]
+    summary["warmup_visibility"] = probe.warmup_visibility(scored, decisions.phi_mid)
+    keep = [
+        "event_id",
+        "stint_key",
+        "stint_lap",
+        "TyreLife",
+        "race_lap",
+        "total_laps",
+        "lap_time_s",
+        *probe.PROXY_COLUMNS,
+    ]
+    return summary, scored.reindex(columns=keep)
 
 
 def environment() -> dict[str, Any]:
@@ -264,6 +279,7 @@ def build_records(result: dict[str, Any]) -> list[dict[str, Any]]:
         "so 0 MB means the cache was already warm"
     )
     records = []
+    phi = result["proxy_comparison"]["phi"]
     for race in result["races"]:
         if "error" in race:
             continue
@@ -278,6 +294,28 @@ def build_records(result: dict[str, Any]) -> list[dict[str, Any]]:
             records.append(
                 MetricRecord(quantity, population, conditions, "scripts/probe_fastf1.py", value, "Observed")
             )
+        if "warmup_visibility" in race:
+            warm = race["warmup_visibility"]
+            warm_population = f"{race['event_id']} scored laps, stints with at least 3 scored laps"
+            warm_conditions = (
+                f"phi={phi}, y = lap_time - phi*(L - race_lap); dip = fastest scored lap at stint lap 2-8 "
+                "and last scored lap slower; stint lap = position in stint"
+            )
+            for quantity, value in (
+                ("Share of stints with an early corrected-pace dip (S4 on real data)", warm["dip_share"]),
+                ("Median gain in s of the fastest lap over the first scored lap, dip stints",
+                 warm["dip_gain_s"]["median"]),
+            ):
+                records.append(
+                    MetricRecord(
+                        quantity,
+                        warm_population,
+                        warm_conditions,
+                        "apexpinn.data.probe.warmup_visibility",
+                        value,
+                        "Observed",
+                    )
+                )
     cmp_cfg = result["proxy_comparison"]
     population = f"scored laps of dev events {cmp_cfg['events']}"
     cmp_conditions = f"phi={cmp_cfg['phi']}, traffic_gap_threshold_s={cmp_cfg['traffic_gap_threshold_s']}"
@@ -375,6 +413,32 @@ def render_report(result: dict[str, Any]) -> str:
             line += f" Median raw within-stint slope {_fmt(s['median'])} s/lap over {s['n_stints']} stints."
         line += f" Drivers without car data: {r['drivers_without_car_data'] or 'none'}."
         lines.append(line)
+    warm_races = [r for r in ok if "warmup_visibility" in r]
+    if warm_races:
+        lines += [
+            "",
+            "## Warm-up visibility (S4 on real stints)",
+            "",
+            "Development races only, scored laps after all exclusions, stints with at least 3 scored laps. "
+            "`y = lap_time - phi_mid * (L - race_lap)`. Stint lap is the 1-based position in the stint over "
+            "all laps before exclusions, so stint lap 1 is the out-lap (or race lap 1) and is normally "
+            "excluded. A dip means the fastest scored lap is at stint lap 2-8 and the last scored lap is "
+            "slower (PRD S4, PLAN T3 test 3). Gain is `y` of the first scored lap minus the minimum `y`; "
+            "it is 0 when the first scored lap is itself the fastest.",
+            "",
+            "| Event | Stints | Dip stints | Dip share | Gain median s | Gain IQR s "
+            "| First scored stint lap (median; counts) | First scored TyreLife median |",
+            "| :--- | ---: | ---: | ---: | ---: | :--- | :--- | ---: |",
+        ]
+        for r in warm_races:
+            w = r["warmup_visibility"]
+            gain, first = w["dip_gain_s"], w["first_scored_stint_lap"]
+            counts = ", ".join(f"{k}: {v}" for k, v in first["counts"].items()) or "none"
+            lines.append(
+                f"| {r['event_id']} | {w['n_stints']} | {w['n_dip']} | {_fmt(w['dip_share'])} "
+                f"| {_fmt(gain['median'])} | [{_fmt(gain['q25'])}, {_fmt(gain['q75'])}] "
+                f"| {_fmt(first['median'], 1)}; {counts} | {_fmt(w['first_scored_tyre_life_median'], 1)} |"
+            )
     cmp_cfg = result["proxy_comparison"]
     lines += [
         "",
@@ -406,6 +470,7 @@ def render_report(result: dict[str, Any]) -> str:
         "- O2: choose the proxy and normalization from the table above and record the reason.",
         "- O3: check `phi` and the traffic threshold against the traffic shares and slopes above.",
         "- O8: compare pit-lane medians with the `per_circuit_median_iqr` plan.",
+        "- T5: use the warm-up visibility table to judge whether real stints show the S4 dip before fitting.",
         "- O5: user review before any model results are seen.",
         "",
     ]
