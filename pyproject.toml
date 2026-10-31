@@ -1,0 +1,53 @@
+[project]
+name = "apexpinn"
+version = "0.1.0"
+description = "Physics-informed tire-degradation forecasting and pit-strategy simulation for Formula 1, in JAX"
+readme = "README.md"
+authors = [
+    { name = "Teo Jun Jie", email = "jasonteo1408@gmail.com" }
+]
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "jax>=0.4.35",
+    "equinox>=0.11.10",
+    "optax>=0.2.4",
+    "diffrax>=0.6.2",
+    "numpy>=1.26",
+    "pandas>=2.2",
+    "pyarrow>=17.0",
+    "duckdb>=1.1",
+    "lightgbm>=4.5",
+    "scipy>=1.14",
+    "pyyaml>=6.0",
+    "fastf1>=3.4",
+]
+
+[project.optional-dependencies]
+# Linux only (WSL2, EC2). Colab already ships CUDA-enabled JAX.
+cuda = ["jax[cuda12]>=0.4.35 ; sys_platform == 'linux'"]
+
+[project.scripts]
+apexpinn-demo = "apexpinn.demo:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "hypothesis>=6.115",
+    "ruff>=0.7",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers -m 'not slow'"
+markers = ["slow: long-running tests (run with -m slow)"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "NPY"]

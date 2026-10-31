@@ -1,0 +1,146 @@
+# ApexPINN frozen decisions O1-O8 (PRD section 9).
+#
+# status: draft means the structure is final but the values are documented defaults.
+# T6 (data probe) replaces the defaults with probe-backed values and sets status: frozen.
+# Loaded and validated by apexpinn.contracts.load_decisions.
+
+version: 1
+status: draft
+
+# O1: race list and circuit-to-fold map (leave-one-circuit-group-out).
+# Default: every 2023-2024 calendar event and K = 6 folds of 4 circuits. T6 drops wet races and
+# races with more than 20% missing telemetry. Every circuit belongs to exactly one fold, across all seasons.
+# Event ids are "<season>_<circuit>".
+o1_races:
+  dev_seasons: [2023, 2024]
+  folds:
+    F1: [bahrain, jeddah, melbourne, suzuka]
+    F2: [shanghai, miami, imola, monaco]
+    F3: [barcelona, montreal, spielberg, silverstone]
+    F4: [budapest, spa, zandvoort, monza]
+    F5: [baku, singapore, austin, mexico_city]
+    F6: [interlagos, las_vegas, lusail, yas_marina]
+  dev_events:
+    - "2023_bahrain"
+    - "2023_jeddah"
+    - "2023_melbourne"
+    - "2023_baku"
+    - "2023_miami"
+    - "2023_monaco"
+    - "2023_barcelona"
+    - "2023_montreal"
+    - "2023_spielberg"
+    - "2023_silverstone"
+    - "2023_budapest"
+    - "2023_spa"
+    - "2023_zandvoort"
+    - "2023_monza"
+    - "2023_singapore"
+    - "2023_suzuka"
+    - "2023_lusail"
+    - "2023_austin"
+    - "2023_mexico_city"
+    - "2023_interlagos"
+    - "2023_las_vegas"
+    - "2023_yas_marina"
+    - "2024_bahrain"
+    - "2024_jeddah"
+    - "2024_melbourne"
+    - "2024_suzuka"
+    - "2024_shanghai"
+    - "2024_miami"
+    - "2024_imola"
+    - "2024_monaco"
+    - "2024_montreal"
+    - "2024_barcelona"
+    - "2024_spielberg"
+    - "2024_silverstone"
+    - "2024_budapest"
+    - "2024_spa"
+    - "2024_zandvoort"
+    - "2024_monza"
+    - "2024_baku"
+    - "2024_singapore"
+    - "2024_austin"
+    - "2024_mexico_city"
+    - "2024_interlagos"
+    - "2024_las_vegas"
+    - "2024_lusail"
+    - "2024_yas_marina"
+  # 2025 temporal holdout: evaluated exactly once, after every freeze (PRD section 6.1).
+  # Default: the full 2025 calendar. T6 keeps dry races only.
+  holdout:
+    season: 2025
+    events:
+      - "2025_melbourne"
+      - "2025_shanghai"
+      - "2025_suzuka"
+      - "2025_bahrain"
+      - "2025_jeddah"
+      - "2025_miami"
+      - "2025_imola"
+      - "2025_monaco"
+      - "2025_barcelona"
+      - "2025_montreal"
+      - "2025_spielberg"
+      - "2025_silverstone"
+      - "2025_spa"
+      - "2025_budapest"
+      - "2025_zandvoort"
+      - "2025_monza"
+      - "2025_baku"
+      - "2025_singapore"
+      - "2025_austin"
+      - "2025_mexico_city"
+      - "2025_interlagos"
+      - "2025_las_vegas"
+      - "2025_lusail"
+      - "2025_yas_marina"
+
+# O2: heat-load proxy formula and normalization. Default candidate; T6 compares candidates on
+# training-fold races only and records the choice.
+o2_heat_load_proxy:
+  formula: energy_index # mean(|a_lat| + |a_lon|) from position and speed
+  candidates: [speed_trap, energy_index, brake_fraction_weighted]
+  normalization: per_fold_minmax # statistics fitted on each fold's training circuits only
+
+# O3: race-lap trend phi (s per race lap, fuel burn-off plus track evolution) and traffic threshold.
+# Default: phi_mid near the literature fuel effect (about 0.03 s/kg at about 1.8 kg/lap); low and high
+# bracket it for the sensitivity sweep. Must satisfy phi_low <= phi_mid <= phi_high.
+o3_race_lap_trend:
+  phi_low: 0.03
+  phi_mid: 0.06
+  phi_high: 0.09
+  traffic_gap_threshold_s: 1.0
+
+# O4: target definition (PROJECT section 4.2): y = lap_time_s - phi * (L_race - race_lap).
+o4_target:
+  definition: race_lap_trend_corrected
+
+# O5: forecasting protocol (PROJECT section 4.5). Chosen before any model results are seen.
+o5_protocol:
+  horizons: [1, 3, 5, 10]
+  primary_horizon: 5
+  k_min: 3
+
+# O6: synthetic study (S1b) ranges, noise, identifiable subset, and pass tolerance (relative error).
+o6_synthetic:
+  n_seeds: 5
+  noise_levels_s: [0.05, 0.15]
+  identifiable_subset: [rho_c, k_c]
+  tolerance:
+    rho_c: 0.15
+    k_c: 0.25
+
+# O7: ensemble size and tuning budget. The budget is equal for all models.
+o7_ensemble:
+  ensemble_size: 5
+  tuning_budget:
+    kind: trials
+    per_model: 20
+
+# O8: pit-loss estimation and strategy candidate set.
+o8_strategy:
+  pit_loss: per_circuit_median_iqr
+  max_stops: 2
+  candidate_window_laps: 10 # candidates within +-10 laps of the actual stops
