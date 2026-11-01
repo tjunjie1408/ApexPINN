@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-11-01T08:28:25.841391+00:00",
+  "generated_utc": "2026-11-01T08:59:46.790440+00:00",
   "main_fits": {
     "M1": {
       "config_hash": "5865e8579449d96979fe7b2b4280101eed794297b2bb391243a7d125ebd6a0b0",
@@ -31,7 +31,36 @@
       "residual_ratio": 54.07964825177775,
       "run_id": "main_fit_M1_well_specified_noise0.05_seed0"
     },
-    "M2": null
+    "M2": {
+      "config_hash": "dd615fc5fbbdf4cac0383834e245c2090db0e7cd0abfcbabc0391623c5a31483",
+      "config_name": "full",
+      "objective_rel_change_last20": -0.03177212387999073,
+      "recovered": {
+        "k_c[C2]": false,
+        "k_c[C3]": true,
+        "k_c[C4]": true,
+        "rho_c[C2]": false,
+        "rho_c[C3]": true,
+        "rho_c[C4]": true
+      },
+      "rel_error": {
+        "gamma_c[C2]": 0.28676941176528165,
+        "gamma_c[C3]": 0.007626737350979518,
+        "gamma_c[C4]": -0.1853498831981737,
+        "h_opt_c[C2]": 0.11215911131238643,
+        "h_opt_c[C3]": -0.005674618695799549,
+        "h_opt_c[C4]": -0.001084608992679411,
+        "k_c[C2]": -0.880808827513824,
+        "k_c[C3]": -0.022785419539842956,
+        "k_c[C4]": -0.07716845099983817,
+        "kappa": -0.028729396072628477,
+        "rho_c[C2]": 0.9505706707596,
+        "rho_c[C3]": -0.0018502077173762857,
+        "rho_c[C4]": 0.005888229745676204
+      },
+      "residual_ratio": 1.7108598790257508,
+      "run_id": "main_fit_M2_well_specified_noise0.05_seed0"
+    }
   },
   "profile": {
     "chi2_95_n_params": 22.362032494826934,

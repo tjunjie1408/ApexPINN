@@ -1,6 +1,6 @@
 # S1 identifiability study (PLAN T5), full config
 
-Built from 2 run records in `experiments/s1/` by `apexpinn.eval.s1_report`. Every number is `Observed`, read from the record named by its run id. Labels and criterion outcomes apply the rules declared in PLAN T5 to those numbers. Config: 48 stints, compounds ['C2', 'C3', 'C4'], seeds [0, 1, 2, 3, 4], noise [0.05, 0.15] s, models ['M1', 'M2'].
+Built from 21 run records in `experiments/s1/` by `apexpinn.eval.s1_report`. Every number is `Observed`, read from the record named by its run id. Labels and criterion outcomes apply the rules declared in PLAN T5 to those numbers. Config: 48 stints, compounds ['C2', 'C3', 'C4'], seeds [0, 1, 2, 3, 4], noise [0.05, 0.15] s, models ['M1', 'M2'].
 
 ## S1b recovery
 
@@ -9,25 +9,25 @@ Relative error (estimate - truth) / truth of the trained `M1` and `M2` estimates
 | Run id | Model | Noise s | Seed | Status | rho_c[C2] | rho_c[C3] | rho_c[C4] | k_c[C2] | k_c[C3] | k_c[C4] | Recovered | Max abs err, ungated | Residual ratio | Collapse flags |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | main_fit_M1_well_specified_noise0.05_seed0 | M1 | 0.05 | 0 | ok | +140.2% | +462.2% | +216.6% | -99.5% | -95.3% | -96.3% | no | +117.8% | 54.080 | none |
-| main_fit_M1_well_specified_noise0.05_seed1 | M1 | 0.05 | 1 | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M1_well_specified_noise0.05_seed2 | M1 | 0.05 | 2 | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M1_well_specified_noise0.05_seed3 | M1 | 0.05 | 3 | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M1_well_specified_noise0.05_seed4 | M1 | 0.05 | 4 | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M1_well_specified_noise0.15_seed0 | M1 | 0.15 | 0 | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M1_well_specified_noise0.15_seed1 | M1 | 0.15 | 1 | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M1_well_specified_noise0.15_seed2 | M1 | 0.15 | 2 | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M1_well_specified_noise0.15_seed3 | M1 | 0.15 | 3 | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M1_well_specified_noise0.15_seed4 | M1 | 0.15 | 4 | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M2_well_specified_noise0.05_seed0 | M2 | 0.05 | 0 | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M2_well_specified_noise0.05_seed1 | M2 | 0.05 | 1 | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M2_well_specified_noise0.05_seed2 | M2 | 0.05 | 2 | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M2_well_specified_noise0.05_seed3 | M2 | 0.05 | 3 | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M2_well_specified_noise0.05_seed4 | M2 | 0.05 | 4 | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M2_well_specified_noise0.15_seed0 | M2 | 0.15 | 0 | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M2_well_specified_noise0.15_seed1 | M2 | 0.15 | 1 | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M2_well_specified_noise0.15_seed2 | M2 | 0.15 | 2 | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M2_well_specified_noise0.15_seed3 | M2 | 0.15 | 3 | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M2_well_specified_noise0.15_seed4 | M2 | 0.15 | 4 | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
+| main_fit_M1_well_specified_noise0.05_seed1 | M1 | 0.05 | 1 | ok | +1490.8% | +847.3% | +323.1% | -96.7% | -93.5% | -98.9% | no | +92.9% | 32.652 | none |
+| main_fit_M1_well_specified_noise0.05_seed2 | M1 | 0.05 | 2 | ok | +623.5% | +644.7% | +273.2% | -89.6% | -93.1% | -94.4% | no | +277.9% | 5.642 | none |
+| main_fit_M1_well_specified_noise0.05_seed3 | M1 | 0.05 | 3 | ok | +419.1% | +801.8% | +525.7% | -89.2% | -97.3% | -97.5% | no | +221.7% | 20.095 | none |
+| main_fit_M1_well_specified_noise0.05_seed4 | M1 | 0.05 | 4 | ok | +1475.0% | +1018.5% | +3963.3% | -97.0% | -97.9% | -98.8% | no | +213.3% | 227.347 | none |
+| main_fit_M1_well_specified_noise0.15_seed0 | M1 | 0.15 | 0 | ok | -75.2% | -73.8% | -85.4% | -99.1% | -94.8% | -95.7% | no | +107.3% | 26.343 | none |
+| main_fit_M1_well_specified_noise0.15_seed1 | M1 | 0.15 | 1 | ok | +346.0% | +181.0% | +77.6% | -98.0% | -93.4% | -99.2% | no | +88.9% | 15.821 | none |
+| main_fit_M1_well_specified_noise0.15_seed2 | M1 | 0.15 | 2 | ok | +668.3% | +689.5% | +307.3% | -89.4% | -92.9% | -93.4% | no | +277.3% | 3.270 | none |
+| main_fit_M1_well_specified_noise0.15_seed3 | M1 | 0.15 | 3 | ok | +414.3% | +790.6% | +516.1% | -89.2% | -97.3% | -97.6% | no | +224.9% | 8.729 | none |
+| main_fit_M1_well_specified_noise0.15_seed4 | M1 | 0.15 | 4 | ok | +2883.4% | +1812.3% | +3800.0% | -95.4% | -96.6% | -99.0% | no | +244.1% | 64.167 | none |
+| main_fit_M2_well_specified_noise0.05_seed0 | M2 | 0.05 | 0 | ok | +95.1% | -0.2% | +0.6% | -88.1% | -2.3% | -7.7% | no | +28.7% | 1.711 | none |
+| main_fit_M2_well_specified_noise0.05_seed1 | M2 | 0.05 | 1 | ok | +1.2% | +1.6% | -1.1% | +3.7% | +1.8% | -7.5% | yes | +9.5% | 0.957 | none |
+| main_fit_M2_well_specified_noise0.05_seed2 | M2 | 0.05 | 2 | ok | +1.4% | -0.7% | +0.2% | +3.7% | -12.3% | +20.0% | yes | +48.5% | 0.996 | none |
+| main_fit_M2_well_specified_noise0.05_seed3 | M2 | 0.05 | 3 | ok | +0.2% | +2.8% | -1.2% | -0.1% | -12.8% | -30.7% | no | +39.8% | 0.965 | none |
+| main_fit_M2_well_specified_noise0.05_seed4 | M2 | 0.05 | 4 | ok | +2.1% | +0.8% | -1.7% | -7.4% | -6.4% | -15.7% | yes | +14.1% | 1.015 | none |
+| main_fit_M2_well_specified_noise0.15_seed0 | M2 | 0.15 | 0 | ok | +94.2% | -0.1% | +3.4% | -88.7% | -8.6% | -3.5% | no | +28.2% | 1.091 | none |
+| main_fit_M2_well_specified_noise0.15_seed1 | M2 | 0.15 | 1 | ok | +1.7% | +5.1% | -1.3% | +17.0% | +7.1% | -2.7% | yes | +11.7% | 0.953 | none |
+| main_fit_M2_well_specified_noise0.15_seed2 | M2 | 0.15 | 2 | ok | +3.2% | -2.6% | +0.1% | +20.1% | -23.6% | +28.3% | no | +49.8% | 0.966 | none |
+| main_fit_M2_well_specified_noise0.15_seed3 | M2 | 0.15 | 3 | ok | -0.3% | +7.2% | -0.6% | +9.3% | -6.9% | -37.5% | no | +37.0% | 0.956 | none |
+| main_fit_M2_well_specified_noise0.15_seed4 | M2 | 0.15 | 4 | ok | +6.5% | +2.4% | -0.7% | -18.5% | -14.9% | -16.5% | yes | +28.9% | 1.013 | none |
 
 ## S1c identifiability
 
@@ -41,38 +41,38 @@ Labels follow the PLAN T5 method declarations: identifiable if every seed recove
 | h_opt_c[C2] | 0.05 | profile | **missing** | sharp | n/a |
 | h_opt_c[C3] | 0.05 | profile | **missing** | sharp | n/a |
 | h_opt_c[C4] | 0.05 | profile | **missing** | sharp | n/a |
-| k_c[C2] | 0.05 | M1 | **missing** | sharp | no |
-| k_c[C2] | 0.05 | M2 | **missing** | sharp |  |
-| k_c[C3] | 0.05 | M1 | **missing** | sharp | no |
-| k_c[C3] | 0.05 | M2 | **missing** | sharp |  |
-| k_c[C4] | 0.05 | M1 | **missing** | sharp | no |
-| k_c[C4] | 0.05 | M2 | **missing** | sharp |  |
+| k_c[C2] | 0.05 | M1 | **missing** | sharp | no, no, no, no, no |
+| k_c[C2] | 0.05 | M2 | **missing** | sharp | no, yes, yes, yes, yes |
+| k_c[C3] | 0.05 | M1 | **missing** | sharp | no, no, no, no, no |
+| k_c[C3] | 0.05 | M2 | **missing** | sharp | yes, yes, yes, yes, yes |
+| k_c[C4] | 0.05 | M1 | **missing** | sharp | no, no, no, no, no |
+| k_c[C4] | 0.05 | M2 | **missing** | sharp | yes, yes, yes, no, yes |
 | kappa | 0.05 | profile | **missing** | sharp | n/a |
-| rho_c[C2] | 0.05 | M1 | **missing** | sharp | no |
-| rho_c[C2] | 0.05 | M2 | **missing** | sharp |  |
-| rho_c[C3] | 0.05 | M1 | **missing** | sharp | no |
-| rho_c[C3] | 0.05 | M2 | **missing** | sharp |  |
-| rho_c[C4] | 0.05 | M1 | **missing** | sharp | no |
-| rho_c[C4] | 0.05 | M2 | **missing** | sharp |  |
+| rho_c[C2] | 0.05 | M1 | **missing** | sharp | no, no, no, no, no |
+| rho_c[C2] | 0.05 | M2 | **missing** | sharp | no, yes, yes, yes, yes |
+| rho_c[C3] | 0.05 | M1 | **missing** | sharp | no, no, no, no, no |
+| rho_c[C3] | 0.05 | M2 | **missing** | sharp | yes, yes, yes, yes, yes |
+| rho_c[C4] | 0.05 | M1 | **missing** | sharp | no, no, no, no, no |
+| rho_c[C4] | 0.05 | M2 | **missing** | sharp | yes, yes, yes, yes, yes |
 | gamma_c[C2] | 0.15 | profile | **missing** | n/a | n/a |
 | gamma_c[C3] | 0.15 | profile | **missing** | n/a | n/a |
 | gamma_c[C4] | 0.15 | profile | **missing** | n/a | n/a |
 | h_opt_c[C2] | 0.15 | profile | **missing** | n/a | n/a |
 | h_opt_c[C3] | 0.15 | profile | **missing** | n/a | n/a |
 | h_opt_c[C4] | 0.15 | profile | **missing** | n/a | n/a |
-| k_c[C2] | 0.15 | M1 | **missing** | n/a |  |
-| k_c[C2] | 0.15 | M2 | **missing** | n/a |  |
-| k_c[C3] | 0.15 | M1 | **missing** | n/a |  |
-| k_c[C3] | 0.15 | M2 | **missing** | n/a |  |
-| k_c[C4] | 0.15 | M1 | **missing** | n/a |  |
-| k_c[C4] | 0.15 | M2 | **missing** | n/a |  |
+| k_c[C2] | 0.15 | M1 | **missing** | n/a | no, no, no, no, no |
+| k_c[C2] | 0.15 | M2 | **missing** | n/a | no, yes, yes, yes, yes |
+| k_c[C3] | 0.15 | M1 | **missing** | n/a | no, no, no, no, no |
+| k_c[C3] | 0.15 | M2 | **missing** | n/a | yes, yes, yes, yes, yes |
+| k_c[C4] | 0.15 | M1 | **missing** | n/a | no, no, no, no, no |
+| k_c[C4] | 0.15 | M2 | **missing** | n/a | yes, yes, no, no, yes |
 | kappa | 0.15 | profile | **missing** | n/a | n/a |
-| rho_c[C2] | 0.15 | M1 | **missing** | n/a |  |
-| rho_c[C2] | 0.15 | M2 | **missing** | n/a |  |
-| rho_c[C3] | 0.15 | M1 | **missing** | n/a |  |
-| rho_c[C3] | 0.15 | M2 | **missing** | n/a |  |
-| rho_c[C4] | 0.15 | M1 | **missing** | n/a |  |
-| rho_c[C4] | 0.15 | M2 | **missing** | n/a |  |
+| rho_c[C2] | 0.15 | M1 | **missing** | n/a | no, no, no, no, no |
+| rho_c[C2] | 0.15 | M2 | **missing** | n/a | no, yes, yes, yes, yes |
+| rho_c[C3] | 0.15 | M1 | **missing** | n/a | no, no, no, no, no |
+| rho_c[C3] | 0.15 | M2 | **missing** | n/a | yes, yes, yes, yes, yes |
+| rho_c[C4] | 0.15 | M1 | **missing** | n/a | no, no, no, no, no |
+| rho_c[C4] | 0.15 | M2 | **missing** | n/a | yes, yes, yes, yes, yes |
 
 ### Gauss-Newton spectrum and MLE
 
@@ -258,27 +258,37 @@ Declared clarifications (PLAN T5 method declarations, verbatim):
 - **`M2` in the misspecification study**: included if the slowest main-study `M2` fit took under 600 s.
 - While any main-study `M2` fit record is missing or failed, `M2` is undecided: part misspec runs the `M1` and profile runs, and adds the `M2` runs once every main-study `M2` fit has finished. A failing `M2` fit never blocks the mandatory `M1` runs.
 
-**M2 in the misspecification study**: undecided (10 of 10 main M2 fit records are missing or failed); the M1 runs proceed, and the M2 misspecification runs are planned once every main-study M2 fit has finished.
+**M2 in the misspecification study**: included (slowest main M2 fit 26.2 s < 600 s, run main_fit_M2_well_specified_noise0.05_seed1, measured).
 
 ### Outcomes
 
 | Variant | Model | Criterion 1 | Criterion 2 | Criterion 3 | Criterion 4 |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | wrong_phi | M1 | missing | missing | missing | missing |
+| wrong_phi | M2 | missing | missing | missing | missing |
 | student_t | M1 | missing | missing | missing | not_applicable |
+| student_t | M2 | missing | missing | missing | not_applicable |
 | piecewise_wear | M1 | missing | missing | missing | not_applicable |
+| piecewise_wear | M2 | missing | missing | missing | not_applicable |
 | drop_early | M1 | missing | missing | missing | not_applicable |
+| drop_early | M2 | missing | missing | missing | not_applicable |
 | traffic | M1 | missing | missing | missing | not_applicable |
+| traffic | M2 | missing | missing | missing | not_applicable |
 
 ### Details
 
 Criterion 2 lists each seed's misspecification profile shape next to coverage, because an open interval side counts as covering; `*` marks a shape that rests on an unconverged profile point.
 
 - **wrong_phi / M1**: C1 rho_c[C2]: governed_by_criterion_4; C1 rho_c[C3]: governed_by_criterion_4; C1 rho_c[C4]: governed_by_criterion_4; C1 k_c[C2]: missing; C1 k_c[C3]: missing; C1 k_c[C4]: missing; C2 rho_c[C2]: missing; C2 rho_c[C3]: missing; C2 rho_c[C4]: missing; C2 k_c[C2]: missing; C2 k_c[C3]: missing; C2 k_c[C4]: missing; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing; C4 rho_c[C2]: missing; C4 rho_c[C3]: missing; C4 rho_c[C4]: missing.
+- **wrong_phi / M2**: C1 rho_c[C2]: governed_by_criterion_4; C1 rho_c[C3]: governed_by_criterion_4; C1 rho_c[C4]: governed_by_criterion_4; C1 k_c[C2]: missing; C1 k_c[C3]: missing; C1 k_c[C4]: missing; C2 rho_c[C2]: missing; C2 rho_c[C3]: missing; C2 rho_c[C4]: missing; C2 k_c[C2]: missing; C2 k_c[C3]: missing; C2 k_c[C4]: missing; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing; C4 rho_c[C2]: missing; C4 rho_c[C3]: missing; C4 rho_c[C4]: missing.
 - **student_t / M1**: C1 rho_c[C2]: missing; C1 rho_c[C3]: missing; C1 rho_c[C4]: missing; C1 k_c[C2]: missing; C1 k_c[C3]: missing; C1 k_c[C4]: missing; C2 rho_c[C2]: missing; C2 rho_c[C3]: missing; C2 rho_c[C4]: missing; C2 k_c[C2]: missing; C2 k_c[C3]: missing; C2 k_c[C4]: missing; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
+- **student_t / M2**: C1 rho_c[C2]: missing; C1 rho_c[C3]: missing; C1 rho_c[C4]: missing; C1 k_c[C2]: missing; C1 k_c[C3]: missing; C1 k_c[C4]: missing; C2 rho_c[C2]: missing; C2 rho_c[C3]: missing; C2 rho_c[C4]: missing; C2 k_c[C2]: missing; C2 k_c[C3]: missing; C2 k_c[C4]: missing; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
 - **piecewise_wear / M1**: C1 rho_c[C2]: missing; C1 rho_c[C3]: missing; C1 rho_c[C4]: missing; C1 k_c[C2]: missing; C1 k_c[C3]: missing; C1 k_c[C4]: missing; C2 rho_c[C2]: missing; C2 rho_c[C3]: missing; C2 rho_c[C4]: missing; C2 k_c[C2]: missing; C2 k_c[C3]: missing; C2 k_c[C4]: missing; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
+- **piecewise_wear / M2**: C1 rho_c[C2]: missing; C1 rho_c[C3]: missing; C1 rho_c[C4]: missing; C1 k_c[C2]: missing; C1 k_c[C3]: missing; C1 k_c[C4]: missing; C2 rho_c[C2]: missing; C2 rho_c[C3]: missing; C2 rho_c[C4]: missing; C2 k_c[C2]: missing; C2 k_c[C3]: missing; C2 k_c[C4]: missing; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
 - **drop_early / M1**: C1 rho_c[C2]: missing; C1 rho_c[C3]: missing; C1 rho_c[C4]: missing; C1 k_c[C2]: missing; C1 k_c[C3]: missing; C1 k_c[C4]: missing; C2 rho_c[C2]: missing; C2 rho_c[C3]: missing; C2 rho_c[C4]: missing; C2 k_c[C2]: missing; C2 k_c[C3]: missing; C2 k_c[C4]: missing; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
+- **drop_early / M2**: C1 rho_c[C2]: missing; C1 rho_c[C3]: missing; C1 rho_c[C4]: missing; C1 k_c[C2]: missing; C1 k_c[C3]: missing; C1 k_c[C4]: missing; C2 rho_c[C2]: missing; C2 rho_c[C3]: missing; C2 rho_c[C4]: missing; C2 k_c[C2]: missing; C2 k_c[C3]: missing; C2 k_c[C4]: missing; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
 - **traffic / M1**: C1 rho_c[C2]: missing; C1 rho_c[C3]: missing; C1 rho_c[C4]: missing; C1 k_c[C2]: missing; C1 k_c[C3]: missing; C1 k_c[C4]: missing; C2 rho_c[C2]: missing; C2 rho_c[C3]: missing; C2 rho_c[C4]: missing; C2 k_c[C2]: missing; C2 k_c[C3]: missing; C2 k_c[C4]: missing; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
+- **traffic / M2**: C1 rho_c[C2]: missing; C1 rho_c[C3]: missing; C1 rho_c[C4]: missing; C1 k_c[C2]: missing; C1 k_c[C3]: missing; C1 k_c[C4]: missing; C2 rho_c[C2]: missing; C2 rho_c[C3]: missing; C2 rho_c[C4]: missing; C2 k_c[C2]: missing; C2 k_c[C3]: missing; C2 k_c[C4]: missing; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
 
 ### Silent failures
 
@@ -290,10 +300,11 @@ Measured wall time in seconds per run, read from the JSON records (`Observed`; m
 
 | Part | Kind | Model | Runs | Median total s | Max total s | Sum total s | Max fit s |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| main | fit | M1 | 1 | 40.4 | 40.4 | 40.4 | 30.7 |
+| main | fit | M1 | 10 | 28.0 | 49.7 | 323.1 | 39.0 |
+| main | fit | M2 | 10 | 15.6 | 31.8 | 186.3 | 26.2 |
 | main | profile | ode | 1 | 255.2 | 255.2 | 255.2 | n/a |
 
-Sum over all records: 295.6 s. Slowest main-study M2 fit: n/a (no measured main-study M2 fit); the threshold for M2 in the misspecification study is 600 s.
+Sum over all records: 764.5 s. Slowest main-study M2 fit: 26.2 s (run main_fit_M2_well_specified_noise0.05_seed1); the threshold for M2 in the misspecification study is 600 s.
 
 ## P1 trigger evidence
 
@@ -302,56 +313,35 @@ These are mechanical trigger checks against PRD section 8, not the decision. The
 - **R0 (plan)**: the default rung. It stays unless the user moves to R1 or R2.
 - **R1 trigger** (`k_c` or `h_opt,c` non-identifiable at realistic noise), mechanical trigger check, not the decision: `incomplete`.
   Non-identifiable: none. Weakly identifiable: none.
-- **R2 indicator** (`M1` stalls on at least 3 seeds at one noise level, with the `M2` records of those seeds present), mechanical trigger check, not the decision: `incomplete`. Declared rule (PLAN T5, verbatim): **R2 indicator for P1** (mechanical, not the decision): an `M1` fit stalls when its objective fell by less than 1% over the last 20% of logged steps while its residual ratio stayed at or above 1.2, so the data term did not reach the noise level. The indicator is present when `M1` stalls on at least 3 seeds (all seeds if fewer) at one noise level and the `M2` records of those seeds exist. `M1` and `M2` recovery and the final normalized loss terms are shown as context. The `R4` remedies and the tuning budget of `PRD §8` are not checked by code.
+- **R2 indicator** (`M1` stalls on at least 3 seeds at one noise level, with the `M2` records of those seeds present), mechanical trigger check, not the decision: `indicator_absent`. Declared rule (PLAN T5, verbatim): **R2 indicator for P1** (mechanical, not the decision): an `M1` fit stalls when its objective fell by less than 1% over the last 20% of logged steps while its residual ratio stayed at or above 1.2, so the data term did not reach the noise level. The indicator is present when `M1` stalls on at least 3 seeds (all seeds if fewer) at one noise level and the `M2` records of those seeds exist. `M1` and `M2` recovery and the final normalized loss terms are shown as context. The `R4` remedies and the tuning budget of `PRD §8` are not checked by code.
 
 | Run id | Model | Noise s | Seed | Status | Stalled | Objective change, last 20% | Residual ratio | Final normalized terms | Not recovered |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | main_fit_M1_well_specified_noise0.05_seed0 | M1 | 0.05 | 0 | ok | no | -0.4861 | 54.080 | data 0.023, mono 0.000, reg 6.255, thermal 0.009, wear 2.21e-04 | rho_c[C2], rho_c[C3], rho_c[C4], k_c[C2], k_c[C3], k_c[C4] |
-| main_fit_M1_well_specified_noise0.05_seed1 | M1 | 0.05 | 1 | missing | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M1_well_specified_noise0.05_seed2 | M1 | 0.05 | 2 | missing | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M1_well_specified_noise0.05_seed3 | M1 | 0.05 | 3 | missing | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M1_well_specified_noise0.05_seed4 | M1 | 0.05 | 4 | missing | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M2_well_specified_noise0.05_seed0 | M2 | 0.05 | 0 | missing | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M2_well_specified_noise0.05_seed1 | M2 | 0.05 | 1 | missing | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M2_well_specified_noise0.05_seed2 | M2 | 0.05 | 2 | missing | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M2_well_specified_noise0.05_seed3 | M2 | 0.05 | 3 | missing | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M2_well_specified_noise0.05_seed4 | M2 | 0.05 | 4 | missing | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M1_well_specified_noise0.15_seed0 | M1 | 0.15 | 0 | missing | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M1_well_specified_noise0.15_seed1 | M1 | 0.15 | 1 | missing | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M1_well_specified_noise0.15_seed2 | M1 | 0.15 | 2 | missing | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M1_well_specified_noise0.15_seed3 | M1 | 0.15 | 3 | missing | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M1_well_specified_noise0.15_seed4 | M1 | 0.15 | 4 | missing | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M2_well_specified_noise0.15_seed0 | M2 | 0.15 | 0 | missing | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M2_well_specified_noise0.15_seed1 | M2 | 0.15 | 1 | missing | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M2_well_specified_noise0.15_seed2 | M2 | 0.15 | 2 | missing | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M2_well_specified_noise0.15_seed3 | M2 | 0.15 | 3 | missing | n/a | n/a | n/a | n/a | n/a |
-| main_fit_M2_well_specified_noise0.15_seed4 | M2 | 0.15 | 4 | missing | n/a | n/a | n/a | n/a | n/a |
+| main_fit_M1_well_specified_noise0.05_seed1 | M1 | 0.05 | 1 | ok | no | -0.4010 | 32.652 | data 0.007, mono 0.000, reg 6.613, thermal 0.008, wear 8.18e-05 | rho_c[C2], rho_c[C3], rho_c[C4], k_c[C2], k_c[C3], k_c[C4] |
+| main_fit_M1_well_specified_noise0.05_seed2 | M1 | 0.05 | 2 | ok | no | -0.7503 | 5.642 | data 0.001, mono 0.000, reg 2.789, thermal 0.001, wear 5.13e-05 | rho_c[C2], rho_c[C3], rho_c[C4], k_c[C2], k_c[C3], k_c[C4] |
+| main_fit_M1_well_specified_noise0.05_seed3 | M1 | 0.05 | 3 | ok | no | -0.3832 | 20.095 | data 0.012, mono 0.000, reg 2.693, thermal 0.006, wear 5.26e-05 | rho_c[C2], rho_c[C3], rho_c[C4], k_c[C2], k_c[C3], k_c[C4] |
+| main_fit_M1_well_specified_noise0.05_seed4 | M1 | 0.05 | 4 | ok | no | -0.1655 | 227.347 | data 0.052, mono 0.000, reg 5.894, thermal 0.010, wear 1.22e-04 | rho_c[C2], rho_c[C3], rho_c[C4], k_c[C2], k_c[C3], k_c[C4] |
+| main_fit_M2_well_specified_noise0.05_seed0 | M2 | 0.05 | 0 | ok | no | -0.0318 | 1.711 | data 0.017 | rho_c[C2], k_c[C2] |
+| main_fit_M2_well_specified_noise0.05_seed1 | M2 | 0.05 | 1 | ok | no | -0.0197 | 0.957 | data 0.011 | none |
+| main_fit_M2_well_specified_noise0.05_seed2 | M2 | 0.05 | 2 | ok | no | -0.0249 | 0.996 | data 0.020 | none |
+| main_fit_M2_well_specified_noise0.05_seed3 | M2 | 0.05 | 3 | ok | no | -0.0108 | 0.965 | data 0.018 | k_c[C4] |
+| main_fit_M2_well_specified_noise0.05_seed4 | M2 | 0.05 | 4 | ok | no | -0.0013 | 1.015 | data 0.020 | none |
+| main_fit_M1_well_specified_noise0.15_seed0 | M1 | 0.15 | 0 | ok | no | -0.4080 | 26.343 | data 0.044, mono 0.000, reg 4.965, thermal 0.010, wear 9.07e-05 | rho_c[C2], rho_c[C3], rho_c[C4], k_c[C2], k_c[C3], k_c[C4] |
+| main_fit_M1_well_specified_noise0.15_seed1 | M1 | 0.15 | 1 | ok | no | -0.5512 | 15.821 | data 0.013, mono 0.000, reg 6.524, thermal 0.009, wear 8.11e-05 | rho_c[C2], rho_c[C3], rho_c[C4], k_c[C2], k_c[C3], k_c[C4] |
+| main_fit_M1_well_specified_noise0.15_seed2 | M1 | 0.15 | 2 | ok | no | -0.4875 | 3.270 | data 0.002, mono 0.000, reg 2.665, thermal 0.001, wear 8.83e-05 | rho_c[C2], rho_c[C3], rho_c[C4], k_c[C2], k_c[C3], k_c[C4] |
+| main_fit_M1_well_specified_noise0.15_seed3 | M1 | 0.15 | 3 | ok | no | -0.4271 | 8.729 | data 0.010, mono 0.000, reg 2.623, thermal 0.005, wear 4.47e-05 | rho_c[C2], rho_c[C3], rho_c[C4], k_c[C2], k_c[C3], k_c[C4] |
+| main_fit_M1_well_specified_noise0.15_seed4 | M1 | 0.15 | 4 | ok | no | -0.2196 | 64.167 | data 0.039, mono 0.000, reg 7.297, thermal 0.009, wear 4.47e-05 | rho_c[C2], rho_c[C3], rho_c[C4], k_c[C2], k_c[C3], k_c[C4] |
+| main_fit_M2_well_specified_noise0.15_seed0 | M2 | 0.15 | 0 | ok | no | -0.0099 | 1.091 | data 0.060 | rho_c[C2], k_c[C2] |
+| main_fit_M2_well_specified_noise0.15_seed1 | M2 | 0.15 | 1 | ok | no | -0.0039 | 0.953 | data 0.089 | none |
+| main_fit_M2_well_specified_noise0.15_seed2 | M2 | 0.15 | 2 | ok | no | -0.0040 | 0.966 | data 0.145 | k_c[C4] |
+| main_fit_M2_well_specified_noise0.15_seed3 | M2 | 0.15 | 3 | ok | no | -0.0013 | 0.956 | data 0.143 | k_c[C4] |
+| main_fit_M2_well_specified_noise0.15_seed4 | M2 | 0.15 | 4 | ok | no | -0.0001 | 1.013 | data 0.153 | none |
 
 - **E5** (refuted if a relative Gauss-Newton eigenvalue is below 1e-06 at noise 0.05 s), mechanical trigger check, not the decision: `incomplete`. Values: main_profile_ode_well_specified_noise0.05_seed0 0.001, main_profile_ode_well_specified_noise0.05_seed1 n/a, main_profile_ode_well_specified_noise0.05_seed2 n/a, main_profile_ode_well_specified_noise0.05_seed3 n/a, main_profile_ode_well_specified_noise0.05_seed4 n/a.
 
 ## Missing runs
 
-M2 misspecification runs are listed once every main-study M2 fit has a record.
-
-- main_fit_M1_well_specified_noise0.05_seed1: no record
-- main_fit_M1_well_specified_noise0.05_seed2: no record
-- main_fit_M1_well_specified_noise0.05_seed3: no record
-- main_fit_M1_well_specified_noise0.05_seed4: no record
-- main_fit_M1_well_specified_noise0.15_seed0: no record
-- main_fit_M1_well_specified_noise0.15_seed1: no record
-- main_fit_M1_well_specified_noise0.15_seed2: no record
-- main_fit_M1_well_specified_noise0.15_seed3: no record
-- main_fit_M1_well_specified_noise0.15_seed4: no record
-- main_fit_M2_well_specified_noise0.05_seed0: no record
-- main_fit_M2_well_specified_noise0.05_seed1: no record
-- main_fit_M2_well_specified_noise0.05_seed2: no record
-- main_fit_M2_well_specified_noise0.05_seed3: no record
-- main_fit_M2_well_specified_noise0.05_seed4: no record
-- main_fit_M2_well_specified_noise0.15_seed0: no record
-- main_fit_M2_well_specified_noise0.15_seed1: no record
-- main_fit_M2_well_specified_noise0.15_seed2: no record
-- main_fit_M2_well_specified_noise0.15_seed3: no record
-- main_fit_M2_well_specified_noise0.15_seed4: no record
 - main_profile_ode_well_specified_noise0.05_seed1: no record
 - main_profile_ode_well_specified_noise0.05_seed2: no record
 - main_profile_ode_well_specified_noise0.05_seed3: no record
@@ -376,6 +366,21 @@ M2 misspecification runs are listed once every main-study M2 fit has a record.
 - misspec_fit_M1_wrong_phi_noise0.05_seed0: no record
 - misspec_fit_M1_wrong_phi_noise0.05_seed1: no record
 - misspec_fit_M1_wrong_phi_noise0.05_seed2: no record
+- misspec_fit_M2_drop_early_noise0.05_seed0: no record
+- misspec_fit_M2_drop_early_noise0.05_seed1: no record
+- misspec_fit_M2_drop_early_noise0.05_seed2: no record
+- misspec_fit_M2_piecewise_wear_noise0.05_seed0: no record
+- misspec_fit_M2_piecewise_wear_noise0.05_seed1: no record
+- misspec_fit_M2_piecewise_wear_noise0.05_seed2: no record
+- misspec_fit_M2_student_t_noise0.05_seed0: no record
+- misspec_fit_M2_student_t_noise0.05_seed1: no record
+- misspec_fit_M2_student_t_noise0.05_seed2: no record
+- misspec_fit_M2_traffic_noise0.05_seed0: no record
+- misspec_fit_M2_traffic_noise0.05_seed1: no record
+- misspec_fit_M2_traffic_noise0.05_seed2: no record
+- misspec_fit_M2_wrong_phi_noise0.05_seed0: no record
+- misspec_fit_M2_wrong_phi_noise0.05_seed1: no record
+- misspec_fit_M2_wrong_phi_noise0.05_seed2: no record
 - misspec_profile_ode_drop_early_noise0.05_seed0: no record
 - misspec_profile_ode_drop_early_noise0.05_seed1: no record
 - misspec_profile_ode_drop_early_noise0.05_seed2: no record
