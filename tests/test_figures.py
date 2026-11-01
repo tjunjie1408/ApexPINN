@@ -23,9 +23,13 @@ from apexpinn.eval.figures import (
     coord_to_natural,
     derived_numbers,
     deviance_at_truth,
+    interval_legend_labels,
+    interval_methods,
     linear_interval,
+    linear_interval_v1,
     o6_tolerance,
     pick_fit_pair,
+    pick_fit_source,
     pick_record,
     plot_fit_convergence,
     plot_gn_spectrum,
@@ -35,8 +39,11 @@ from apexpinn.eval.figures import (
     plot_probe_warmup,
     plot_profiles,
     plot_recovery,
+    plot_recovery_seeds,
     plot_synthetic_stints,
     quadratic_interval,
+    reported_interval,
+    seed_recovery_table,
 )
 from apexpinn.physics.identifiability import likelihood_interval
 
@@ -80,7 +87,7 @@ def test_linear_interval_is_narrower_when_neighbours_exceed_threshold():
     dev = _parabola(200.0, 0.02)
     assert dev[3] > THRESHOLD and dev[5] > THRESHOLD
     iv = linear_interval(GRID, dev)
-    assert iv == likelihood_interval(GRID, dev)  # the reported method, unchanged
+    assert iv == likelihood_interval(GRID, dev)  # interval method v1, unchanged
     assert iv.lo_bounded and iv.hi_bounded
     lo, hi = quadratic_interval(GRID, dev)
     assert lo < iv.lo and iv.hi < hi
@@ -261,8 +268,12 @@ def test_derived_numbers_keys_and_coverage():
         "truth",
         "mle",
         "shape",
+        "interval_method",
         "reported_interval",
         "reported_covers_truth",
+        "linear_interval_v1",
+        "linear_v1_covers_truth",
+        "linear_v1_status",
         "quadratic_interval",
         "quadratic_covers_truth",
         "min_index",
@@ -270,6 +281,11 @@ def test_derived_numbers_keys_and_coverage():
         "deviance_step_upper",
     }
     assert set(k) == expected_keys
+    # A record from before profile method version 3: the reported interval is the v1 linear one.
+    assert out["interval_methods"] == ["v1_linear"]
+    assert k["interval_method"] == "v1_linear" and k["linear_v1_status"] == "reported"
+    assert k["linear_interval_v1"] == k["reported_interval"]
+    assert k["linear_v1_covers_truth"] is False
     # The linear interval misses the truth 0.276; the quadratic diagnostic of the exact parabola covers it.
     assert k["reported_covers_truth"] is False
     assert k["quadratic_covers_truth"] is True
@@ -478,16 +494,199 @@ def test_loading_make_figures_restores_x64():
     assert jax.config.x64_enabled == previous
 
 
-def test_figure_names_cover_the_nine_figures():
-    assert len(FIGURE_NAMES) == 9
+def test_figure_names_cover_the_ten_figures():
+    assert len(FIGURE_NAMES) == 10
     assert {
         "probe_warmup",
         "probe_pace_pit",
         "synthetic_stints",
         "s1_fit_convergence",
         "s1_recovery",
+        "s1_recovery_seeds",
         "s1_profiles",
         "s1_intervals",
         "s1_gn_spectrum",
         "s1_misspec_smoke",
     } == set(FIGURE_NAMES)
+    assert FIGURE_NAMES.index("s1_recovery_seeds") == FIGURE_NAMES.index("s1_recovery") + 1
+
+
+# --- interval method (PLAN T5 'Interval method v2') ---
+
+K_HALF = math.sqrt(THRESHOLD / 1000.0)  # exact half-width of the fake k profile in log coordinates
+
+
+def _v2_profile_record(config="full", store_linear=True):
+    """_profile_record with the k_c[C2] entry as profile method version 3 writes it: the v2 interval is
+    the exact crossing (covers the truth 0.276), the v1 linear interval misses it."""
+    record = _profile_record(config)
+    entry = dict(record["profiles"]["k_c[C2]"])
+    linear = dict(entry["interval"])
+    entry["interval"] = dict(linear, lo=0.29 * math.exp(-K_HALF), hi=0.29 * math.exp(K_HALF))
+    entry["interval_method"] = "v2_refined"
+    entry["covers_truth"] = True
+    if store_linear:
+        entry["interval_linear"] = linear
+    record["profiles"] = {**record["profiles"], "k_c[C2]": entry}
+    return record, linear
+
+
+def test_reported_interval_follows_interval_method():
+    v1 = _profile_record()["profiles"]["k_c[C2]"]
+    iv, method = reported_interval(v1)
+    assert method == "v1_linear" and iv is v1["interval"]
+    record, linear = _v2_profile_record()
+    v2 = record["profiles"]["k_c[C2]"]
+    iv, method = reported_interval(v2)
+    assert method == "v2_refined"
+    assert iv["lo"] == pytest.approx(0.29 * math.exp(-K_HALF)) and iv["lo"] != pytest.approx(linear["lo"])
+    assert linear_interval_v1(v2) == linear
+    assert linear_interval_v1(v1) == v1["interval"]
+    # A v2 entry without interval_linear gets the v1 interval recomputed from its deviance.
+    record, linear = _v2_profile_record(store_linear=False)
+    recomputed = linear_interval_v1(record["profiles"]["k_c[C2]"])
+    assert recomputed["lo"] == pytest.approx(linear["lo"], rel=1e-12)
+    assert recomputed["hi"] == pytest.approx(linear["hi"], rel=1e-12)
+    assert interval_methods(record["profiles"].values()) == ["v2_refined", "v1_linear"]
+
+
+def test_derived_numbers_reports_v2_and_keeps_v1_as_superseded():
+    record, linear = _v2_profile_record()
+    out = derived_numbers(record)
+    assert out["interval_methods"] == ["v1_linear", "v2_refined"]
+    k = out["params"]["k_c[C2]"]
+    assert k["interval_method"] == "v2_refined"
+    assert k["reported_interval"]["lo"] == pytest.approx(0.29 * math.exp(-K_HALF))
+    assert k["reported_interval"]["hi"] == pytest.approx(0.29 * math.exp(K_HALF))
+    assert k["reported_covers_truth"] is True
+    assert k["linear_interval_v1"] == {key: linear[key] for key in ("lo", "hi", "lo_bounded", "hi_bounded")}
+    assert k["linear_v1_covers_truth"] is False
+    assert k["linear_v1_status"] == "Superseded"
+    # The quadratic diagnostic is still there and unchanged.
+    assert k["quadratic_interval"]["lo"] == pytest.approx(0.29 * math.exp(-K_HALF), rel=1e-9)
+    assert out["params"]["h_opt_c[C2]"]["interval_method"] == "v1_linear"
+
+
+def test_interval_legend_labels_name_the_method():
+    assert interval_legend_labels(["v1_linear"]) == ["reported 95% interval (linear interpolation)"]
+    assert interval_legend_labels(["v2_refined"]) == [
+        "reported 95% interval (v2 refined)",
+        "v1 linear (Superseded)",
+    ]
+
+
+def test_profile_plots_write_png_for_v2_records(mpl, tmp_path):
+    record, _ = _v2_profile_record()
+    assert _is_png(plot_profiles(record, tmp_path / "s1_profiles.png"))
+    assert _is_png(plot_intervals(derived_numbers(record), tmp_path / "s1_intervals.png"))
+
+
+# --- all-seeds fit figure ---
+
+TOL = {"rho": 0.15, "k": 0.25}
+SEED_NOISES = (0.05, 0.15)
+SEED_SEEDS = (0, 1)
+SEED_MODEL_TAGS = ("M1", "M2", "M2v2")
+
+
+def _k_err(noise, seed):
+    return 0.1 * (1 + 3 * seed) + noise / 10  # seed 0 inside the 25% k tolerance, seed 1 outside
+
+
+def _rho_err(noise, seed):
+    return -0.05 * (1 + 4 * seed) - noise / 10  # seed 0 inside the 15% rho tolerance, seed 1 outside
+
+
+def _ratio(model, noise, seed):
+    return 1.0 + seed + noise + SEED_MODEL_TAGS.index(model)
+
+
+def _seed_fit(model, noise, seed, config="full", status="ok"):
+    r = _fit_record(model, config=config)
+    return dict(
+        r,
+        run_id=f"main_fit_{model}_well_specified_noise{noise:g}_seed{seed}",
+        status=status,
+        spec=dict(r["spec"], noise_s=noise, seed=seed),
+        diagnostics={"residual_ratio": _ratio(model, noise, seed), "collapse_flags": []},
+        rel_error={
+            "k_c[C2]": _k_err(noise, seed),
+            "rho_c[C2]": _rho_err(noise, seed),
+            "gamma_c[C2]": 0.5,
+            "kappa": None,
+        },
+    )
+
+
+def _seed_records(models=SEED_MODEL_TAGS, config="full"):
+    fits = [_seed_fit(m, n, s, config) for m in models for n in SEED_NOISES for s in SEED_SEEDS]
+    return {r["run_id"]: r for r in fits}
+
+
+def test_seed_recovery_table_has_every_seed_and_noise_level():
+    rows = seed_recovery_table(_seed_records(), TOL)
+    assert len(rows) == 3 * 2 * 2 * 2  # models x noise levels x seeds x gated parameters
+    assert {(r["noise_s"], r["seed"]) for r in rows} == {(n, s) for n in SEED_NOISES for s in SEED_SEEDS}
+    assert {r["param"] for r in rows} == {"k_c[C2]", "rho_c[C2]"}  # no tolerance for gamma, kappa
+    assert [r["model"] for r in rows[:8]] == ["M1"] * 8
+    assert (rows[0]["noise_s"], rows[0]["seed"], rows[0]["param"]) == (0.05, 0, "rho_c[C2]")
+    for r in rows:
+        noise, seed = r["noise_s"], r["seed"]
+        err = _k_err(noise, seed) if r["param"] == "k_c[C2]" else _rho_err(noise, seed)
+        assert r["rel_error"] == err
+        assert r["residual_ratio"] == _ratio(r["model"], noise, seed)
+        # Computed with the O6 tolerance, not copied: the fake records store recovered False everywhere.
+        assert r["recovered"] is (seed == 0)
+        assert r["config_name"] == "full"
+
+
+def test_seed_recovery_table_omits_missing_models_and_unfinished_records():
+    records = _seed_records(models=("M1", "M2"))
+    errored = _seed_fit("M2v2", 0.05, 0, status="error")
+    misspec = _fit_record("M2", config="full", part="misspec", variant="traffic")
+    profile = _profile_record()
+    records |= {r["run_id"]: r for r in (errored, misspec, profile)}
+    rows = seed_recovery_table(records, TOL)
+    assert {r["model"] for r in rows} == {"M1", "M2"}
+    assert len(rows) == 2 * 2 * 2 * 2
+    nan_fit = _seed_fit("M1", 0.05, 2)
+    nan_fit["rel_error"] = {"k_c[C2]": None, "rho_c[C2]": float("nan")}
+    rows = seed_recovery_table({nan_fit["run_id"]: nan_fit}, TOL)
+    assert [(r["rel_error"], r["recovered"]) for r in rows] == [(None, False), (None, False)]
+
+
+def test_pick_fit_source_never_mixes_full_and_smoke():
+    full = _seed_records(models=("M1",), config="full")
+    smoke = _seed_records(config="smoke")
+    sources = [("experiments/s1", full), ("experiments/s1_smoke", smoke)]
+    label, records = pick_fit_source(sources)
+    assert label == "experiments/s1" and records is full
+    rows = seed_recovery_table(records, TOL)
+    assert {r["model"] for r in rows} == {"M1"} and {r["config_name"] for r in rows} == {"full"}
+    profile = _profile_record()
+    sources[0] = ("experiments/s1", {profile["run_id"]: profile})  # a profile is not a fit
+    assert pick_fit_source(sources) == ("experiments/s1_smoke", smoke)
+    assert pick_fit_source([("experiments/s1", {})]) is None
+
+
+def test_plot_recovery_seeds_writes_png(mpl, tmp_path):
+    path = plot_recovery_seeds(_seed_records(), TOL, tmp_path / "s1_recovery_seeds.png", source="x")
+    assert _is_png(path)
+    smoke = _seed_records(models=("M2",), config="smoke")
+    assert _is_png(plot_recovery_seeds(smoke, TOL, tmp_path / "smoke.png", source="smoke"))
+    with pytest.raises(FigureInputMissing):
+        plot_recovery_seeds({}, TOL, tmp_path / "none.png")
+
+
+def test_build_figures_recovery_seeds_from_full_folder_only(mpl, tmp_path):
+    _write_records(tmp_path, "s1", list(_seed_records(models=("M1", "M2v2")).values()))
+    _write_records(tmp_path, "s1_smoke", list(_seed_records(config="smoke").values()))
+    _decisions_fixture(tmp_path / "configs" / "decisions_v1.yaml")
+    results = build_figures(tmp_path, only=["s1_recovery_seeds"], log=lambda _: None)
+    assert results["s1_recovery_seeds"].startswith("written"), results
+    assert _is_png(tmp_path / "reports" / "figures" / "s1_recovery_seeds.png")
+
+
+def test_build_figures_skips_recovery_seeds_without_fits(tmp_path):
+    results = build_figures(tmp_path, only=["s1_recovery_seeds"], log=lambda _: None)
+    assert results["s1_recovery_seeds"].startswith("skipped"), results

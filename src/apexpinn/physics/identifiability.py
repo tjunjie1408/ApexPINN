@@ -15,7 +15,7 @@ otherwise JAX evaluates the losses in float32 and the profiles lose precision.
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 import equinox as eqx
 import jax
@@ -289,6 +289,34 @@ def minimize(
     return result.theta, result.loss, result.success
 
 
+def _pinned_solve(
+    vg: ValueAndGrad,
+    theta0: np.ndarray,
+    index: int,
+    value: float,
+    free_bounds: Sequence[tuple[float | None, float | None]],
+    maxiter: int,
+    gtol: float,
+) -> _Solve:
+    """One profile solve: theta[index] held at value by equal bounds, the other entries free in their box.
+
+    theta0 is clipped into the box and its entry index set to value. A 1-parameter problem has nothing
+    to optimize and is a single evaluation.
+    """
+    bounds_i = list(free_bounds)
+    bounds_i[index] = (value, value)
+    x0 = _clip_into(theta0, bounds_i)
+    x0[index] = value
+    if x0.shape[0] == 1:
+        loss_value, grad = vg(jnp.asarray(x0))
+        ok = bool(np.isfinite(float(loss_value)) and np.all(np.isfinite(np.asarray(grad))))
+        loss = float(loss_value) if ok else float("nan")
+        return _Solve(theta=x0, loss=loss, success=ok, failed=not ok, n_failed_evals=int(not ok))
+    out = _lbfgs(vg, x0, maxiter, gtol, bounds_i)
+    out.theta[index] = value
+    return out
+
+
 @dataclass(frozen=True, eq=False)
 class ProfileResult:
     """Profile of one parameter: loss[i] is the minimum over the other entries at grid[i], at thetas[i].
@@ -377,18 +405,7 @@ def profile_likelihood(
         )
 
     def solve_point(i: int, theta0: np.ndarray) -> _Solve:
-        bounds_i = list(free_bounds)
-        bounds_i[index] = (float(grid[i]), float(grid[i]))
-        x0 = _clip_into(theta0, bounds_i)
-        x0[index] = grid[i]
-        if n == 1:
-            value, grad = vg(jnp.asarray(x0))
-            ok = bool(np.isfinite(float(value)) and np.all(np.isfinite(np.asarray(grad))))
-            loss = float(value) if ok else float("nan")
-            return _Solve(theta=x0, loss=loss, success=ok, failed=not ok, n_failed_evals=int(not ok))
-        out = _lbfgs(vg, x0, maxiter, gtol, bounds_i)
-        out.theta[index] = grid[i]
-        return out
+        return _pinned_solve(vg, theta0, index, float(grid[i]), free_bounds, maxiter, gtol)
 
     def solve(i: int, theta0: np.ndarray) -> np.ndarray:
         """Solve grid point i from theta0; returns the start for the next point of the walk."""
@@ -520,6 +537,178 @@ def likelihood_interval(grid: ArrayLike, deviance: ArrayLike, level: float = 0.9
         lo_failed=lo_failed,
         hi_failed=hi_failed,
     )
+
+
+# Why a refined side kept its coarse (v1 linear) endpoint; None when the side was refined.
+REFINE_REASONS = ("unbounded", "no_interval", "failed_solve", "bracket_lost", "not_converged")
+
+
+@dataclass(frozen=True, eq=False)
+class RefinedSide:
+    """One endpoint of refine_interval, in grid coordinates.
+
+    coord is the refined endpoint when refined is True, else the coarse endpoint. reason (one of
+    REFINE_REASONS, or None when refined): 'unbounded' (open side, left unchanged), 'no_interval' (the
+    deviance minimum is above the threshold), 'failed_solve' (a refinement solve found no finite SSE),
+    'bracket_lost' (the re-solved bracket ends do not straddle the threshold) or 'not_converged' (Brent's
+    method did not converge within max_iter). n_evals counts the profile solves of this side and
+    n_unconverged those with a finite SSE where L-BFGS-B reported no convergence. coords, sse, deviance
+    and success hold every evaluation in order (sse and deviance NaN for a failed solve).
+    """
+
+    coord: float
+    refined: bool
+    reason: str | None
+    n_evals: int
+    n_unconverged: int
+    coords: np.ndarray
+    sse: np.ndarray
+    deviance: np.ndarray
+    success: np.ndarray
+
+
+class _RefineSolveFailed(Exception):
+    """A refinement solve found no finite, positive SSE."""
+
+
+def _kept_side(coord: float, reason: str) -> RefinedSide:
+    empty = np.zeros(0, dtype=np.float64)
+    return RefinedSide(
+        coord=float(coord),
+        refined=False,
+        reason=reason,
+        n_evals=0,
+        n_unconverged=0,
+        coords=empty,
+        sse=empty.copy(),
+        deviance=empty.copy(),
+        success=np.zeros(0, dtype=bool),
+    )
+
+
+def refine_interval(
+    value_and_grad: ValueAndGrad,
+    profile: ProfileResult,
+    index: int,
+    coarse: Interval,
+    deviance: ArrayLike,
+    *,
+    sse_min: float,
+    n_obs: int,
+    bounds: Bounds | None,
+    maxiter: int,
+    gtol: float = 1e-8,
+    xtol: float = 1e-4,
+    max_iter: int = 30,
+) -> tuple[Interval, RefinedSide, RefinedSide]:
+    """Interval method v2 (PLAN T5 'Interval method v2'): refine the bounded endpoints by real solves.
+
+    coarse = likelihood_interval(profile.grid, deviance), all in grid coordinates. For each bounded side,
+    the bracket is the last grid point inside the threshold (walking out from the deviance minimum, as in
+    likelihood_interval) and the first one outside. scipy.optimize.brentq (xtol, at most max_iter
+    iterations) finds the crossing of n_obs * log(SSE(x) / sse_min) = coarse.threshold, where SSE(x) is
+    one L-BFGS-B solve with theta[index] pinned at x, the other entries inside bounds, warm-started from
+    profile.thetas at the inside bracket point, with maxiter and gtol.
+
+    A side keeps its coarse endpoint, with refined False and a reason (RefinedSide), when it is unbounded
+    (no evaluation), when a refinement solve finds no finite SSE, when the re-solved bracket ends do not
+    straddle the threshold, or when Brent's method does not converge. If even the deviance minimum is
+    above the threshold, coarse is returned unchanged with reason 'no_interval' on both sides. The
+    returned Interval has the refined endpoints and the bounded and failed flags of coarse.
+    """
+    grid = _as_grid(profile.grid, min_points=2)
+    thetas = np.asarray(profile.thetas, dtype=np.float64)
+    if thetas.ndim != 2 or thetas.shape[0] != grid.shape[0]:
+        raise ValueError(f"profile.thetas must have shape ({grid.shape[0]}, n), got {thetas.shape}")
+    n = thetas.shape[1]
+    if isinstance(index, bool) or not isinstance(index, int | np.integer) or not 0 <= index < n:
+        raise ValueError(f"index must be an integer in [0, {n}), got {index!r}")
+    index = int(index)
+    if not isinstance(coarse, Interval):
+        raise ValueError(f"coarse must be an Interval, got {type(coarse).__name__}")
+    dev = np.asarray(deviance, dtype=np.float64)
+    if dev.shape != grid.shape:
+        raise ValueError(f"deviance must have the grid shape {grid.shape}, got {dev.shape}")
+    finite = np.isfinite(dev)
+    if not np.any(finite):
+        raise ValueError("deviance must have at least one finite entry")
+    if not (np.isfinite(sse_min) and sse_min > 0):
+        raise ValueError(f"sse_min must be finite and > 0, got {sse_min!r}")
+    n_obs = _check_positive_int("n_obs", n_obs)
+    maxiter, gtol = _check_options(maxiter, gtol)
+    if not (np.isfinite(xtol) and xtol > 0):
+        raise ValueError(f"xtol must be finite and > 0, got {xtol!r}")
+    max_iter = _check_positive_int("max_iter", max_iter)
+    free_bounds = _check_bounds(bounds, n)
+    if not callable(value_and_grad):
+        raise ValueError(f"value_and_grad must be callable, got {type(value_and_grad).__name__}")
+    vg = value_and_grad
+    threshold = float(coarse.threshold)
+    i_min = int(np.argmin(np.where(finite, dev, np.inf)))
+    if dev[i_min] > threshold:
+        return coarse, _kept_side(coarse.lo, "no_interval"), _kept_side(coarse.hi, "no_interval")
+
+    def inside(j: int) -> bool:
+        return bool(finite[j] and dev[j] <= threshold)
+
+    def refine_side(step: int, coarse_x: float, bounded: bool) -> RefinedSide:
+        if not bounded:
+            return _kept_side(coarse_x, "unbounded")
+        j = i_min
+        while 0 <= j + step < grid.shape[0] and inside(j + step):
+            j += step
+        if not (0 <= j + step < grid.shape[0] and finite[j + step]):
+            raise ValueError("coarse marks a side bounded that the deviance leaves open")
+        x_in, x_out = float(grid[j]), float(grid[j + step])
+        theta0 = thetas[j]
+        evals: list[tuple[float, float, float, bool]] = []
+
+        def f(x: float) -> float:
+            out = _pinned_solve(vg, theta0, index, float(x), free_bounds, maxiter, gtol)
+            ok = not out.failed and bool(np.isfinite(out.loss)) and out.loss > 0
+            sse = float(out.loss) if ok else float("nan")
+            d = float(n_obs * np.log(sse / sse_min)) if ok else float("nan")
+            evals.append((float(x), sse, d, bool(out.success) and ok))
+            if not ok:
+                raise _RefineSolveFailed
+            return d - threshold
+
+        a, b = min(x_in, x_out), max(x_in, x_out)
+        coord, reason = float(coarse_x), None
+        try:
+            root, res = scipy.optimize.brentq(
+                f, a, b, xtol=xtol, maxiter=max_iter, full_output=True, disp=False
+            )
+        except _RefineSolveFailed:
+            reason = "failed_solve"
+        except ValueError:
+            # brentq raises ValueError when f(a) and f(b) have the same sign: its first two evaluations.
+            ends = [e[2] - threshold for e in evals]
+            if len(ends) != 2 or not all(np.isfinite(ends)) or ends[0] * ends[1] <= 0:
+                raise
+            reason = "bracket_lost"
+        else:
+            if res.converged:
+                coord = float(root)
+            else:
+                reason = "not_converged"
+        arr = np.asarray([e[:3] for e in evals], dtype=np.float64).reshape(-1, 3)
+        success = np.asarray([e[3] for e in evals], dtype=bool)
+        return RefinedSide(
+            coord=coord,
+            refined=reason is None,
+            reason=reason,
+            n_evals=len(evals),
+            n_unconverged=int(np.sum(np.isfinite(arr[:, 1]) & ~success)),
+            coords=arr[:, 0].copy(),
+            sse=arr[:, 1].copy(),
+            deviance=arr[:, 2].copy(),
+            success=success,
+        )
+
+    lo_side = refine_side(-1, coarse.lo, coarse.lo_bounded)
+    hi_side = refine_side(1, coarse.hi, coarse.hi_bounded)
+    return replace(coarse, lo=lo_side.coord, hi=hi_side.coord), lo_side, hi_side
 
 
 def profile_shape_label(interval: Interval, truth: float) -> str:

@@ -24,6 +24,7 @@ from apexpinn.physics.identifiability import (
     ode_mle,
     profile_likelihood,
     profile_shape_label,
+    refine_interval,
     sample_prior_physics,
     sse_deviance,
 )
@@ -128,6 +129,110 @@ def test_profile_reoptimizes_free_parameters_on_correlated_design(x64):
     profile = profile_likelihood(loss_fn, theta_hat, 0, grid)
     np.testing.assert_allclose(profile.thetas[:, 0], grid)
     np.testing.assert_allclose(profile.thetas[:, 1], [np.mean(y - a * x) for a in grid], atol=1e-6)
+
+
+# --- interval method v2 (PLAN T5 'Interval method v2') ---
+
+
+def _slope_profile(factors):
+    """Coarse profile of the slope a of y = a x + b on grid a_hat + half * factors.
+
+    With b concentrated out, SSE(a) = SSE_min + Sxx (a - a_hat)^2, so the deviance is
+    n log(1 + f^2 q0) at a = a_hat + f * half, with q0 = expm1(3.841 / n), and the exact 95% endpoints are
+    a_hat -+ half, half = sqrt(SSE_min q0 / Sxx). For n = 20 the deviance is 1.03 at f = 0.5, 3.16 at
+    f = 0.9 and 12.3 at f = 2, whatever the noise draw.
+    """
+    x = np.linspace(-1.0, 1.0, 20)
+    y = 0.8 * x + 0.3 + 0.5 * np.random.default_rng(3).standard_normal(x.shape[0])
+
+    def loss_fn(theta):
+        return jnp.sum((y - theta[0] * x - theta[1]) ** 2)
+
+    theta_hat = np.polyfit(x, y, 1)
+    sse_min = float(np.sum((y - np.polyval(theta_hat, x)) ** 2))
+    n = x.shape[0]
+    half = float(np.sqrt(sse_min * np.expm1(THRESHOLD_95 / n) / np.sum((x - x.mean()) ** 2)))
+    grid = theta_hat[0] + half * np.asarray(factors, dtype=np.float64)
+    vg = jax.jit(jax.value_and_grad(loss_fn))
+    profile = profile_likelihood(loss_fn, theta_hat, 0, grid, value_and_grad=vg)
+    deviance = sse_deviance(profile.loss, n, sse_min=sse_min)
+    return {
+        "loss_fn": loss_fn,
+        "vg": vg,
+        "profile": profile,
+        "deviance": deviance,
+        "coarse": likelihood_interval(grid, deviance),
+        "exact": (float(theta_hat[0] - half), float(theta_hat[0] + half)),
+        "half": half,
+        "kwargs": {"sse_min": sse_min, "n_obs": n, "bounds": None, "maxiter": 500},
+    }
+
+
+@pytest.mark.parametrize("factors", [(-2.0, -0.5, 0.0, 0.5, 2.0), (-2.0, 0.0, 2.0)])
+def test_refine_interval_finds_the_analytic_crossing_that_linear_interpolation_misses(x64, factors):
+    """The second grid has the coarse minimum as the inside bracket point on both sides."""
+    p = _slope_profile(factors)
+    coarse = p["coarse"]
+    assert coarse.bounded
+    interval, lo, hi = refine_interval(p["vg"], p["profile"], 0, coarse, p["deviance"], **p["kwargs"])
+    assert interval.bounded and interval.threshold == coarse.threshold
+    sides = ((lo, coarse.lo, interval.lo, p["exact"][0]), (hi, coarse.hi, interval.hi, p["exact"][1]))
+    for side, linear, refined, exact in sides:
+        assert side.refined and side.reason is None
+        assert side.n_evals > 0 and side.coords.shape == side.sse.shape == (side.n_evals,)
+        assert np.all(np.isfinite(side.sse)) and np.all(np.isfinite(side.deviance))
+        assert side.coord == refined
+        assert abs(refined - exact) < 1e-3
+        assert abs(linear - exact) > 0.1 * p["half"]  # linear interpolation is far off on this grid
+
+
+def test_refine_interval_keeps_the_linear_endpoint_when_a_refinement_solve_fails(x64):
+    p = _slope_profile((-2.0, -0.5, 0.0, 0.5, 2.0))
+    coarse = p["coarse"]
+    cut = p["exact"][1] - 0.2 * p["half"]
+
+    def nan_beyond(theta):
+        return jnp.where(theta[0] > cut, jnp.nan, p["loss_fn"](theta))
+
+    vg_nan = jax.jit(jax.value_and_grad(nan_beyond))
+    interval, lo, hi = refine_interval(vg_nan, p["profile"], 0, coarse, p["deviance"], **p["kwargs"])
+    assert hi.reason == "failed_solve" and not hi.refined
+    assert interval.hi == hi.coord == coarse.hi and interval.hi_bounded
+    assert hi.n_evals >= 1 and np.isnan(hi.sse[-1]) and not hi.success[-1]
+    assert lo.refined and abs(interval.lo - p["exact"][0]) < 1e-3
+
+
+def test_refine_interval_leaves_open_sides_and_reports_each_fallback(x64):
+    p = _slope_profile((-2.0, -0.5, 0.0, 0.5, 0.9))  # deviance 3.16 at the upper grid edge: open
+    coarse = p["coarse"]
+    assert coarse.lo_bounded and not coarse.hi_bounded
+    interval, lo, hi = refine_interval(p["vg"], p["profile"], 0, coarse, p["deviance"], **p["kwargs"])
+    assert hi.reason == "unbounded" and not hi.refined and hi.n_evals == 0 and hi.coords.shape == (0,)
+    assert interval.hi == coarse.hi and not interval.hi_bounded
+    assert lo.refined and abs(interval.lo - p["exact"][0]) < 1e-3
+
+    def no_solve(theta):
+        raise AssertionError("no refinement solve expected")
+
+    high = np.array([10.0, 9.0, 5.0, 9.0, 10.0])  # even the minimum is above 3.841
+    collapsed = likelihood_interval(p["profile"].grid, high)
+    out, lo, hi = refine_interval(no_solve, p["profile"], 0, collapsed, high, **p["kwargs"])
+    assert out is collapsed and lo.reason == hi.reason == "no_interval" and lo.n_evals == hi.n_evals == 0
+
+    q = _slope_profile((-2.0, -0.5, 0.0, 0.5, 2.0))
+    coarse = q["coarse"]
+    doubled = jax.jit(jax.value_and_grad(lambda theta: 2.0 * q["loss_fn"](theta)))
+    out, lo, hi = refine_interval(doubled, q["profile"], 0, coarse, q["deviance"], **q["kwargs"])
+    assert (lo.reason, hi.reason) == ("bracket_lost", "bracket_lost")  # both ends re-solve above 3.841
+    assert (out.lo, out.hi) == (coarse.lo, coarse.hi) and lo.n_evals == hi.n_evals == 2
+
+    args = (q["vg"], q["profile"], 0, coarse, q["deviance"])
+    out, lo, hi = refine_interval(*args, **q["kwargs"], xtol=1e-12, max_iter=1)
+    assert (lo.reason, hi.reason) == ("not_converged", "not_converged")
+    assert (out.lo, out.hi) == (coarse.lo, coarse.hi) and not lo.refined and lo.n_evals >= 3
+
+    with pytest.raises(ValueError, match="deviance"):
+        refine_interval(q["vg"], q["profile"], 0, coarse, q["deviance"][:3], **q["kwargs"])
 
 
 def test_passed_value_and_grad_is_reused_and_matches_the_default_path(x64):

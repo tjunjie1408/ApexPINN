@@ -9,9 +9,16 @@ The module is read-only over the records: it never writes into experiments/ and 
 result, label or report. Smoke records do not answer S1, so every figure title names its source record and
 config, and figures built from smoke records say 'smoke'.
 
+Interval methods (PLAN T5 'Interval method v2'): the reported S1c interval of a profile entry is the v2
+refined interval when the entry has interval_method 'v2_refined' (records from profile method version 3),
+and the v1 linear interpolation of likelihood_interval for older records, which have no interval_method.
+For v2 records the v1 linear interval (interval_linear) is still drawn and written, labeled Superseded.
 The quadratic interval (quadratic_interval) is a post-hoc diagnostic added after the full-config profile
-was read. The reported S1c interval is the linear interpolation of likelihood_interval; the quadratic
-diagnostic only shows how much a coarse grid can narrow that interval, and it changes no report or label.
+was read. It only shows how much a coarse grid can narrow the linear interval, and it changes no report or
+label.
+
+The all-seeds fit figure (s1_recovery_seeds) shows every main fit of one folder (seed_recovery_table):
+experiments/s1/ if it holds any finished main fit, else experiments/s1_smoke/, never both.
 
 Pure computation functions use numpy only. matplotlib is imported inside _pyplot() with the Agg backend, so
 importing this module needs neither matplotlib nor a display.
@@ -21,7 +28,7 @@ from __future__ import annotations
 
 import json
 import math
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -32,7 +39,15 @@ import scipy.stats
 from apexpinn.contracts import load_decisions
 from apexpinn.physics.identifiability import Interval, likelihood_interval
 from apexpinn.physics.residuals import COMPOUNDS
-from apexpinn.train.s1_study import GROUPS, MISSPEC_STUDY_VARIANTS, O6_NAMES, group_of, load_records, usable
+from apexpinn.train.s1_study import (
+    GROUPS,
+    MISSPEC_STUDY_VARIANTS,
+    MODELS,
+    O6_NAMES,
+    group_of,
+    load_records,
+    usable,
+)
 
 __all__ = [
     "ARTIFACT_NAMES",
@@ -44,9 +59,13 @@ __all__ = [
     "coord_to_natural",
     "derived_numbers",
     "deviance_at_truth",
+    "interval_legend_labels",
+    "interval_methods",
     "linear_interval",
+    "linear_interval_v1",
     "o6_tolerance",
     "pick_fit_pair",
+    "pick_fit_source",
     "pick_record",
     "plot_fit_convergence",
     "plot_gn_spectrum",
@@ -56,8 +75,11 @@ __all__ = [
     "plot_probe_warmup",
     "plot_profiles",
     "plot_recovery",
+    "plot_recovery_seeds",
     "plot_synthetic_stints",
     "quadratic_interval",
+    "reported_interval",
+    "seed_recovery_table",
 ]
 
 CHI2_1_95 = float(scipy.stats.chi2.ppf(0.95, 1))  # 3.841, the S1c profile threshold
@@ -68,6 +90,7 @@ FIGURE_NAMES = (
     "synthetic_stints",
     "s1_fit_convergence",
     "s1_recovery",
+    "s1_recovery_seeds",
     "s1_profiles",
     "s1_intervals",
     "s1_gn_spectrum",
@@ -81,6 +104,13 @@ DECISIONS_PATH = "configs/decisions_v1.yaml"
 UNITS = {"k": "1/lap", "rho": "s/lap", "gamma": "s", "h_opt": "dimensionless", "kappa": "dimensionless"}
 QUADRATIC_LABEL = "quadratic fit, post-hoc diagnostic"
 LINEAR_LABEL = "reported 95% interval (linear interpolation)"
+V2_METHOD = "v2_refined"
+V1_METHOD = "v1_linear"
+INTERVAL_LABELS = {V2_METHOD: "reported 95% interval (v2 refined)", V1_METHOD: LINEAR_LABEL}
+SUPERSEDED_LABEL = "v1 linear (Superseded)"
+SEED_MODELS = MODELS  # M1, M2 (v1) and M2v2 in the all-seeds fit figure
+GATED_GROUPS = ("rho", "k")  # the O6-gated groups, panel order in s1_recovery_seeds
+NOISE_MARKERS = ("o", "^", "s", "D", "v")
 
 Record = Mapping[str, Any]
 Records = Mapping[str, Record]
@@ -119,7 +149,7 @@ def quadratic_interval(
     returns the crossings (lo, hi) in that coordinate, or None when the minimum is at the grid edge, a
     neighbour is non-finite, or the parabola does not open upward or stays above the threshold.
 
-    Reason: the reported interval (likelihood_interval) interpolates linearly between grid points. On a
+    Reason: the v1 interval (likelihood_interval) interpolates linearly between grid points. On a
     coarse grid around a roughly quadratic profile the chord lies above the curve, so the linear crossing
     sits closer to the minimum and the interval comes out too narrow. This diagnostic shows how large that
     effect is. It is not a reported result and changes no S1 label.
@@ -146,7 +176,8 @@ def quadratic_interval(
 
 
 def linear_interval(grid_coord: Sequence[Any], deviance: Sequence[Any]) -> Interval:
-    """The reported S1c interval method: likelihood_interval on the grid coordinate (None as NaN)."""
+    """Interval method v1, Superseded by v2 for reported intervals: likelihood_interval on the grid
+    coordinate (None as NaN). Records from before profile method version 3 report this interval."""
     return likelihood_interval(_floats(grid_coord), _floats(deviance))
 
 
@@ -177,15 +208,65 @@ def _neighbour_steps(deviance: np.ndarray) -> tuple[int | None, float | None, fl
     return i, lower, upper
 
 
+def _endpoints(iv: Mapping[str, Any] | None) -> dict[str, Any] | None:
+    if iv is None:
+        return None
+    return {k: iv[k] for k in ("lo", "hi", "lo_bounded", "hi_bounded")}
+
+
+def _covers(iv: Mapping[str, Any] | None, truth: float) -> bool | None:
+    """Whether iv covers truth; an unbounded side covers everything on its side. None without iv."""
+    if iv is None:
+        return None
+    lo_ok = not iv["lo_bounded"] or _num(iv["lo"]) <= truth
+    hi_ok = not iv["hi_bounded"] or truth <= _num(iv["hi"])
+    return bool(lo_ok and hi_ok)
+
+
+def reported_interval(entry: Record) -> tuple[Mapping[str, Any] | None, str]:
+    """(reported interval in natural units, its method) of one profile entry.
+
+    The method is 'v2_refined' when the entry says interval_method 'v2_refined' (profile method version
+    3), else 'v1_linear': entries from older records have no interval_method and their 'interval' is the
+    v1 linear interval. The interval is the entry's 'interval' as stored, or None.
+    """
+    method = V2_METHOD if entry.get("interval_method") == V2_METHOD else V1_METHOD
+    return entry.get("interval"), method
+
+
+def linear_interval_v1(entry: Record) -> dict[str, Any] | None:
+    """The v1 linear interval of one profile entry in natural units.
+
+    Stored as interval_linear in v2 entries; for v1 entries it is the reported 'interval'. A v2 entry
+    without interval_linear gets it recomputed from grid_coord and deviance (linear_interval). None when
+    neither is possible.
+    """
+    stored = entry.get("interval_linear")
+    if stored is not None:
+        return dict(stored)
+    iv, method = reported_interval(entry)
+    if method == V1_METHOD:
+        return None if iv is None else dict(iv)
+    coord, dev = _floats(entry.get("grid_coord")), _floats(entry.get("deviance"))
+    if coord.size == 0 or coord.size != dev.size:
+        return None
+    group = str(entry.get("group"))
+    lin = linear_interval(coord, dev)
+    return {
+        "lo": coord_to_natural(group, lin.lo),
+        "hi": coord_to_natural(group, lin.hi),
+        "lo_bounded": lin.lo_bounded,
+        "hi_bounded": lin.hi_bounded,
+    }
+
+
 def _param_entry(name: str, entry: Record) -> dict[str, Any]:
     group = str(entry.get("group") or group_of(name))
     truth = float(entry["truth"])
     coord = _floats(entry.get("grid_coord"))
     dev = _floats(entry.get("deviance"))
-    iv = entry.get("interval")
-    reported = None
-    if iv is not None:
-        reported = {k: iv[k] for k in ("lo", "hi", "lo_bounded", "hi_bounded")}
+    reported, method = reported_interval(entry)
+    linear = linear_interval_v1(dict(entry, group=group))
     quad = quadratic_interval(coord, dev) if dev.size == coord.size else None
     quad_natural = None
     quad_covers = None
@@ -199,8 +280,12 @@ def _param_entry(name: str, entry: Record) -> dict[str, Any]:
         "truth": truth,
         "mle": _num(entry.get("mle")),
         "shape": entry.get("shape"),
-        "reported_interval": reported,
+        "interval_method": method,
+        "reported_interval": _endpoints(reported),
         "reported_covers_truth": entry.get("covers_truth"),
+        "linear_interval_v1": _endpoints(linear),
+        "linear_v1_covers_truth": _covers(linear, truth),
+        "linear_v1_status": "Superseded" if method == V2_METHOD else "reported",
         "quadratic_interval": quad_natural,
         "quadratic_covers_truth": quad_covers,
         "min_index": i_min,
@@ -212,10 +297,12 @@ def _param_entry(name: str, entry: Record) -> dict[str, Any]:
 def derived_numbers(profile_record: Record) -> dict[str, Any]:
     """Per-parameter interval numbers and the record-level deviance at truth of one profile record.
 
-    Per parameter: truth, MLE, the reported interval and its covers_truth flag (copied from the record),
-    the quadratic-diagnostic interval in natural units and whether it covers the truth (post-hoc
-    diagnostic, see quadratic_interval), and the deviance step from the minimum to each neighbouring grid
-    point. Record level: deviance_at_truth with sse_min the lowest of the MLE SSE and every profile's
+    Per parameter: truth, MLE, the interval method ('v2_refined' or 'v1_linear', see reported_interval),
+    the reported interval and its covers_truth flag (copied from the record), the v1 linear interval and
+    whether it covers the truth (Superseded when the method is v2), the quadratic-diagnostic interval in
+    natural units and whether it covers the truth (post-hoc diagnostic, see quadratic_interval), and the
+    deviance step from the minimum to each neighbouring grid point. Record level: the interval methods
+    present, and deviance_at_truth with sse_min the lowest of the MLE SSE and every profile's
     sse_min, compared with the chi2(n_params) 95% quantile, where n_params counts the MLE values.
     """
     mle = profile_record.get("mle") or {}
@@ -245,6 +332,12 @@ def derived_numbers(profile_record: Record) -> dict[str, Any]:
         "truth_inside_joint_95_region": inside,
         "threshold_1d": CHI2_1_95,
         "quadratic_note": "quadratic_interval is a post-hoc diagnostic; the reported interval is unchanged",
+        "interval_methods": sorted({p["interval_method"] for p in params.values()}),
+        "interval_note": (
+            "reported_interval is interval method v2 (refined) where interval_method is 'v2_refined' and "
+            "the v1 linear interpolation where it is 'v1_linear'; linear_interval_v1 is Superseded "
+            "wherever v2 is reported"
+        ),
         "params": params,
     }
 
@@ -311,6 +404,80 @@ def pick_fit_pair(
         if m1 is not None or m2 is not None:
             return label, None if m1 is None else m1[1], None if m2 is None else m2[1]
     return None
+
+
+def _is_fit(record: Record, models: Sequence[str], part: str, variant: str) -> bool:
+    spec = record.get("spec") or {}
+    return (
+        usable(record) is not None
+        and spec.get("kind") == "fit"
+        and spec.get("part") == part
+        and spec.get("variant") == variant
+        and spec.get("model") in models
+    )
+
+
+def pick_fit_source(
+    sources: Sources,
+    *,
+    models: Sequence[str] = SEED_MODELS,
+    part: str = "main",
+    variant: str = "well_specified",
+) -> tuple[str, Records] | None:
+    """(source label, records) of the first source (full before smoke) holding any finished fit of models.
+
+    The all-seeds fit figure reads only this source, so it never mixes full-config and smoke fits.
+    Returns None when no source has a finished fit.
+    """
+    for label, records in sources:
+        if any(_is_fit(r, models, part, variant) for r in records.values()):
+            return label, records
+    return None
+
+
+def seed_recovery_table(
+    records: Records,
+    tolerance: Mapping[str, float],
+    *,
+    models: Sequence[str] = SEED_MODELS,
+    part: str = "main",
+    variant: str = "well_specified",
+) -> list[dict[str, Any]]:
+    """One row per finished fit record and O6-gated parameter, over every seed and noise level.
+
+    Row keys: model, noise_s, seed, param, rel_error (copied, None when non-finite), recovered
+    (|rel_error| <= tolerance of the parameter's group, as s1_study computes it), residual_ratio (copied),
+    run_id and config_name. Only parameters whose group has a tolerance are rows. Rows are sorted by
+    model (models order), noise, seed and parameter. Pure over the given records.
+    """
+    rows: list[dict[str, Any]] = []
+    for record in records.values():
+        if not _is_fit(record, models, part, variant):
+            continue
+        spec = record["spec"]
+        ratio = (record.get("diagnostics") or {}).get("residual_ratio")
+        for name, err in (record.get("rel_error") or {}).items():
+            tol = tolerance.get(group_of(name))
+            if tol is None:
+                continue
+            value = None if err is None or not math.isfinite(float(err)) else float(err)
+            rows.append(
+                {
+                    "model": str(spec["model"]),
+                    "noise_s": _num(spec.get("noise_s")),
+                    "seed": int(spec.get("seed") or 0),
+                    "param": name,
+                    "rel_error": value,
+                    "recovered": value is not None and abs(value) <= tol,
+                    "residual_ratio": None if ratio is None else float(ratio),
+                    "run_id": record.get("run_id"),
+                    "config_name": record.get("config_name"),
+                }
+            )
+    model_rank = {m: i for i, m in enumerate(models)}
+    param_rank = {n: i for i, n in enumerate(_param_order([r["param"] for r in rows]))}
+    rows.sort(key=lambda r: (model_rank[r["model"]], r["noise_s"], r["seed"], param_rank[r["param"]]))
+    return rows
 
 
 def _spec_rank(record: Record) -> tuple[float, int, str]:
@@ -569,6 +736,102 @@ def plot_recovery(
     return _save(fig, path)
 
 
+def _slot_offsets(rows: Sequence[Record], span: float) -> dict[tuple[float, int], float]:
+    """x offset inside one cluster per (noise_s, seed): noise levels left to right, seeds ascending."""
+    slots = sorted({(r["noise_s"], r["seed"]) for r in rows})
+    return {slot: span * ((k + 0.5) / len(slots) - 0.5) for k, slot in enumerate(slots)}
+
+
+def plot_recovery_seeds(
+    records: Records | None, tolerance: Mapping[str, float], path: str | Path, *, source: str = ""
+) -> Path:
+    """Every main fit of one folder: relative error of each gated parameter per seed and noise level.
+
+    One panel per gated group (rho_c, k_c): x is the parameter, one cluster per model (M1, M2, M2v2 when
+    present), one point per (noise level, seed), filled when recovered within the O6 tolerance (shaded
+    band), marker shape per noise level, symlog y in percent. A last panel shows the residual ratio per
+    model, noise level and seed (log y) with lines at 1.0 and 1.2. records must come from one folder
+    (pick_fit_source); source names it in the title.
+    """
+    rows = seed_recovery_table(records or {}, tolerance)
+    if not rows:
+        raise FigureInputMissing("no finished main fit record with O6-gated relative errors")
+    plt = _pyplot()
+    from matplotlib.lines import Line2D
+    from matplotlib.patches import Patch
+
+    models = [m for m in SEED_MODELS if any(r["model"] == m for r in rows)]
+    color = {m: f"C{i}" for i, m in enumerate(SEED_MODELS)}
+    noises = sorted({r["noise_s"] for r in rows})
+    marker = {n: NOISE_MARKERS[i % len(NOISE_MARKERS)] for i, n in enumerate(noises)}
+    groups = [g for g in GATED_GROUPS if any(group_of(r["param"]) == g for r in rows)]
+    width = 0.8 / len(models)
+    model_offset = {m: -0.4 + width * (j + 0.5) for j, m in enumerate(models)}
+    in_cluster = _slot_offsets(rows, 0.8 * width)
+    fig, axes = plt.subplots(1, len(groups) + 1, figsize=(6 * len(groups) + 5, 5), squeeze=False)
+    for ax, group in zip(axes[0][:-1], groups, strict=True):
+        group_rows = [r for r in rows if group_of(r["param"]) == group]
+        names = _param_order([r["param"] for r in group_rows])
+        index = {n: i for i, n in enumerate(names)}
+        band = 100.0 * tolerance[group]
+        ax.fill_between([-0.5, len(names) - 0.5], -band, band, color="0.6", alpha=0.25)
+        for r in group_rows:
+            x = index[r["param"]] + model_offset[r["model"]] + in_cluster[(r["noise_s"], r["seed"])]
+            c = color[r["model"]]
+            y = 100.0 * _num(r["rel_error"])
+            mfc = c if r["recovered"] else "none"
+            ax.plot([x], [y], marker[r["noise_s"]], color=c, mfc=mfc, mec=c, ms=6, ls="")
+        ax.axhline(0.0, color="k", lw=0.8)
+        ax.set_yscale("symlog", linthresh=10.0)
+        ax.set_xlim(-0.5, len(names) - 0.5)
+        ax.set_xticks(np.arange(len(names)), names)
+        ax.set_ylabel("relative error (estimate - truth) / truth [%], symlog")
+        ax.set_title(f"{group}_c, O6 tolerance +-{band:g}%", fontsize=9)
+        ax.grid(axis="y", alpha=0.3)
+    ax = axes[0][-1]
+    ratios = {(r["model"], r["noise_s"], r["seed"]): _num(r["residual_ratio"]) for r in rows}
+    ratio_slots = _slot_offsets(rows, 0.8)
+    for (model, noise, seed), ratio in ratios.items():  # rows are sorted, so models come in order
+        if not (math.isfinite(ratio) and ratio > 0):
+            continue
+        x = models.index(model) + ratio_slots[(noise, seed)]
+        ax.plot([x], [ratio], marker[noise], color=color[model], ms=6, ls="")
+    ax.axhline(1.0, color="k", lw=0.8)
+    ax.axhline(1.2, color="k", ls="--", lw=0.8)
+    ax.set_yscale("log")
+    ax.set_xlim(-0.5, len(models) - 0.5)
+    ax.set_xticks(np.arange(len(models)), models)
+    ax.set_ylabel("residual ratio = scored residual RMS / noise_s [-]")
+    ax.set_title("residual ratio per fit (lines at 1.0 and 1.2)", fontsize=9)
+    ax.grid(axis="y", alpha=0.3, which="both")
+    handles = [Line2D([], [], marker="s", ls="", color=color[m], label=m) for m in models]
+    for n in noises:
+        handles.append(Line2D([], [], marker=marker[n], ls="", color="k", label=f"noise_s {n:g} s"))
+    handles += [
+        Line2D([], [], marker="o", ls="", color="k", label="filled: recovered within O6 tolerance"),
+        Line2D([], [], marker="o", ls="", mfc="none", mec="k", label="open: not recovered"),
+        Patch(color="0.6", alpha=0.25, label="O6 tolerance band"),
+        Line2D([], [], color="k", lw=0.8, label="residual ratio 1.0 (noise floor)"),
+        Line2D([], [], color="k", ls="--", lw=0.8, label="residual ratio 1.2"),
+    ]
+    fig.legend(handles=handles, loc="lower center", ncol=5, fontsize=8, bbox_to_anchor=(0.5, -0.06))
+    configs = sorted({str(r["config_name"]) for r in rows})
+    if configs == ["smoke"]:
+        config_text = "smoke config, smoke numbers do not answer S1"
+    else:
+        config_text = f"{'/'.join(configs)} config"
+    seeds = sorted({r["seed"] for r in rows})
+    n_records = len({r["run_id"] for r in rows})
+    fig.suptitle(
+        f"S1b parameter recovery, every seed, well specified ({config_text})\n"
+        f"source: {source or 'records'}, {n_records} main fit records, seeds {seeds[0]} to {seeds[-1]}; "
+        f"points per cluster: noise levels left to right, seeds ascending",
+        fontsize=10,
+    )
+    fig.tight_layout(rect=(0, 0.04, 1, 0.94))
+    return _save(fig, path)
+
+
 def _require_profile(profile: Record | None) -> Record:
     if profile is None or not profile.get("profiles"):
         raise FigureInputMissing("no finished main profile record with profiles")
@@ -593,9 +856,33 @@ def _zoom(x: np.ndarray, d: np.ndarray, truth: float) -> tuple[float, float]:
     return lo - pad, hi + pad
 
 
-def plot_profiles(profile: Record | None, path: str | Path) -> Path:
-    """One panel per profiled parameter: deviance vs value, threshold, truth, MLE and both intervals.
+def interval_methods(entries: Iterable[Record]) -> list[str]:
+    """Interval methods present among profile entries (reported_interval), v2 before v1."""
+    found = {reported_interval(e)[1] for e in entries}
+    return [m for m in (V2_METHOD, V1_METHOD) if m in found]
 
+
+def interval_legend_labels(methods: Sequence[str]) -> list[str]:
+    """Legend labels of the drawn interval bars: one reported label per method, plus the Superseded v1
+    linear bar when any entry reports v2. The quadratic diagnostic label is added by the plots."""
+    labels = [INTERVAL_LABELS[m] for m in methods]
+    return labels + ([SUPERSEDED_LABEL] if V2_METHOD in methods else [])
+
+
+def _interval_handles(line2d: Any, methods: Sequence[str]) -> list[Any]:
+    styles = {INTERVAL_LABELS[V2_METHOD]: 4, INTERVAL_LABELS[V1_METHOD]: 4, SUPERSEDED_LABEL: 1.5}
+    colors = {SUPERSEDED_LABEL: "C7"}
+    return [
+        line2d([], [], color=colors.get(label, "C4"), lw=styles[label], label=label)
+        for label in interval_legend_labels(methods)
+    ]
+
+
+def plot_profiles(profile: Record | None, path: str | Path) -> Path:
+    """One panel per profiled parameter: deviance vs value, threshold, truth, MLE and the intervals.
+
+    The reported interval bar is labeled by its method (reported_interval); for v2 records the v1 linear
+    interval is a thin bar labeled Superseded, and the quadratic diagnostic is drawn below.
     Converged points are filled, unconverged points (success false) open, failed points (no deviance) are
     crosses at zero. x is zoomed to the two grid points on each side of the minimum (and the truth).
     """
@@ -605,6 +892,7 @@ def plot_profiles(profile: Record | None, path: str | Path) -> Path:
 
     derived = derived_numbers(profile)["params"]
     names = _param_order(list(profile["profiles"]))
+    methods = interval_methods(profile["profiles"].values())
     ncols = min(4, len(names))
     nrows = math.ceil(len(names) / ncols)
     fig, axes = plt.subplots(nrows, ncols, figsize=(4.2 * ncols, 3.4 * nrows), squeeze=False)
@@ -628,9 +916,12 @@ def plot_profiles(profile: Record | None, path: str | Path) -> Path:
         ax.axhline(CHI2_1_95, ls="--", color="k", lw=0.8)
         ax.axvline(truth, color="C2", lw=1.2)
         ax.plot([_num(entry.get("mle"))], [0.0], "*", color="k", ms=10)
-        iv = entry.get("interval")
+        iv, method = reported_interval(entry)
         if iv is not None:
             ax.hlines(2.5, _num(iv["lo"]), _num(iv["hi"]), color="C4", lw=4)
+        linear = linear_interval_v1(entry) if method == V2_METHOD else None
+        if linear is not None:
+            ax.hlines(3.5, _num(linear["lo"]), _num(linear["hi"]), color="C7", lw=1.5)
         quad = derived[name]["quadratic_interval"]
         if quad is not None:
             ax.hlines(1.2, quad["lo"], quad["hi"], color="C5", lw=4)
@@ -648,7 +939,7 @@ def plot_profiles(profile: Record | None, path: str | Path) -> Path:
         Line2D([], [], ls="--", color="k", label=f"threshold chi2(1) 95% = {CHI2_1_95:.3f}"),
         Line2D([], [], color="C2", label="truth"),
         Line2D([], [], marker="*", ls="", color="k", label="MLE"),
-        Line2D([], [], color="C4", lw=4, label=LINEAR_LABEL),
+        *_interval_handles(Line2D, methods),
         Line2D([], [], color="C5", lw=4, label=QUADRATIC_LABEL),
     ]
     fig.legend(handles=handles, loc="lower center", ncol=4, fontsize=8, bbox_to_anchor=(0.5, -0.02))
@@ -662,7 +953,11 @@ def plot_profiles(profile: Record | None, path: str | Path) -> Path:
 
 
 def plot_intervals(derived: Mapping[str, Any] | None, path: str | Path) -> Path:
-    """Forest plot of interval / truth: reported and quadratic diagnostic, coloured by coverage."""
+    """Forest plot of interval / truth, coloured by coverage.
+
+    Rows per parameter: the reported interval (labeled by its method), the v1 linear interval when v2 is
+    reported (dashed, Superseded) and the quadratic diagnostic (dotted).
+    """
     params = (derived or {}).get("params") or {}
     if not params:
         raise FigureInputMissing("no derived profile numbers")
@@ -670,14 +965,20 @@ def plot_intervals(derived: Mapping[str, Any] | None, path: str | Path) -> Path:
     from matplotlib.lines import Line2D
 
     names = _param_order(list(params))
+    methods = interval_methods(
+        {"interval_method": p.get("interval_method", V1_METHOD)} for p in params.values()
+    )
     fig, ax = plt.subplots(figsize=(9, 0.45 * len(names) + 2))
     for i, name in enumerate(names):
         p = params[name]
         truth = p["truth"]
         y = len(names) - 1 - i
+        superseded = p.get("interval_method", V1_METHOD) == V2_METHOD
+        linear = p.get("linear_interval_v1") if superseded else None
         rows = (
-            (p["reported_interval"], p["reported_covers_truth"], 0.15, "-", 4),
-            (p["quadratic_interval"], p["quadratic_covers_truth"], -0.15, ":", 3),
+            (p["reported_interval"], p["reported_covers_truth"], 0.2, "-", 4),
+            (linear, p.get("linear_v1_covers_truth"), 0.0, "--", 1.5),
+            (p["quadratic_interval"], p["quadratic_covers_truth"], -0.2, ":", 3),
         )
         for iv, covers, dy, ls, lw in rows:
             if iv is None or covers is None:
@@ -689,9 +990,12 @@ def plot_intervals(derived: Mapping[str, Any] | None, path: str | Path) -> Path:
     ax.set_yticks(np.arange(len(names))[::-1], names)
     ax.set_xlabel("interval endpoint / truth [-] (1 = truth)")
     ax.grid(axis="x", alpha=0.3)
-    handles = [
-        Line2D([], [], color="C2", lw=4, label=f"{LINEAR_LABEL}, covers truth"),
-        Line2D([], [], color="C3", lw=4, label=f"{LINEAR_LABEL}, misses truth"),
+    handles = []
+    for label in interval_legend_labels(methods):
+        ls, lw = ("--", 1.5) if label == SUPERSEDED_LABEL else ("-", 4)
+        handles.append(Line2D([], [], color="C2", lw=lw, ls=ls, label=f"{label}, covers truth"))
+        handles.append(Line2D([], [], color="C3", lw=lw, ls=ls, label=f"{label}, misses truth"))
+    handles += [
         Line2D([], [], color="C2", lw=3, ls=":", label=f"{QUADRATIC_LABEL}, covers truth"),
         Line2D([], [], color="C3", lw=3, ls=":", label=f"{QUADRATIC_LABEL}, misses truth"),
         Line2D([], [], marker="|", ls="", color="k", ms=10, label="MLE / truth"),
@@ -841,9 +1145,9 @@ def build_figures(
     The outcome is 'written: <path>', 'skipped: <reason>' when the figure's input is missing
     (FigureInputMissing), or 'failed: <type>: <message>' when the build raised anything else. Every
     outcome is logged and the run never stops on one figure. M1 and M2 come from one source
-    (pick_fit_pair); the profile record is picked on its own, and every figure names the config of each
-    record it shows. Relative out_dir is resolved against root. dataset_fn builds the synthetic dataset
-    (only called for synthetic_stints).
+    (pick_fit_pair), the all-seeds fit figure reads one source (pick_fit_source); the profile record is
+    picked on its own, and every figure names the config of each record it shows. Relative out_dir is
+    resolved against root. dataset_fn builds the synthetic dataset (only called for synthetic_stints).
     """
     root = Path(root).resolve()
     out = Path(out_dir)
@@ -863,6 +1167,7 @@ def build_figures(
 
     pair = pick_fit_pair(sources)
     m1, m2 = (None, None) if pair is None else pair[1:]
+    fit_source = pick_fit_source(sources)
     profile = record(kind="profile")
 
     def tolerance() -> dict[str, float]:
@@ -871,12 +1176,19 @@ def build_figures(
             raise FigureInputMissing(f"{DECISIONS_PATH} not found")
         return o6_tolerance(path)
 
+    def recovery_seeds(p: Path) -> Path:
+        if fit_source is None:
+            raise FigureInputMissing("no finished main fit record")
+        label, fits = fit_source
+        return plot_recovery_seeds(fits, tolerance(), p, source=label)
+
     builders: dict[str, Callable[[Path], Path]] = {
         "probe_warmup": lambda p: plot_probe_warmup(_read_probe(root), p),
         "probe_pace_pit": lambda p: plot_probe_pace_pit(_read_probe(root), p),
         "synthetic_stints": lambda p: plot_synthetic_stints(dataset_fn(), p),
         "s1_fit_convergence": lambda p: plot_fit_convergence(m1, m2, p),
         "s1_recovery": lambda p: plot_recovery(m1, m2, profile, tolerance(), p),
+        "s1_recovery_seeds": recovery_seeds,
         "s1_profiles": lambda p: plot_profiles(profile, p),
         "s1_intervals": lambda p: plot_intervals(derived_numbers(_require_profile(profile)), p),
         "s1_gn_spectrum": lambda p: plot_gn_spectrum(profile, p),

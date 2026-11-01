@@ -1,8 +1,10 @@
 """M1: inverse PINN with hard initial conditions and autodiff rates (PROJECT.md section 4.6).
 
 The latent ansatz h = tau * n_h, w = tau * softplus(n_w) follows PLAN.md section 4, so h(0) = w(0) = 0
-exactly. Rates come from residuals.states_and_rates (forward-mode autodiff), and lap time from the
-observation equation shared with M2 (residuals.observation).
+exactly. latent_mode 'tanh' bounds the thermal state instead: h = tanh(tau * n_h), in (-1, 1) with
+h(0) = 0 exactly; it exists for the exploratory M1 diagnostics (PLAN T5, `M1` exploratory diagnostics)
+and w is the same in both modes. Rates come from residuals.states_and_rates (forward-mode autodiff), and
+lap time from the observation equation shared with M2 (residuals.observation).
 """
 
 from __future__ import annotations
@@ -35,6 +37,7 @@ from apexpinn.train.trainer import LossWeights, TrainConfig
 
 TAU_SCALE = 40.0  # network input is tau / TAU_SCALE, about [0, 1] over the collocation domain
 INIT_NOISE_S = 0.1
+LATENT_MODES = ("linear", "tanh")  # 'linear': h = tau * n_h (v1); 'tanh': h = tanh(tau * n_h)
 
 
 def default_physics() -> PhysicsParams:
@@ -49,13 +52,17 @@ def masked_mean(values: jax.Array, mask: jax.Array) -> jax.Array:
 
 
 class PINN(eqx.Module):
-    """M1. The network N(tau / TAU_SCALE, ctx) -> (n_h, n_w) is an MLP with tanh activations."""
+    """M1. The network N(tau / TAU_SCALE, ctx) -> (n_h, n_w) is an MLP with tanh activations.
+
+    latent_mode (one of LATENT_MODES) selects the thermal-state ansatz; the default 'linear' is v1.
+    """
 
     net: eqx.nn.MLP
     physics: PhysicsParams
     noise_s: jax.Array  # scalar observation noise std in seconds; fit sets it from the training residual
     train_cfg: TrainConfig = eqx.field(static=True)
     weights: LossWeights = eqx.field(static=True)
+    latent_mode: str = eqx.field(static=True, default="linear")
 
     uses_collocation: ClassVar[bool] = True
 
@@ -69,12 +76,15 @@ class PINN(eqx.Module):
         physics: PhysicsParams | None = None,
         train_cfg: TrainConfig | None = None,
         weights: LossWeights | None = None,
+        latent_mode: str = "linear",
     ) -> PINN:
         """New model. Network dtype follows jax_enable_x64; physics defaults to default_physics()."""
         if isinstance(width, bool) or not isinstance(width, int) or width < 1:
             raise ValueError(f"width must be an integer >= 1, got {width!r}")
         if isinstance(depth, bool) or not isinstance(depth, int) or depth < 0:
             raise ValueError(f"depth must be an integer >= 0, got {depth!r}")
+        if latent_mode not in LATENT_MODES:
+            raise ValueError(f"latent_mode must be one of {LATENT_MODES}, got {latent_mode!r}")
         net = eqx.nn.MLP(
             in_size=1 + CTX_DIM, out_size=2, width_size=width, depth=depth, activation=jnp.tanh, key=key
         )
@@ -84,15 +94,22 @@ class PINN(eqx.Module):
             noise_s=jnp.asarray(INIT_NOISE_S, dtype=float),
             train_cfg=TrainConfig() if train_cfg is None else train_cfg,
             weights=LossWeights() if weights is None else weights,
+            latent_mode=latent_mode,
         )
 
     def latent(self, tau: ArrayLike, ctx: ArrayLike) -> tuple[jax.Array, jax.Array]:
-        """(h, w) at a scalar tau for one context vector of shape (CTX_DIM,)."""
+        """(h, w) at a scalar tau for one context vector of shape (CTX_DIM,).
+
+        h = tau * n_h ('linear') or tanh(tau * n_h) ('tanh'); w = tau * softplus(n_w) in both modes.
+        """
         tau = jnp.asarray(tau)
         if tau.ndim != 0:
             raise ValueError(f"tau must be a scalar, got shape {tau.shape}")
         out = self.net(jnp.concatenate([jnp.reshape(tau / TAU_SCALE, (1,)), jnp.asarray(ctx)]))
-        return tau * out[0], tau * jax.nn.softplus(out[1])
+        h = tau * out[0]
+        if self.latent_mode == "tanh":
+            h = jnp.tanh(h)
+        return h, tau * jax.nn.softplus(out[1])
 
     def latent_and_rates(
         self, tau: ArrayLike, ctx: ArrayLike

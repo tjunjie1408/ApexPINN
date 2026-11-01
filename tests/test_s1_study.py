@@ -2,7 +2,7 @@
 records only: they never call train() or compile Diffrax. The end-to-end test is marked slow."""
 
 import json
-from dataclasses import asdict, replace
+from dataclasses import asdict, fields, replace
 from types import SimpleNamespace
 
 import jax
@@ -12,10 +12,14 @@ import pytest
 
 from apexpinn.contracts import FOUR_FIELDS, STATUSES, MetricRecord
 from apexpinn.eval.s1_report import (
+    INTERVAL_V2_DECLARATION,
+    M1_DIAG_DECLARATION,
+    M2_V2_DECLARATION,
     MISSPEC_CRITERIA_V1,
     MISSPEC_READING_V1,
     P1_DECISION_SENTENCE,
     R2_DECLARATION,
+    S1B_V1_FREEZE,
     S1C_SOLVER_DECLARATIONS,
     at_bound_points,
     classify,
@@ -27,7 +31,15 @@ from apexpinn.eval.s1_report import (
     unconverged_points,
     write_report,
 )
-from apexpinn.physics.identifiability import S1C_BOUNDS, ProfilePointError, ProfileResult, ThetaLayout
+from apexpinn.physics.identifiability import (
+    S1C_BOUNDS,
+    ProfilePointError,
+    ProfileResult,
+    RefinedSide,
+    ThetaLayout,
+    likelihood_interval,
+    sample_prior_physics,
+)
 from apexpinn.physics.synthetic import MISSPEC_VARIANTS, default_theta_true
 from apexpinn.train import s1_study
 from apexpinn.train.s1_study import (
@@ -47,8 +59,10 @@ from apexpinn.train.s1_study import (
     prior_physics,
     profile_grid,
     run_study,
+    select_start,
     shard_runs,
     smoke_config,
+    start_key,
     theta_values,
 )
 
@@ -90,7 +104,7 @@ def test_full_config_reads_o6_from_the_decisions_file():
     assert cfg.misspec_noise == 0.05
     assert cfg.m2_misspec_max_fit_s == 600.0
     assert cfg.n_stints == 48 and cfg.compounds == ("C2", "C3", "C4")
-    assert cfg.models_main == ("M1", "M2")
+    assert cfg.models_main == ("M1", "M2", "M2v2") and cfg.m2v2_n_starts == 3
     assert cfg.profile_params == ("rho", "k", "gamma", "h_opt", "kappa")
     assert len(cfg.grid_factors) == 13 and 1.0 in cfg.grid_factors
     assert len(cfg.h_opt_offsets) == 13
@@ -125,6 +139,11 @@ def test_smoke_config_and_validation():
     assert cfg.grid_factors == (0.5, 0.75, 1.0, 1.33, 2.0)
     assert cfg.out_dir == "experiments/s1_smoke"
     assert cfg.report_path == "reports/s1_identifiability_smoke.md"
+    assert cfg.models_main == ("M1", "M2", "M2v2") and cfg.m2v2_n_starts == 2
+    with pytest.raises(ValueError, match="m2v2_n_starts"):
+        replace(cfg, m2v2_n_starts=0)
+    with pytest.raises(ValueError, match="models_main"):
+        replace(cfg, models_main=("M1", "M3"))
     with pytest.raises(ValueError, match="profile_params"):
         replace(cfg, profile_params=("rho", "theta"))
     with pytest.raises(ValueError, match="grid_factors"):
@@ -146,10 +165,11 @@ def test_smoke_config_and_validation():
 def test_plan_counts_and_stable_unique_run_ids():
     cfg = full_config()
     main = plan_runs(cfg, "main")
-    assert len(main) == 30
+    assert len(main) == 40
     assert sum(s.kind == "profile" for s in main) == 10
     fits = [s for s in main if s.kind == "fit"]
-    assert len(fits) == 20 and {s.model for s in fits} == {"M1", "M2"}
+    assert len(fits) == 30 and {s.model for s in fits} == {"M1", "M2", "M2v2"}
+    assert all(sum(s.model == m for s in fits) == 10 for m in ("M1", "M2", "M2v2"))
     misspec = plan_runs(cfg, "misspec")
     assert len(misspec) == 30
     assert sum(s.kind == "profile" for s in misspec) == 15
@@ -161,12 +181,14 @@ def test_plan_counts_and_stable_unique_run_ids():
     assert [s.run_id for s in plan_runs(cfg, "main")] == [s.run_id for s in main]
     assert [s.run_id for s in main] == sorted(s.run_id for s in main)
     assert "main_fit_M1_well_specified_noise0.05_seed0" in ids
+    assert "main_fit_M2v2_well_specified_noise0.15_seed4" in ids
+    assert not any("M2v2" in s.run_id for s in with_m2)  # M2 v2 is a main-study fit only
     assert "main_profile_ode_well_specified_noise0.15_seed4" in ids
     assert "misspec_profile_ode_traffic_noise0.05_seed2" in ids
     assert "misspec_fit_M2_wrong_phi_noise0.05_seed1" in ids
 
     smoke = smoke_config()
-    assert len(plan_runs(smoke, "main")) == 3
+    assert len(plan_runs(smoke, "main")) == 4
     assert len(plan_runs(smoke, "misspec")) == 10
     assert len(plan_runs(smoke, "misspec", include_m2_misspec=True)) == 15
     with pytest.raises(ValueError, match="part"):
@@ -265,16 +287,30 @@ def test_profile_hash_tracks_the_optimizer_box_max_steps_and_method_version(monk
     fit = RunSpec("main", "fit", "M2", "well_specified", 0.05, 0)
     prof = RunSpec("main", "profile", None, "well_specified", 0.05, 0)
     settings = s1_study._settings(cfg, prof)["profile"]
-    assert settings["method_version"] == s1_study.PROFILE_METHOD_VERSION == 2
+    assert settings["method_version"] == s1_study.PROFILE_METHOD_VERSION == 3
+    assert settings["refine_xtol"] == s1_study.REFINE_XTOL == 1e-4  # interval method v2 (PLAN T5)
+    assert settings["refine_max_iter"] == s1_study.REFINE_MAX_ITER == 30
     assert settings["bounds"] == {g: list(v) for g, v in sorted(S1C_BOUNDS.items())}
     assert settings["max_steps"] == 4096  # ODEModel.max_steps class default
     assert "profile" not in s1_study._settings(cfg, fit)
+    fit_keys = {"schema", "spec", "n_stints", "compounds", "generator", "prior_ranges", "key_folds"}
+    assert set(s1_study._settings(cfg, fit)) == fit_keys | {"m2"}  # v1 fit hashes must not change
+    assert set(s1_study._settings(cfg, fit)["m2"]) == {"train", "weights", "rtol", "atol"}
+    m1_fit = RunSpec("main", "fit", "M1", "well_specified", 0.05, 0)
+    assert set(s1_study._settings(cfg, m1_fit)) == fit_keys | {"m1"}
+    assert set(s1_study._settings(cfg, m1_fit)["m1"]) == {"width", "depth", "train", "weights"}
     base = {s: config_hash(cfg, s) for s in (fit, prof)}
     with monkeypatch.context() as m:
         m.setitem(s1_study.S1C_BOUNDS, "k", (0.01, 20.0))
         assert config_hash(cfg, prof) != base[prof] and config_hash(cfg, fit) == base[fit]
     with monkeypatch.context() as m:
-        m.setattr(s1_study, "PROFILE_METHOD_VERSION", 3)
+        m.setattr(s1_study, "PROFILE_METHOD_VERSION", 2)
+        assert config_hash(cfg, prof) != base[prof] and config_hash(cfg, fit) == base[fit]
+    with monkeypatch.context() as m:
+        m.setattr(s1_study, "REFINE_XTOL", 1e-6)
+        assert config_hash(cfg, prof) != base[prof] and config_hash(cfg, fit) == base[fit]
+    with monkeypatch.context() as m:
+        m.setattr(s1_study, "REFINE_MAX_ITER", 50)
         assert config_hash(cfg, prof) != base[prof] and config_hash(cfg, fit) == base[fit]
     with monkeypatch.context() as m:
         m.setattr(s1_study, "_ode_max_steps", lambda: 8192)
@@ -308,6 +344,157 @@ def test_generator_digest_covers_the_residual_equations(tmp_path, monkeypatch):
     finally:
         s1_study.generator_digest.cache_clear()
     assert config_hash(cfg, spec) == base
+
+
+# S1b v1 hashes read from the frozen records (FEAT-001 of task-s1-v2-methods, Observed).
+V1_SEED0_HASHES = {
+    "main_fit_M1_well_specified_noise0.05_seed0": (
+        "5865e8579449d96979fe7b2b4280101eed794297b2bb391243a7d125ebd6a0b0"
+    ),
+    "main_fit_M2_well_specified_noise0.05_seed0": (
+        "dd615fc5fbbdf4cac0383834e245c2090db0e7cd0abfcbabc0391623c5a31483"
+    ),
+}
+
+
+def test_v1_fit_config_hashes_match_the_frozen_s1_records():
+    """S1b v1 is frozen (PLAN T5): no later change may alter the config_hash of a v1 M1 or M2 main fit."""
+    cfg = full_config()
+    for run_id, stored in V1_SEED0_HASHES.items():
+        model = "M1" if "_M1_" in run_id else "M2"
+        assert config_hash(cfg, RunSpec("main", "fit", model, "well_specified", 0.05, 0)) == stored
+    folder = s1_study.REPO_ROOT / "experiments" / "s1"
+    paths = sorted(folder.glob("main_fit_M1_*.json")) + sorted(folder.glob("main_fit_M2_*.json"))
+    if not paths:
+        pytest.skip("no v1 main fit records in experiments/s1")
+    expected = {s.run_id for s in plan_runs(cfg, "main") if s.kind == "fit" and s.model in ("M1", "M2")}
+    assert len(expected) == 20 and {p.stem for p in paths} == expected  # all 20 frozen v1 fits, no more
+    for path in paths:
+        record = json.loads(path.read_text(encoding="utf-8"))
+        spec = RunSpec(**record["spec"])
+        assert spec.model in ("M1", "M2") and record["config_name"] == "full", path.name
+        assert config_hash(cfg, spec) == record["config_hash"], path.name
+        if spec.run_id in V1_SEED0_HASHES:
+            assert record["config_hash"] == V1_SEED0_HASHES[spec.run_id]
+
+
+def test_m2v2_settings_hash_and_run_ids_are_separate_from_m2_v1():
+    cfg = full_config()
+    m2 = RunSpec("main", "fit", "M2", "well_specified", 0.05, 0)
+    v2 = RunSpec("main", "fit", "M2v2", "well_specified", 0.05, 0)
+    assert v2.run_id == "main_fit_M2v2_well_specified_noise0.05_seed0" and v2.run_id != m2.run_id
+    settings = s1_study._settings(cfg, v2)
+    fit_keys = {"schema", "spec", "n_stints", "compounds", "generator", "prior_ranges", "key_folds"}
+    assert set(settings) == fit_keys | {"m2v2"}
+    block = settings["m2v2"]
+    assert block["n_starts"] == 3 and block["selection"] == "min_final_scored_rms"
+    assert block["method_version"] == s1_study.M2_V2_METHOD_VERSION == 2
+    assert {k: block[k] for k in ("train", "weights", "rtol", "atol")} == s1_study._settings(cfg, m2)["m2"]
+    assert config_hash(cfg, v2) != config_hash(cfg, m2)
+    more = replace(cfg, m2v2_n_starts=4)
+    assert config_hash(more, v2) != config_hash(cfg, v2) and config_hash(more, m2) == config_hash(cfg, m2)
+    m1 = RunSpec("main", "fit", "M1", "well_specified", 0.05, 0)
+    assert config_hash(more, m1) == config_hash(cfg, m1)
+    defaults = {f.name: f.default for f in fields(s1_study.StudyConfig)}
+    assert defaults["models_main"] == s1_study.V1_MODELS == ("M1", "M2")  # code defaulting to v1 stays v1
+    assert defaults["m2v2_n_starts"] == 3
+
+
+def test_m1_latent_is_hashed_only_when_not_the_default():
+    cfg = full_config()
+    m1 = RunSpec("main", "fit", "M1", "well_specified", 0.05, 0)
+    m2 = RunSpec("main", "fit", "M2", "well_specified", 0.05, 0)
+    assert cfg.m1_latent == "linear"
+    assert "latent" not in s1_study._settings(cfg, m1)["m1"]  # v1 M1 settings, so v1 hashes are unchanged
+    assert config_hash(cfg, m1) == V1_SEED0_HASHES[m1.run_id]
+    bounded = replace(cfg, m1_latent="tanh")
+    assert s1_study._settings(bounded, m1)["m1"]["latent"] == "tanh"
+    assert config_hash(bounded, m1) != config_hash(cfg, m1)
+    assert config_hash(bounded, m2) == config_hash(cfg, m2)
+    assert config_hash(replace(cfg, m1_latent="linear"), m1) == config_hash(cfg, m1)
+    with pytest.raises(ValueError, match="m1_latent"):
+        replace(cfg, m1_latent="sigmoid")
+
+
+def test_run_fit_m1_builds_the_pinn_with_the_configured_latent(monkeypatch):
+    """Fake training (no train() call): run_fit passes m1_latent to PINN.init."""
+
+    class Stop(Exception):
+        pass
+
+    seen = []
+
+    def fake_train(model, batch, weights, train_cfg, key):
+        seen.append(model.latent_mode)
+        raise Stop
+
+    monkeypatch.setattr(s1_study, "dataset_for", lambda cfg_, spec_: None)
+    monkeypatch.setattr(s1_study, "batch_from_synthetic", lambda ds_: None)
+    monkeypatch.setattr(s1_study, "train", fake_train)
+    spec = RunSpec("main", "fit", "M1", "well_specified", 0.05, 0)
+    for mode in ("linear", "tanh"):
+        with pytest.raises(Stop):
+            s1_study.run_fit(replace(smoke_config(), m1_latent=mode), spec)
+    assert seen == ["linear", "tanh"]
+
+
+def test_select_start_picks_the_lowest_finite_rms_and_ties_to_the_lowest_index():
+    assert select_start([0.3, 0.1, 0.2]) == 1
+    assert select_start([0.3, 0.1, 0.1]) == 1
+    assert select_start([float("nan"), 0.4, 0.2]) == 2
+    assert select_start([float("nan"), float("inf"), None]) == 0
+    assert select_start([0.5]) == 0
+    assert select_start([float("inf"), 0.7]) == 1
+
+
+def test_m2v2_starts_are_the_prior_draw_and_the_profile_mle_starts():
+    starts = s1_study.m2v2_starts(smoke_config(), 0)  # smoke: 2 starts
+    assert len(starts) == 2
+    expected = (prior_physics(0), sample_prior_physics(start_key(0, 1)))
+    for got, want in zip(starts, expected, strict=True):
+        for a, b in zip(jax.tree.leaves(got), jax.tree.leaves(want), strict=True):
+            np.testing.assert_array_equal(np.asarray(a), np.asarray(b))
+    assert len(s1_study.m2v2_starts(full_config(), 0)) == 3
+
+
+def test_run_fit_m2v2_selects_by_residual_rms_before_reading_the_truth(monkeypatch):
+    """Fake training (no Diffrax): start 1 has the lowest final RMS, start 2 is non-finite."""
+    cfg = replace(smoke_config(), m2v2_n_starts=3)
+    spec = RunSpec("main", "fit", "M2v2", "well_specified", 0.05, 0)
+    truth = default_theta_true()
+    ds = SimpleNamespace(theta_true=truth, rho_target=np.asarray(truth.rho))
+    rms = iter([0.09, 0.06, float("nan")])
+    wall = iter([1.0, 2.0, 3.0])
+    trained = []
+    order = []
+
+    def fake_train_ode(cfg_, spec_, batch, physics):
+        trained.append(physics)
+        log = SimpleNamespace(wall_time_s=next(wall), steps=[0, 1], objective=[2.0, 1.0], normalized={})
+        return SimpleNamespace(noise_s=next(rms), physics=physics), log
+
+    real_select, real_truth = s1_study.select_start, s1_study.variant_truth
+    monkeypatch.setattr(s1_study, "dataset_for", lambda cfg_, spec_: ds)
+    monkeypatch.setattr(s1_study, "batch_from_synthetic", lambda ds_: SimpleNamespace(mask=np.ones(40)))
+    monkeypatch.setattr(s1_study, "_train_ode", fake_train_ode)
+    monkeypatch.setattr(s1_study, "select_start", lambda v: order.append("select") or real_select(v))
+    monkeypatch.setattr(s1_study, "variant_truth", lambda d, c: order.append("truth") or real_truth(d, c))
+    record = s1_study._jsonable(s1_study.run_fit(cfg, spec))
+    json.dumps(record, allow_nan=False)
+    assert order == ["select", "truth"]  # the truth is read only after the start is selected
+    diag = record["diagnostics"]
+    assert diag["selected_start"] == 1 and diag["selection"] == "min_final_scored_rms"
+    assert diag["scored_residual_rms_s"] == pytest.approx(0.06)
+    assert diag["residual_ratio"] == pytest.approx(1.2)
+    assert [s["index"] for s in diag["starts"]] == [0, 1, 2]
+    assert diag["starts"][2]["scored_residual_rms_s"] is None  # NaN, stored as null
+    assert [s["fit_s"] for s in diag["starts"]] == [1.0, 2.0, 3.0]
+    assert record["estimates"] == pytest.approx(theta_values(trained[1], cfg.compounds))
+    assert diag["starts"][1]["estimates"] == record["estimates"]
+    assert diag["starts"][1]["rel_error"] == pytest.approx(record["rel_error"])
+    assert record["wall_time_s"]["fit"] == pytest.approx(6.0)
+    assert record["n_scored"] == 40
+    assert "3 prior draws" in record["records"][0]["conditions"]
 
 
 # --- (5) run_study with stub runners ---
@@ -351,11 +538,15 @@ def test_run_study_writes_one_record_per_run_and_resumes(tmp_path):
     summary = run_study(cfg, part="main", runner=stub, root=tmp_path, log=_quiet)
     out = tmp_path / cfg.out_dir
     planned = plan_runs(cfg, "main")
-    assert len(planned) == 6
+    assert len(planned) == 8
+    assert {s.model for s in planned if s.kind == "fit"} == {"M1", "M2", "M2v2"}
     assert {p.stem for p in out.glob("*.json")} == {s.run_id for s in planned}
     assert sorted(stub.calls) == sorted(s.run_id for s in planned)
-    assert (summary["planned"], summary["run"], summary["skipped"], summary["errors"]) == (6, 6, 0, 0)
+    assert (summary["planned"], summary["run"], summary["skipped"], summary["errors"]) == (8, 8, 0, 0)
     assert not list(out.glob("*.tmp"))
+    v2_spec = RunSpec("main", "fit", "M2v2", "well_specified", 0.05, 1)
+    v2_record = _read(out, v2_spec.run_id)  # the stub runner writes M2v2 records like any other fit
+    assert v2_record["spec"]["model"] == "M2v2" and v2_record["config_hash"] == config_hash(cfg, v2_spec)
     spec = planned[0]
     record = _read(out, spec.run_id)
     assert record["run_id"] == spec.run_id and record["spec"] == asdict(spec)
@@ -366,7 +557,7 @@ def test_run_study_writes_one_record_per_run_and_resumes(tmp_path):
     again = Stub()
     summary = run_study(cfg, part="main", runner=again, root=tmp_path, log=_quiet)
     assert again.calls == []
-    assert (summary["run"], summary["skipped"]) == (0, 6)
+    assert (summary["run"], summary["skipped"]) == (0, 8)
 
 
 def test_run_study_refuses_a_changed_config_unless_forced(tmp_path):
@@ -394,7 +585,7 @@ def test_run_study_reruns_errors_and_keeps_nonfinite_records(tmp_path):
     stub = Stub(fail={fail_id}, status={nonfinite_id: "nonfinite"})
     summary = run_study(cfg, part="main", runner=stub, root=tmp_path, log=_quiet)
     out = tmp_path / cfg.out_dir
-    assert summary["errors"] == 1 and summary["run"] == 6
+    assert summary["errors"] == 1 and summary["run"] == 8
     failed = _read(out, fail_id)
     assert failed["status"] == "error" and "boom" in failed["error"] and failed["records"] == []
     assert _read(out, nonfinite_id)["status"] == "nonfinite"
@@ -738,10 +929,87 @@ def test_run_profile_records_failed_points_and_keeps_running(x64, monkeypatch):
     assert interval["lo"] == pytest.approx(0.75 * entry["mle"])
     assert interval["hi_bounded"] is True and interval["hi_failed"] is False
     assert entry["shape"] == "flat" and entry["covers_truth"] is True
+    # Interval method v2: the open side is untouched, the bounded side is refined by real solves. The
+    # profile SSE is 1 + 0.09 d^2 at log distance d from the MLE (n_obs 100), so the exact crossing is
+    # d = sqrt(expm1(3.841 / 100) / 0.09), which linear interpolation on the grid undershoots.
+    assert entry["interval_method"] == "v2_refined"
+    assert entry["refinement"]["lo"]["reason"] == "unbounded" and entry["refinement"]["lo"]["n_evals"] == 0
+    hi = entry["refinement"]["hi"]
+    assert hi["refined"] is True and hi["reason"] is None and hi["n_evals"] > 2
+    assert len(hi["points"]["sse"]) == hi["n_evals"] and hi["value"] == pytest.approx(interval["hi"])
+    exact_hi = entry["mle"] * np.exp(np.sqrt(np.expm1(interval["threshold"] / 100) / 0.09))
+    assert interval["hi"] == pytest.approx(exact_hi, rel=1e-3)
+    linear = entry["interval_linear"]
+    assert linear["hi"] < 0.995 * exact_hi and linear["lo_failed"] is True
+    assert record["wall_time_s"]["refine"] > 0
 
     other = record["profiles"]["rho_c[C2]"]
     assert not any(other["failed"]) and other["interval"]["lo_bounded"] and other["interval"]["hi_bounded"]
     assert other["sse_min"] == pytest.approx(1.0)
+
+
+def _refined_side(coord, n_evals):
+    return RefinedSide(
+        coord=coord,
+        refined=True,
+        reason=None,
+        n_evals=n_evals,
+        n_unconverged=1,
+        coords=np.full(n_evals, coord),
+        sse=np.ones(n_evals),
+        deviance=np.full(n_evals, 3.841),
+        success=np.array([True] * (n_evals - 1) + [False]),
+    )
+
+
+def test_profile_entry_uses_the_refined_interval_and_keeps_the_linear_one_as_superseded():
+    """Neighbour deviance 26 next to the minimum: the linear interval misses the truth, the refined one
+    (fabricated here) covers it, and shape and coverage must follow the refined one."""
+    natural = 0.05 * np.array([0.7, 0.85, 1.0, 1.15, 1.3])
+    coord = np.log(natural)
+    deviance = np.array([30.0, 26.0, 0.0, 26.0, 30.0])
+    thetas = np.zeros((5, 13))
+    thetas[:, 0] = coord
+    prof = ProfileResult(
+        grid=coord,
+        loss=np.exp(deviance / 100),  # sse_min 1, n_obs 100
+        thetas=thetas,
+        success=np.ones(5, dtype=bool),
+        failed=np.zeros(5, dtype=bool),
+        n_failed_evals=np.zeros(5, dtype=int),
+    )
+    common = dict(
+        group="rho",
+        index=0,
+        natural=natural,
+        coord=coord,
+        mle_value=0.05,
+        truth=0.06,
+        sse_fit=1.0,
+        n_obs=100,
+        bounds=[(-50.0, 50.0)] * 13,
+        names=ThetaLayout.from_compounds(("C2", "C3", "C4")).names,
+    )
+    linear = s1_study._profile_entry(prof, **common)
+    assert linear["interval_method"] == "v1_linear"
+    assert "interval_linear" not in linear and "refinement" not in linear
+    assert linear["interval"]["hi"] < 0.06 and linear["covers_truth"] is False
+
+    coarse = likelihood_interval(coord, deviance)
+    refined_iv = replace(coarse, lo=float(np.log(0.042)), hi=float(np.log(0.0615)))
+    refined = (refined_iv, _refined_side(refined_iv.lo, 7), _refined_side(refined_iv.hi, 8))
+    entry = s1_study._profile_entry(prof, **common, refined=refined)
+    assert entry["interval_method"] == "v2_refined"
+    assert entry["interval"]["lo"] == pytest.approx(0.042)
+    assert entry["interval"]["hi"] == pytest.approx(0.0615)
+    assert entry["interval"]["lo_bounded"] and entry["interval"]["hi_bounded"]
+    assert entry["interval_linear"] == linear["interval"]
+    assert entry["covers_truth"] is True and entry["shape"] == "sharp"
+    hi = entry["refinement"]["hi"]
+    assert hi["refined"] is True and hi["n_evals"] == 8 and hi["n_unconverged"] == 1
+    assert hi["value"] == pytest.approx(0.0615)
+    assert entry["refinement"]["lo"]["points"]["value"] == pytest.approx([0.042] * 7)
+    json.dumps(s1_study._jsonable(entry), allow_nan=False)
 
 
 def test_run_profile_keeps_the_mle_and_profiles_inside_the_optimizer_box(x64, monkeypatch):
@@ -1245,19 +1513,141 @@ def test_render_report_has_every_section_and_the_declared_text(tmp_path):
     assert not list((tmp_path / "reports").glob("*.tmp"))
 
 
+def test_report_shows_the_interval_method_the_superseded_linear_interval_and_refinement_counts():
+    cfg = _report_cfg()
+    recs = _records(cfg)
+    plain = render_report(recs, cfg)
+    assert "Interval method per main profile record: v2 refined 0, v1 linear 6." in plain
+    assert "mix interval methods" not in plain
+    rid = _main_prof(0.05, 0)
+    lost = {"refined": False, "reason": "failed_solve", "n_evals": 2, "n_unconverged": 1}
+    recs[rid]["profiles"]["rho_c[C3]"].update(
+        interval_method="v2_refined",
+        interval_linear={**recs[rid]["profiles"]["rho_c[C3]"]["interval"], "lo": 0.057, "hi": 0.0582},
+        refinement={"lo": {"refined": True, "reason": None, "n_evals": 7, "n_unconverged": 0}, "hi": lost},
+    )
+    text = render_report(recs, cfg)
+    assert "Interval method per main profile record: v2 refined 1, v1 linear 5." in text
+    assert "**Warning**: the profile records mix interval methods" in text
+    header = "| Interval method | v1 linear interval (Superseded) | Refinement | Unconverged points |"
+    assert f"| Covers truth {header}" in text
+    rows = [line for line in text.splitlines() if line.startswith(f"| {rid} | ")]
+    row = next(r for r in rows if r.startswith(f"| {rid} | rho_c[C3] |"))
+    refinement = "lo 7 evals, hi kept v1 linear (failed_solve), 1 unconverged"
+    assert f"| v2 refined | [0.0570, 0.0582] | {refinement} |" in row
+    old = next(r for r in rows if r.startswith(f"| {rid} | kappa |"))  # a record from before version 3
+    assert "| v1 linear | n/a | n/a |" in old
+    assert f"- {INTERVAL_V2_DECLARATION}" in text
+
+
+def test_report_shows_the_recovery_tally_and_m2_v1_next_to_m2_v2():
+    cfg = _report_cfg()
+    assert cfg.models_main == ("M1", "M2", "M2v2")
+    recs = _records(cfg)
+    recs[_main_fit("M2", 0.05, 0)]["rel_error"]["rho_c[C3]"] = 0.5  # v1 misses rho on seed 0
+    v2 = recs[_main_fit("M2v2", 0.05, 0)]  # v2 recovers it from its second start
+    v2["diagnostics"].update(
+        residual_ratio=1.1,
+        selected_start=1,
+        starts=[{"index": 0, "residual_ratio": 1.9}, {"index": 1, "residual_ratio": 1.1}],
+    )
+    del recs[_main_fit("M2v2", 0.15, 2)]
+    same = recs[_main_fit("M2v2", 0.05, 2)]["diagnostics"]  # start 0 reproduces v1 up to rounding
+    same.update(selected_start=0, starts=[{"index": 0, "residual_ratio": 1.3 * (1 + 1e-9)}])
+    text = render_report(recs, cfg)
+    assert "### Recovered fits per model and noise level" in text
+    assert "| Model | Method version | Noise s | Recovered | Missing |" in text
+    assert "| M1 | v1 | all | 6 of 6 | 0 |" in text
+    assert "| M2 | v1 | 0.05 | 2 of 3 | 0 |" in text and "| M2 | v1 | all | 5 of 6 | 0 |" in text
+    assert "| M2v2 | v2 | 0.05 | 3 of 3 | 0 |" in text
+    assert "| M2v2 | v2 | 0.15 | 2 of 3 | 1 |" in text and "| M2v2 | v2 | all | 5 of 6 | 1 |" in text
+    assert "### `M2` v1 vs `M2` v2" in text
+    assert "| 0.05 | 0 | no | 1.300 | rho_c[C3] | yes | 1.100 | none | 1 | 0: 1.900, 1: 1.100 | no |" in text
+    assert "| 0.05 | 1 | yes | 1.300 | none | yes | 1.300 | none | n/a | n/a | n/a |" in text
+    assert "| 0.05 | 2 | yes | 1.300 | none | yes | 1.300 | none | 0 | 0: 1.300 | yes |" in text
+    missing = "| missing | missing | missing | missing | missing | missing |"
+    assert f"| 0.15 | 2 | yes | 1.300 | none {missing}" in text
+    assert "| v2 residual ratio per start | Start 0 matches v1 |" in text
+    rid = _main_fit("M2v2", 0.05, 0)  # start 0 ratio 1.9 against the v1 ratio 1.3
+    warning = "**Warning**: `M2v2` start 0 does not reproduce the `M2` v1 residual ratio in 1 record(s)"
+    assert f"{warning}: {rid}." in text
+    assert f"- {S1B_V1_FREEZE}\n- {M2_V2_DECLARATION}\n" in text
+    labels = classify(recs, cfg)
+    assert labels[("rho_c[C3]", 0.05, "M2")]["label"] == "weakly_identifiable"
+    assert labels[("rho_c[C3]", 0.05, "M2v2")]["label"] == "identifiable"  # labeled separately
+    assert labels[("rho_c[C3]", 0.15, "M2v2")]["label"] == "missing"
+
+    v1_cfg = replace(cfg, models_main=("M1", "M2"))
+    v1_only = render_report(_records(v1_cfg), v1_cfg)
+    assert "`M2` and `M2v2` are not both in models_main of this config." in v1_only
+
+
+def test_r2_uses_m2_v1_only_and_ignores_m2v2_records():
+    """Declaration B: an M2v2 record never stands in for a missing M2 v1 record in the R2 indicator."""
+    cfg = _report_cfg()
+    recs = _records(cfg)
+    for spec in plan_runs(cfg, "main"):
+        if spec.kind == "fit":  # well-specified fits that reach the noise level
+            recs[spec.run_id]["diagnostics"]["residual_ratio"] = 1.0
+    for seed in (0, 1, 2):  # M1 stalls above the noise level on every seed at 0.15 s
+        recs[_main_fit("M1", 0.15, seed)]["diagnostics"]["residual_ratio"] = 1.5
+    assert p1_evidence(recs, classify(recs, cfg), cfg)["r2"]["status"] == "indicator_present"
+    for seed in (0, 1, 2):  # only the M2v2 records of the stalled seeds remain
+        del recs[_main_fit("M2", 0.15, seed)]
+    r2 = p1_evidence(recs, classify(recs, cfg), cfg)["r2"]
+    assert r2["status"] == "incomplete"
+    assert {r["model"] for r in r2["rows"]} == {"M1", "M2"}
+
+
+def test_r1_reads_only_the_v1_models_and_ignores_missing_m2v2_records():
+    """Declaration B: M2v2 labels neither enter the R1 entries nor keep R1 incomplete."""
+    cfg = _report_cfg()
+    assert "M2v2" in cfg.models_main
+    recs = _records(cfg)
+    for spec in plan_runs(cfg, "main"):
+        if spec.kind == "fit":  # well-specified fits that reach the noise level
+            recs[spec.run_id]["diagnostics"]["residual_ratio"] = 1.0
+    for seed in cfg.seeds_main:  # no M2v2 fit at the realistic noise level has run yet
+        del recs[_main_fit("M2v2", 0.15, seed)]
+    labels = classify(recs, cfg)
+    assert labels[("k_c[C3]", 0.15, "M2v2")]["label"] == "missing"
+    r1 = p1_evidence(recs, labels, cfg)["r1"]
+    assert r1["status"] == "trigger_condition_not_met"
+    assert {e["basis"] for e in r1["entries"]} == {"M1", "M2", "profile"}
+    del recs[_main_fit("M2", 0.15, 0)]  # a missing v1 record still keeps R1 incomplete
+    assert p1_evidence(recs, classify(recs, cfg), cfg)["r1"]["status"] == "incomplete"
+
+
 def test_report_quotes_the_declared_readings_and_plan_t5_holds_them_verbatim():
     text = render_report(_records(_report_cfg()), _report_cfg())
     assert len(S1C_SOLVER_DECLARATIONS) == 2
-    for reading in (*MISSPEC_READING_V1, R2_DECLARATION, *S1C_SOLVER_DECLARATIONS):
+    s1b = (S1B_V1_FREEZE, M2_V2_DECLARATION)
+    readings = (*MISSPEC_READING_V1, R2_DECLARATION, *S1C_SOLVER_DECLARATIONS, INTERVAL_V2_DECLARATION, *s1b)
+    readings = (*readings, M1_DIAG_DECLARATION)
+    for reading in readings:
         assert reading in text
         assert "\u2014" not in reading
+    assert f"(PLAN T5, verbatim): {M1_DIAG_DECLARATION} " in text  # P1 section bullet
+    assert "`reports/s1_m1_diag.md`" in text
     assert "How this report applies them" not in text  # every reading is declared in PLAN T5
     plan = s1_study.REPO_ROOT / "PLAN.md"
     if not plan.is_file():  # PLAN.md is a local planning document, absent from clean checkouts
         pytest.skip("PLAN.md is not in this checkout")
     plan_text = plan.read_text(encoding="utf-8")
-    for text_block in (*MISSPEC_CRITERIA_V1, *MISSPEC_READING_V1, R2_DECLARATION, *S1C_SOLVER_DECLARATIONS):
+    declared = (*MISSPEC_CRITERIA_V1, *MISSPEC_READING_V1, R2_DECLARATION, *S1C_SOLVER_DECLARATIONS)
+    for text_block in (*declared, INTERVAL_V2_DECLARATION, *s1b, M1_DIAG_DECLARATION):
         assert text_block in plan_text, text_block[:60]
+    for block in (INTERVAL_V2_DECLARATION, *s1b, M1_DIAG_DECLARATION):
+        assert f"  - {block}\n" in plan_text  # its own bullet of the T5 declarations
+    # Order in PLAN T5: failed ODE solves, then A (S1b v1 outcome), B (M2 v2), C (interval method v2),
+    # D (M1 exploratory diagnostics).
+    blocks = (S1C_SOLVER_DECLARATIONS[1], *s1b, INTERVAL_V2_DECLARATION, M1_DIAG_DECLARATION)
+    positions = [plan_text.index(b) for b in blocks]
+    assert positions == sorted(positions)
+    assert (
+        "with endpoints by linear interpolation between grid points. This endpoint rule is interval method "
+        "v1, superseded by **Interval method v2** below for every reported interval." in plan_text
+    )
 
 
 # --- slow: the real runner end to end ---
@@ -1271,6 +1661,7 @@ def test_study_end_to_end_on_a_tiny_config(x64, tmp_path):
         n_stints=6,
         m1_train=replace(base.m1_train, n_steps=20),
         m2_train=replace(base.m2_train, n_steps=10),
+        m2v2_n_starts=2,
         profile_params=("rho",),
         grid_factors=(0.75, 1.0, 1.33),
         n_starts=1,
@@ -1289,6 +1680,8 @@ def test_study_end_to_end_on_a_tiny_config(x64, tmp_path):
     for run_id, record in records.items():
         assert record["status"] in ("ok", "nonfinite"), (run_id, record.get("error"))
         assert record["wall_time_s"]["total"] > 0
+    v2 = records[_main_fit("M2v2", 0.05, 0)]
+    assert len(v2["diagnostics"]["starts"]) == 2 and v2["diagnostics"]["selected_start"] in (0, 1)
     text = render_report(records, cfg)
     path = write_report(tmp_path / cfg.report_path, text)
     assert "## S1b recovery" in path.read_text(encoding="utf-8")

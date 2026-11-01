@@ -9,17 +9,19 @@ repository root:
     uv run python scripts/make_figures.py --only s1_profiles   # one figure (repeatable)
 
 Outputs in reports/figures/: probe_warmup.png, probe_pace_pit.png, synthetic_stints.png,
-s1_fit_convergence.png, s1_recovery.png, s1_profiles.png, s1_intervals.png, s1_gn_spectrum.png,
-s1_misspec_smoke.png, and derived_numbers.json (per-parameter interval numbers, the deviance at truth,
-source run ids and config hashes, generated_utc).
+s1_fit_convergence.png, s1_recovery.png, s1_recovery_seeds.png, s1_profiles.png, s1_intervals.png,
+s1_gn_spectrum.png, s1_misspec_smoke.png, and derived_numbers.json (per-parameter interval numbers with
+the interval method, the deviance at truth, source run ids and config hashes, generated_utc).
 
 Fit figures take M1 and M2 from one folder: experiments/s1/ (full config) if it holds any finished
 main fit, else experiments/s1_smoke/. A model with no record in that folder is left out rather than filled
-in from the other folder, so a full-config fit is never paired with a smoke fit. The profile record (the
-MLE bars in s1_recovery.png) is picked on its own, full before smoke. Every title and recovery legend entry
-names its config, and smoke figures say 'smoke'. The quadratic interval in s1_profiles.png,
-s1_intervals.png and derived_numbers.json is a post-hoc diagnostic; the reported S1c interval is the
-linear interpolation of likelihood_interval.
+in from the other folder, so a full-config fit is never paired with a smoke fit. s1_recovery_seeds.png
+shows every seed and noise level of M1, M2 and M2v2 from one folder, chosen by the same rule. The profile
+record (the MLE bars in s1_recovery.png) is picked on its own, full before smoke. Every title and recovery
+legend entry names its config, and smoke figures say 'smoke'. The reported S1c interval is interval
+method v2 (refined) for profile records with interval_method 'v2_refined' and the v1 linear interpolation
+for older records; for v2 records the v1 interval is drawn and written as Superseded. The quadratic
+interval in s1_profiles.png, s1_intervals.png and derived_numbers.json is a post-hoc diagnostic.
 
 matplotlib must be a direct dependency: run `uv add matplotlib` once. A figure whose input is missing is
 skipped with a reason; a figure whose build raises any other exception is reported as failed. The exit

@@ -18,6 +18,7 @@ from typing import Any
 from apexpinn.physics.identifiability import SHAPE_LABELS, identifiability_label
 from apexpinn.physics.synthetic import MISSPEC_VARIANTS
 from apexpinn.train.s1_study import (
+    V1_MODELS,
     RunSpec,
     StudyConfig,
     gated_names,
@@ -31,10 +32,14 @@ from apexpinn.train.s1_study import (
 )
 
 __all__ = [
+    "INTERVAL_V2_DECLARATION",
+    "M1_DIAG_DECLARATION",
+    "M2_V2_DECLARATION",
     "MISSPEC_CRITERIA_V1",
     "MISSPEC_READING_V1",
     "P1_DECISION_SENTENCE",
     "R2_DECLARATION",
+    "S1B_V1_FREEZE",
     "S1C_SOLVER_DECLARATIONS",
     "at_bound_points",
     "classify",
@@ -43,6 +48,7 @@ __all__ = [
     "load_records",
     "p1_evidence",
     "render_report",
+    "stalled",
     "unconverged_points",
     "write_report",
 ]
@@ -138,6 +144,73 @@ S1C_SOLVER_DECLARATIONS = (
     "unconverged points. Reason: a failed point gives no evidence, and reading it as unbounded can only "
     "make a profile look flatter than it is, never sharper.",
 )
+# PLAN T5 method declaration of interval method v2, verbatim.
+INTERVAL_V2_DECLARATION = (
+    "**Interval method v2** (declared 2026-11-01, after the seed 0, noise 0.05 s profile was read and "
+    "before any other profile run was read; the re-solved bracket fallback added after review v1 of this "
+    "change, before any v2 profile was run): each bounded endpoint of a 95% profile interval is found by "
+    "Brent's method (`scipy.optimize.brentq`) on the coarse-grid bracket (the last grid point inside the "
+    "3.841 threshold and the first outside), where every evaluation is a real profile solve: L-BFGS-B "
+    "with the profiled coordinate pinned, warm-started from the coarse solution at the inside bracket "
+    "point, with the same box and `maxiter`, and a deviance against the same `SSE_min` as the coarse "
+    "profile. The tolerance is `xtol` = 1e-4 in the grid coordinate (log, or logit for `h_opt_c`), with "
+    "at most 30 iterations per side. If a refinement solve finds no finite SSE, the re-solved bracket "
+    "ends no longer straddle the 3.841 threshold, or Brent's method does not converge, that side keeps "
+    "the v1 linear endpoint and the report marks it. Refinement "
+    "evaluations where L-BFGS-B reports no convergence are counted per side. Unbounded sides (grid "
+    "edge, or a failed coarse point before the crossing) are unchanged. Shapes, coverage and labels use "
+    "the v2 interval. Every profile record also stores the v1 linear interval, and the report prints it "
+    "as `Superseded`. The seed 0, noise 0.05 s profile is rerun under v2, so every reported interval "
+    "uses one method. The quadratic fit in `scripts/make_figures.py` stays a diagnostic only. Reason: "
+    "on the coarse grid (factors 0.85, 1.0, 1.15 near the MLE, neighbour deviance 26 to 30) linear "
+    "interpolation puts the crossing at about 3.841 / D of the grid step instead of about "
+    "sqrt(3.841 / D), so the v1 intervals came out about 2.6 to 2.8 times too narrow (`Inferred`), and "
+    "6 of 13 seed 0 intervals missed the truth."
+)
+INTERVAL_METHODS = {"v2_refined": "v2 refined", "v1_linear": "v1 linear"}
+# PLAN T5 method declaration freezing the S1b v1 outcome, verbatim.
+S1B_V1_FREEZE = (
+    "**S1b v1 outcome** (declared 2026-11-01, after all 20 main fits under the v1 declarations were "
+    "read): the S1b recovery outcome under the v1 method declarations is final as read: `M1` recovered "
+    "on 0 of 10 main fits and `M2` on 5 of 10. The v1 run records in `experiments/s1/` are kept, never "
+    "overwritten or relabeled, and the report keeps showing them. Later method versions are reported "
+    "alongside v1 and never replace it."
+)
+# PLAN T5 method declaration of M2 v2 (multi-start), verbatim.
+M2_V2_DECLARATION = (
+    "**`M2` v2, multi-start** (declared 2026-11-01, after the v1 `M2` results were read; a post-hoc "
+    "method version reported alongside v1, never in place of it; the R1 trigger basis added after "
+    "review v1 of this change, before any `M2` v2 fit was run): an `M2` v2 fit trains the v1 `M2` "
+    "setup (Adam, learning rate 1e-2, 1000 steps, lap time only) from 3 independent prior draws per "
+    "seed (2 in the smoke config): start 0 is the v1 prior draw `fold_in(key, 101)`, start i >= 1 is "
+    "the profile MLE start `fold_in(key, 200 + i)`. The fit keeps the start with the lowest final "
+    "scored residual RMS (the square root of its final data term with its training offsets); the truth "
+    "is never used to select, and normalized objectives are not compared because each start "
+    "normalizes by its own initial value. The step budget stays at 1000, so v2 changes only the "
+    "starts: on seed 0 the v1 objective fell only 10.1% from step 500 to step 999. Reason: on seed 0 "
+    "the v1 `M2` fit stopped at an SSE about 3.1 times the ODE-likelihood MLE SSE on the same data, "
+    "while the MLE recovers C2, which points to an optimizer failure from that prior draw "
+    "(`Inferred`). Scope: v2 targets optimizer failures only. An `M2` v2 miss while the fit sits at "
+    "the noise floor (residual ratio below 1.2) remains evidence of weak identifiability, and no "
+    "further optimizer change may be used to remove such misses. Run ids use the model tag `M2v2`. "
+    "S1c labels are computed for `M2` and `M2v2` separately; the R1 trigger and the R2 indicator read "
+    "only the v1 models (`M1` and `M2` v1), and the `M2` misspecification decision keeps using `M2` v1."
+)
+MODEL_METHOD = {"M1": "v1", "M2": "v1", "M2v2": "v2"}  # S1b method version per fit model tag
+# M2v2 start 0 repeats the v1 M2 fit; a relative residual-ratio gap above this flags drift (check only).
+START0_RTOL = 1e-6
+# PLAN T5 method declaration of the exploratory M1 diagnostics, verbatim.
+M1_DIAG_DECLARATION = (
+    "**`M1` exploratory diagnostics** (declared 2026-11-01, after the v1 `M1` results were read): runs "
+    "in `experiments/s1_m1_diag/` separate three candidate causes of the v1 `M1` failure (`k_c` "
+    "collapsed on 10 of 10 main fits): (a) a longer budget (20000 steps), (b) the physics weight "
+    "(thermal, wear and mono weights 0; or thermal and wear weights 10), (c) a bounded latent "
+    "`h = tanh(tau * n_h)`. They use seed 0 (seed 1 optional), noise 0.05 s, and otherwise the v1 `M1` "
+    "setup. They are exploratory: they are not S1b evidence, they change no v1 or v2 result or label, "
+    "and no `M1` method change is declared from them. Any later `M1` method version must be declared "
+    "here before its runs are read. The P1 decision stays with the user in `experiments/pivots.md`."
+)
+M1_DIAG_REPORT = "reports/s1_m1_diag.md"  # generated by scripts/run_m1_diag.py
 REALISTIC_NOISE_S = 0.15  # PLAN T5 method declarations: realistic noise for the P1 trigger (Assumed)
 E5_REL_EIGENVALUE = 1e-6  # PLAN section 2, E5
 RESIDUAL_RATIO_FLAG = 1.2  # criterion 3: residual RMS at least 20% above noise_s
@@ -246,10 +319,10 @@ def at_bound_points(entry: Mapping[str, Any] | None) -> int | None:
 def classify(records: Records, cfg: StudyConfig) -> dict[tuple, dict[str, Any]]:
     """S1c labels keyed by (parameter, noise_s rounded to 1e-6, basis).
 
-    basis is the model ('M1', 'M2') for parameters with an O6 tolerance, whose label combines recovery of
-    that model on every seed with the profile shapes; it is 'profile' for gamma_c, h_opt_c and kappa,
-    labeled from the profile shapes only (identifiability.identifiability_label). A label is 'missing'
-    while any planned record it needs is missing, failed, or lacks the profile shape.
+    basis is the model ('M1', 'M2', 'M2v2') for parameters with an O6 tolerance, whose label combines
+    recovery of that model on every seed with the profile shapes; it is 'profile' for gamma_c, h_opt_c and
+    kappa, labeled from the profile shapes only (identifiability.identifiability_label). A label is
+    'missing' while any planned record it needs is missing, failed, or lacks the profile shape.
     """
     main = plan_runs(cfg, "main")
     tol = cfg.tolerance_map
@@ -498,18 +571,23 @@ def evaluate_misspec(records: Records, labels: Labels, cfg: StudyConfig) -> dict
 
 
 def _r1(labels: Labels, cfg: StudyConfig) -> dict[str, Any]:
-    """R1 trigger: k_c or h_opt_c non-identifiable at realistic noise."""
+    """R1 trigger: k_c or h_opt_c non-identifiable at realistic noise.
+
+    Only the v1 models are a basis: M2v2 labels neither enter the entries nor keep R1 incomplete
+    (M2_V2_DECLARATION).
+    """
     if _nkey(REALISTIC_NOISE_S) not in {_nkey(n) for n in cfg.noise_levels}:
         reason = f"noise {REALISTIC_NOISE_S:g} s is not in this config"
         return {"status": "not_evaluable", "reason": reason}
     entries: list[dict[str, str]] = []
     not_profiled: list[str] = []
+    v1_models = tuple(m for m in cfg.models_main if m in V1_MODELS)
     for group in ("k", "h_opt"):
         if group not in cfg.profile_params:
             not_profiled.append(group)
             continue
         for name in param_names(group, cfg.compounds):
-            for basis in cfg.models_main if group in cfg.tolerance_map else ("profile",):
+            for basis in v1_models if group in cfg.tolerance_map else ("profile",):
                 label = _label(labels, name, REALISTIC_NOISE_S, basis)
                 entries.append({"param": name, "basis": basis, "label": label})
     found = [e for e in entries if e["label"] == "non_identifiable"]
@@ -529,7 +607,7 @@ def _r1(labels: Labels, cfg: StudyConfig) -> dict[str, Any]:
     }
 
 
-def _stalled(record: Mapping[str, Any]) -> bool | None:
+def stalled(record: Mapping[str, Any]) -> bool | None:
     """R2 stall: objective fell by less than 1% over the last 20% of the log and residual ratio >= 1.2.
 
     None when the objective change or the residual ratio is not available (not evaluable).
@@ -557,7 +635,9 @@ def _final_normalized(record: Mapping[str, Any]) -> dict[str, float]:
 def _r2(records: Records, cfg: StudyConfig) -> dict[str, Any]:
     """R2 indicator: M1 stalls on at least min(3, n_seeds) seeds at one noise level, with M2 records present.
 
-    Recovery of M1 and M2 and the final normalized loss terms are context only (R2_DECLARATION).
+    Recovery of M1 and M2 and the final normalized loss terms are context only (R2_DECLARATION). Only the
+    v1 models count: M2v2 records neither fill in a missing M2 record nor appear in the rows
+    (M2_V2_DECLARATION).
     """
     main = plan_runs(cfg, "main")
     need = min(3, len(cfg.seeds_main))
@@ -568,7 +648,7 @@ def _r2(records: Records, cfg: StudyConfig) -> dict[str, Any]:
         m2_present: set[int] = set()
         unknown = False
         for s in main:
-            if s.kind != "fit" or s.noise_s != noise:
+            if s.kind != "fit" or s.noise_s != noise or s.model not in V1_MODELS:
                 continue
             row: dict[str, Any] = {"run_id": s.run_id, "model": s.model, "noise_s": noise, "seed": s.seed}
             record = usable(records.get(s.run_id))
@@ -577,16 +657,16 @@ def _r2(records: Records, cfg: StudyConfig) -> dict[str, Any]:
                 row.update(status="missing", stalled=None, not_recovered=None, objective_change=None)
                 rows.append({**row, "residual_ratio": None, "final_normalized": None})
                 continue
-            stalled = _stalled(record)
+            is_stalled = stalled(record)
             if s.model == "M1":
-                if stalled is None:
+                if is_stalled is None:
                     unknown = True
-                elif stalled:
+                elif is_stalled:
                     stalled_m1.add(s.seed)
-            else:
+            elif s.model == "M2":
                 m2_present.add(s.seed)
             change = (record.get("convergence") or {}).get("objective_rel_change_last20")
-            row.update(status=record.get("status"), stalled=stalled, objective_change=change)
+            row.update(status=record.get("status"), stalled=is_stalled, objective_change=change)
             row.update(not_recovered=_not_recovered(record, cfg))
             row.update(residual_ratio=_diag(record).get("residual_ratio"))
             rows.append({**row, "final_normalized": _final_normalized(record)})
@@ -666,10 +746,11 @@ def _recovery_section(records: Records, cfg: StudyConfig) -> list[str]:
     lines = [
         "## S1b recovery",
         "",
-        "Relative error (estimate - truth) / truth of the trained `M1` and `M2` estimates, lap time "
-        "only, initialized from the seed's prior draw. Recovered means |relative error| within the "
-        f"`O6` tolerance ({tolerances}) for every gated parameter. Residual ratio is residual RMS on "
-        "scored laps / noise_s. `Observed`.",
+        "Relative error (estimate - truth) / truth of the trained `M1`, `M2` and `M2v2` estimates, lap "
+        "time only. `M1` and `M2` (S1b v1) start from the seed's prior draw; `M2v2` (`M2` v2) keeps the "
+        "best of several prior draws by final scored residual RMS. Recovered means |relative error| "
+        f"within the `O6` tolerance ({tolerances}) for every gated parameter. Residual ratio is residual "
+        "RMS on scored laps / noise_s. `Observed`.",
         "",
     ]
     header = ["Run id", "Model", "Noise s", "Seed", "Status", *gated, "Recovered"]
@@ -691,7 +772,131 @@ def _recovery_section(records: Records, cfg: StudyConfig) -> list[str]:
         row += [_fmt(not _not_recovered(record, cfg)), _pct(max(ungated)) if ungated else "n/a"]
         row += [_fmt(diag.get("residual_ratio")), ", ".join(diag.get("collapse_flags") or []) or "none"]
         rows.append(row)
-    return lines + _table(header, rows) + [""]
+    lines += _table(header, rows) + [""]
+    lines += _recovery_tally(records, cfg)
+    lines += _m2_versions_table(records, cfg)
+    lines += [
+        "Declared S1b method versions (PLAN T5 method declarations, verbatim):",
+        "",
+        f"- {S1B_V1_FREEZE}",
+        f"- {M2_V2_DECLARATION}",
+        "",
+    ]
+    return lines
+
+
+def _recovered(record: Mapping[str, Any] | None, cfg: StudyConfig) -> bool | None:
+    """Whether a finished fit record recovers every gated parameter; None for a missing or failed one."""
+    return None if usable(record) is None else not _not_recovered(record, cfg)
+
+
+def _recovery_tally(records: Records, cfg: StudyConfig) -> list[str]:
+    """Recovered fits per model and noise level, plus a row over all noise levels per model."""
+    fits = [s for s in plan_runs(cfg, "main") if s.kind == "fit"]
+    rows = []
+    for model in cfg.models_main:
+        for noise in (*cfg.noise_levels, None):
+            specs = [s for s in fits if s.model == model and (noise is None or s.noise_s == noise)]
+            flags = [_recovered(records.get(s.run_id), cfg) for s in specs]
+            noise_text = "all" if noise is None else _fmt(noise, 2)
+            recovered = f"{sum(f is True for f in flags)} of {len(specs)}"
+            rows.append([model, MODEL_METHOD.get(model, "n/a"), noise_text, recovered, flags.count(None)])
+    return [
+        "### Recovered fits per model and noise level",
+        "",
+        "Count of planned main fits that recover every gated parameter, per model and noise level, and "
+        "over all noise levels. Missing counts planned fits without a finished record; they are never "
+        "counted as recovered. The v1 rows (`M1`, `M2`) are the frozen S1b v1 outcome; `M2v2` is `M2` "
+        "v2, reported alongside v1. `Observed`.",
+        "",
+        *_table(["Model", "Method version", "Noise s", "Recovered", "Missing"], rows),
+        "",
+    ]
+
+
+def _start_ratios(diag: Mapping[str, Any]) -> str:
+    """'index: residual ratio' per stored M2v2 start, or 'n/a'."""
+    starts = diag.get("starts")
+    if not isinstance(starts, list) or not starts:
+        return "n/a"
+    parts = []
+    for i, item in enumerate(starts):
+        entry = item if isinstance(item, Mapping) else {}
+        parts.append(f"{entry.get('index', i)}: {_fmt(entry.get('residual_ratio'))}")
+    return ", ".join(parts)
+
+
+def _version_cells(record: Mapping[str, Any] | None, cfg: StudyConfig) -> list[str]:
+    """Recovered, residual ratio and not-recovered parameters of one fit, or 'missing' three times."""
+    if usable(record) is None:
+        return ["missing"] * 3
+    failed = ", ".join(_not_recovered(record, cfg)) or "none"
+    return [_fmt(_recovered(record, cfg)), _fmt(_diag(record).get("residual_ratio")), failed]
+
+
+def _start0_check(v1: Mapping[str, Any] | None, v2: Mapping[str, Any] | None) -> str:
+    """Whether M2v2 start 0 reproduces the M2 v1 residual ratio of the same seed and noise level.
+
+    Start 0 repeats the v1 fit (same prior draw, train key and setup, M2_V2_DECLARATION), so a relative
+    gap above START0_RTOL flags nondeterminism or setup drift. 'yes' or 'no'; 'n/a' when either ratio is
+    not available. A consistency check only: it changes no selection, recovery or label.
+    """
+    if usable(v1) is None or usable(v2) is None:
+        return "n/a"
+    starts = _diag(v2).get("starts")
+    entries = [s for s in starts if isinstance(s, Mapping)] if isinstance(starts, list) else []
+    first = next((s for s in entries if s.get("index") == 0), {})
+    a, b = _diag(v1).get("residual_ratio"), first.get("residual_ratio")
+    if not (_finite(a) and _finite(b)):
+        return "n/a"
+    return "yes" if abs(b - a) <= START0_RTOL * abs(a) else "no"
+
+
+def _m2_versions_table(records: Records, cfg: StudyConfig) -> list[str]:
+    """M2 v1 and M2 v2 side by side per noise level and seed, with the start 0 check."""
+    lines = ["### `M2` v1 vs `M2` v2", ""]
+    if not {"M2", "M2v2"} <= set(cfg.models_main):
+        return lines + ["`M2` and `M2v2` are not both in models_main of this config.", ""]
+    rows = []
+    drift = []
+    for noise in cfg.noise_levels:
+        for seed in cfg.seeds_main:
+            v1 = records.get(RunSpec("main", "fit", "M2", "well_specified", noise, seed).run_id)
+            v2_id = RunSpec("main", "fit", "M2v2", "well_specified", noise, seed).run_id
+            v2 = records.get(v2_id)
+            row = [_fmt(noise, 2), seed, *_version_cells(v1, cfg), *_version_cells(v2, cfg)]
+            if usable(v2) is None:
+                row += ["missing", "missing", "missing"]
+            else:
+                diag = _diag(v2)
+                check = _start0_check(v1, v2)
+                row += [_fmt(diag.get("selected_start")), _start_ratios(diag), check]
+                if check == "no":
+                    drift.append(v2_id)
+            rows.append(row)
+    header = ["Noise s", "Seed", "v1 recovered", "v1 residual ratio", "v1 not recovered"]
+    header += ["v2 recovered", "v2 residual ratio", "v2 not recovered", "v2 selected start"]
+    header += ["v2 residual ratio per start", "Start 0 matches v1"]
+    out = lines + [
+        "Per seed: `M2` v1 (one prior draw) and `M2` v2 (best start by final scored residual RMS; the "
+        "truth is not used to select). Residual ratio per start lists start index: ratio. `missing`: no "
+        "finished record. `Observed`.",
+        "",
+        "Start 0 matches v1: start 0 repeats the v1 fit (same prior draw, train key and setup), so its "
+        f"residual ratio should equal the v1 ratio within a relative {START0_RTOL:g}; `no` points to "
+        "nondeterminism or setup drift. A consistency check only; it changes no selection, recovery or "
+        "label.",
+        "",
+        *_table(header, rows),
+        "",
+    ]
+    if drift:
+        out += [
+            f"**Warning**: `M2v2` start 0 does not reproduce the `M2` v1 residual ratio in {len(drift)} "
+            f"record(s): {', '.join(drift)}.",
+            "",
+        ]
+    return out
 
 
 def _labels_table(labels: Labels) -> list[str]:
@@ -745,6 +950,60 @@ def _side_text(interval: Mapping[str, Any], side: str) -> str:
     return "open at failed point " if interval.get(f"{side}_failed") is True else "open "
 
 
+def _interval_text(interval: Mapping[str, Any]) -> str:
+    lo = _side_text(interval, "lo") + _fmt(interval.get("lo"), 4)
+    hi = _side_text(interval, "hi") + _fmt(interval.get("hi"), 4)
+    return f"[{lo}, {hi}]"
+
+
+def _interval_method(entry: Mapping[str, Any]) -> str:
+    """'v2 refined' or 'v1 linear'; an entry without interval_method predates profile method version 3."""
+    return INTERVAL_METHODS.get(str(entry.get("interval_method")), "v1 linear")
+
+
+def _refinement_text(entry: Mapping[str, Any]) -> str:
+    """Per side: Brent evaluations, or why the side kept its v1 linear endpoint; then unconverged count."""
+    refinement = entry.get("refinement")
+    if not isinstance(refinement, Mapping):
+        return "n/a"
+    parts, n_unconverged = [], 0
+    for side in ("lo", "hi"):
+        info = refinement.get(side) or {}
+        reason = info.get("reason")
+        if info.get("refined") is True:
+            parts.append(f"{side} {_fmt(info.get('n_evals'))} evals")
+        elif reason == "unbounded":
+            parts.append(f"{side} unbounded")
+        else:
+            parts.append(f"{side} kept v1 linear ({reason or 'no reason stored'})")
+        count = info.get("n_unconverged")
+        n_unconverged += count if isinstance(count, int) and not isinstance(count, bool) else 0
+    return ", ".join(parts) + f", {n_unconverged} unconverged"
+
+
+def _interval_methods_line(records: Records, cfg: StudyConfig) -> list[str]:
+    """Count of main profile records per interval method, with a warning when the methods mix."""
+    counts = dict.fromkeys(INTERVAL_METHODS.values(), 0)
+    for spec in plan_runs(cfg, "main"):
+        record = usable(records.get(spec.run_id))
+        if spec.kind != "profile" or record is None:
+            continue
+        entries = [e for e in (record.get("profiles") or {}).values() if isinstance(e, Mapping)]
+        entries = [e for e in entries if e.get("interval")]
+        if entries:
+            v2 = any(_interval_method(e) == "v2 refined" for e in entries)
+            counts["v2 refined" if v2 else "v1 linear"] += 1
+    text = ", ".join(f"{method} {n}" for method, n in counts.items())
+    lines = [f"Interval method per main profile record: {text}."]
+    if all(counts.values()):
+        lines += [
+            "",
+            "**Warning**: the profile records mix interval methods, so the shapes, coverage and labels "
+            "below mix v1 linear and v2 refined intervals until every profile run is rerun under v2.",
+        ]
+    return lines
+
+
 def _interval_table(records: Records, cfg: StudyConfig) -> list[str]:
     rows = []
     for spec in plan_runs(cfg, "main"):
@@ -755,12 +1014,13 @@ def _interval_table(records: Records, cfg: StudyConfig) -> list[str]:
             entry = _profile_entry(record, name)
             iv = entry.get("interval")
             if not iv:
-                rows.append([spec.run_id, name, "n/a", "n/a", "n/a", "missing", *["n/a"] * 4])
+                rows.append([spec.run_id, name, "n/a", "n/a", "n/a", "missing", *["n/a"] * 7])
                 continue
-            lo = _side_text(iv, "lo") + _fmt(iv.get("lo"), 4)
-            hi = _side_text(iv, "hi") + _fmt(iv.get("hi"), 4)
             truth, mle = _fmt(entry.get("truth"), 4), _fmt(entry.get("mle"), 4)
             covers = _fmt(entry.get("covers_truth"))
+            linear = entry.get("interval_linear")
+            method = [_interval_method(entry), _interval_text(linear) if linear else "n/a"]
+            method.append(_refinement_text(entry))
             n_bad, rests = unconverged_points(entry)
             shape = f"{entry.get('shape')}{'*' if rests else ''}"
             unconverged = "n/a" if n_bad is None else str(n_bad)
@@ -768,8 +1028,9 @@ def _interval_table(records: Records, cfg: StudyConfig) -> list[str]:
                 unconverged += ", interval rests on one"
             n_failed, n_edge = failed_points(entry), at_bound_points(entry)
             counts = [unconverged, *("n/a" if n is None else str(n) for n in (n_failed, n_edge))]
-            rows.append([spec.run_id, name, truth, mle, f"[{lo}, {hi}]", shape, covers, *counts])
+            rows.append([spec.run_id, name, truth, mle, _interval_text(iv), shape, covers, *method, *counts])
     header = ["Run id", "Parameter", "Truth", "MLE", "95% interval", "Shape", "Covers truth"]
+    header += ["Interval method", "v1 linear interval (Superseded)", "Refinement"]
     return _table([*header, "Unconverged points", "Failed points", "At box edge"], rows)
 
 
@@ -807,6 +1068,17 @@ def _identifiability_section(records: Records, labels: Labels, cfg: StudyConfig)
         "deviance, and a side that reaches one before the threshold is open. At box edge counts grid "
         "points with a free coordinate on the box edge. `n/a`: the record does not store the count. "
         "`Observed`.",
+        "",
+        "Endpoints follow interval method v2 (PLAN T5 method declarations, verbatim):",
+        "",
+        f"- {INTERVAL_V2_DECLARATION}",
+        "",
+        "Interval method is `v2 refined` for records of profile method version 3 and `v1 linear` for "
+        "older records. The v1 linear interval column is `Superseded` and shown for comparison only. "
+        "Refinement lists the Brent evaluations per side (or why a side kept its v1 linear endpoint) and "
+        "the refinement evaluations where L-BFGS-B reported no convergence.",
+        "",
+        *_interval_methods_line(records, cfg),
         "",
         *_interval_table(records, cfg),
         "",
@@ -987,6 +1259,10 @@ def _p1_section(evidence: Mapping[str, Any]) -> list[str]:
     lines.append(
         f"- **E5** (refuted if a relative Gauss-Newton eigenvalue is below {E5_REL_EIGENVALUE:g} at "
         f"noise {e5['noise_s']:g} s), {MECHANICAL}: `{e5['status']}`. Values: {values}."
+    )
+    lines.append(
+        f"- **`M1` exploratory diagnostics** (PLAN T5, verbatim): {M1_DIAG_DECLARATION} Their runs and "
+        f"mechanical checks are in `{M1_DIAG_REPORT}`, built by `scripts/run_m1_diag.py`."
     )
     return lines + [""]
 

@@ -4,10 +4,14 @@ See PRD.md section 6.4 (S1b, S1c, S1d), PLAN.md T5 (study run, misspecification 
 the T5 'Method declarations' block, which this module implements:
 
 - S1b: M1 (PINN) and M2 (ODE model) are trained on lap time only from a prior draw, never from the truth.
+  The S1b v1 outcome is frozen; M2v2 (M2 method version 2) trains the M2 setup from m2v2_n_starts prior
+  draws and keeps the start with the lowest final scored residual RMS, reported alongside M2 v1.
 - S1c: profiles and the Gauss-Newton spectrum use the exact ODE likelihood with b_s concentrated out
   (physics.identifiability.ode_least_squares), per dataset, in log / logit coordinates. The MLE and the
   profile solves keep the free coordinates inside identifiability.S1C_BOUNDS, and a failed ODE solve
-  gives a failed point instead of stopping the run (PROFILE_METHOD_VERSION 2).
+  gives a failed point instead of stopping the run. Each bounded 95% interval endpoint is refined by
+  Brent's method on real profile solves, and the v1 linear interval is kept as interval_linear (interval
+  method v2, PROFILE_METHOD_VERSION 3).
 - Keys: the data key is jax.random.key(seed), shared by every noise level and variant of a seed (paired
   design); the prior initialization draw comes from fold_in(key, 101) and is shared by M1, M2 and the
   first profile start of that seed.
@@ -39,7 +43,7 @@ import os
 import time
 import traceback
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import asdict, dataclass, fields
+from dataclasses import asdict, dataclass, fields, replace
 from pathlib import Path
 from typing import Any
 
@@ -50,7 +54,7 @@ import numpy as np
 
 from apexpinn.contracts import MetricRecord, load_decisions
 from apexpinn.models.ode_model import ODEModel
-from apexpinn.models.pinn import PINN
+from apexpinn.models.pinn import LATENT_MODES, PINN
 from apexpinn.models.stints import StintBatch, batch_from_synthetic
 from apexpinn.physics.diagnostics import detect_collapse, residual_rms, wear_violation_rate
 from apexpinn.physics.identifiability import (
@@ -58,6 +62,7 @@ from apexpinn.physics.identifiability import (
     S1C_BOUNDS,
     Interval,
     ProfileResult,
+    RefinedSide,
     ThetaLayout,
     gauss_newton_spectrum,
     likelihood_interval,
@@ -65,6 +70,7 @@ from apexpinn.physics.identifiability import (
     ode_mle,
     profile_likelihood,
     profile_shape_label,
+    refine_interval,
     sample_prior_physics,
     sse_deviance,
 )
@@ -84,7 +90,10 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_DECISIONS = "configs/decisions_v1.yaml"
 GROUPS = ("rho", "k", "gamma", "h_opt", "kappa")  # profile order; ThetaLayout order is k, rho, gamma, h_opt
 POSITIVE_GROUPS = ("rho", "k", "gamma", "kappa")  # profiled on a multiplicative grid in log coordinates
-MODELS = ("M1", "M2")
+MODELS = ("M1", "M2", "M2v2")  # M2v2: M2 method version 2, multi-start (PLAN T5 method declarations)
+V1_MODELS = ("M1", "M2")  # the S1b v1 models; StudyConfig.models_main defaults to these
+M2_V2_METHOD_VERSION = 2  # part of every M2v2 fit's config_hash
+M2_V2_SELECTION = "min_final_scored_rms"  # M2v2 keeps the start with the lowest final scored residual RMS
 MISSPEC_STUDY_VARIANTS = ("wrong_phi", "student_t", "piecewise_wear", "drop_early", "traffic")
 RUN_STATUSES = ("ok", "nonfinite", "error")
 DONE_STATUSES = ("ok", "nonfinite")
@@ -98,8 +107,11 @@ CONVERGENCE_TAIL = 0.2  # relative objective change over the last 20% of logged 
 # Key derivation (PLAN T5 method declarations): fold_in offsets of jax.random.key(seed).
 PRIOR_FOLD, NET_FOLD, TRAIN_FOLD, COLLOC_FOLD, START_FOLD = 101, 102, 103, 104, 200
 # Profile method version, part of every profile run's config_hash. 1 = unbounded L-BFGS-B, a failed ODE
-# solve stops the run. 2 = box bounds S1C_BOUNDS and failed-solve handling, declared in PLAN T5.
-PROFILE_METHOD_VERSION = 2
+# solve stops the run. 2 = box bounds S1C_BOUNDS and failed-solve handling, declared in PLAN T5. 3 =
+# interval method v2: bounded endpoints refined by Brent's method on real profile solves (PLAN T5).
+PROFILE_METHOD_VERSION = 3
+REFINE_XTOL = 1e-4  # interval method v2: Brent tolerance in the grid coordinate (log, or logit for h_opt)
+REFINE_MAX_ITER = 30  # interval method v2: at most this many Brent iterations per side
 AT_BOUND_TOL = 1e-9  # a coordinate within this distance of a box edge counts as on the edge
 O6_NAMES = {"rho_c": "rho", "k_c": "k"}
 
@@ -134,7 +146,10 @@ class StudyConfig:
     tolerance holds the O6 recovery tolerances as sorted (group, relative tolerance) pairs, e.g.
     (('k', 0.25), ('rho', 0.15)); groups with a tolerance are recovery-gated (S1b). grid_factors multiply
     the MLE value of positive parameters; h_opt_offsets are added to the MLE h_opt and clipped to
-    [0.02, 0.98]. out_dir and report_path are relative to the repository root.
+    [0.02, 0.98]. out_dir and report_path are relative to the repository root. models_main defaults to the
+    S1b v1 models (V1_MODELS); smoke_config and full_config add 'M2v2', the M2 v2 multi-start fit from
+    m2v2_n_starts prior draws (PLAN T5 method declarations). m1_latent is the PINN latent_mode of M1 fits;
+    only the exploratory M1 diagnostics (apexpinn.train.m1_diag) set it to 'tanh'.
     """
 
     name: str
@@ -158,11 +173,13 @@ class StudyConfig:
     minimize_maxiter: int
     out_dir: str
     report_path: str
-    models_main: tuple[str, ...] = MODELS
+    models_main: tuple[str, ...] = V1_MODELS
     m2_weights: LossWeights = M2_WEIGHTS
     m2_misspec_max_fit_s: float = 600.0
     ode_rtol: float = 1e-6
     ode_atol: float = 1e-6
+    m2v2_n_starts: int = 3
+    m1_latent: str = "linear"
 
     def __post_init__(self) -> None:
         set_ = object.__setattr__
@@ -198,7 +215,7 @@ class StudyConfig:
         if not tol or any(g not in ("rho", "k") or not (np.isfinite(t) and t > 0) for g, t in tol):
             raise ValueError(f"tolerance must be (group, > 0) pairs with groups 'rho' and 'k', got {tol!r}")
         set_(self, "tolerance", tol)
-        for name in ("m1_width", "m1_depth", "n_starts", "minimize_maxiter"):
+        for name in ("m1_width", "m1_depth", "n_starts", "minimize_maxiter", "m2v2_n_starts"):
             value = getattr(self, name)
             minimum = 0 if name == "m1_depth" else 1
             if isinstance(value, bool) or not isinstance(value, int) or value < minimum:
@@ -222,6 +239,8 @@ class StudyConfig:
         for name in ("out_dir", "report_path"):
             if not isinstance(getattr(self, name), str) or not getattr(self, name):
                 raise ValueError(f"{name} must be a non-empty relative path string")
+        if self.m1_latent not in LATENT_MODES:
+            raise ValueError(f"m1_latent must be one of {LATENT_MODES}, got {self.m1_latent!r}")
 
     @property
     def tolerance_map(self) -> dict[str, float]:
@@ -281,11 +300,13 @@ def smoke_config(decisions_path: str | Path = DEFAULT_DECISIONS) -> StudyConfig:
         minimize_maxiter=100,
         out_dir="experiments/s1_smoke",
         report_path="reports/s1_identifiability_smoke.md",
+        models_main=MODELS,
+        m2v2_n_starts=2,
     )
 
 
 def full_config(decisions_path: str | Path = DEFAULT_DECISIONS) -> StudyConfig:
-    """The S1 study of PLAN T5: O6 seeds and noise levels, M1 and M2, all five profiled parameters."""
+    """The S1 study of PLAN T5: O6 seeds and noise levels, M1, M2 and M2v2, all five profiled parameters."""
     seeds, noise, tolerance = _o6(decisions_path)
     return StudyConfig(
         name="full",
@@ -311,6 +332,8 @@ def full_config(decisions_path: str | Path = DEFAULT_DECISIONS) -> StudyConfig:
         minimize_maxiter=500,
         out_dir="experiments/s1",
         report_path="reports/s1_identifiability.md",
+        models_main=MODELS,
+        m2v2_n_starts=3,
     )
 
 
@@ -323,7 +346,7 @@ class RunSpec:
 
     part: str  # 'main' | 'misspec'
     kind: str  # 'fit' | 'profile'
-    model: str | None  # 'M1' | 'M2' for fits, None for profiles
+    model: str | None  # 'M1' | 'M2' | 'M2v2' for fits, None for profiles
     variant: str  # 'well_specified' for main
     noise_s: float
     seed: int
@@ -568,9 +591,13 @@ def _settings(cfg: StudyConfig, spec: RunSpec) -> dict[str, Any]:
 
     Every run also hashes the data and initialization code it depends on: the source digest of the
     generator and the residual equations, the variant's Misspecification fields, PRIOR_RANGES and the key
-    fold offsets. Profile runs also hash the optimizer box S1C_BOUNDS, the ODE max_steps and
-    PROFILE_METHOD_VERSION. The O6 tolerance is not hashed: the report recomputes recovery from
-    rel_error, so a tolerance edit needs no rerun.
+    fold offsets. Profile runs also hash the optimizer box S1C_BOUNDS, the ODE max_steps,
+    PROFILE_METHOD_VERSION and the interval method v2 settings REFINE_XTOL and REFINE_MAX_ITER. M2v2 fits
+    hash the M2 settings under the key 'm2v2' plus m2v2_n_starts, the selection rule and
+    M2_V2_METHOD_VERSION; the 'm1' and 'm2' blocks of the v1 fits are unchanged, so their hashes are too.
+    An M1 fit with a non-default m1_latent adds the key 'latent' to its 'm1' block.
+    The O6 tolerance is not hashed: the report recomputes recovery from rel_error, so a tolerance edit
+    needs no rerun.
     """
     settings: dict[str, Any] = {
         "schema": SCHEMA_VERSION,
@@ -598,12 +625,24 @@ def _settings(cfg: StudyConfig, spec: RunSpec) -> dict[str, Any]:
                 "train": asdict(cfg.m1_train),
                 "weights": asdict(cfg.m1_weights),
             }
-        else:
+            if cfg.m1_latent != "linear":  # only when set, so the v1 M1 hashes are unchanged
+                settings["m1"]["latent"] = cfg.m1_latent
+        elif spec.model == "M2":
             settings["m2"] = {
                 "train": asdict(cfg.m2_train),
                 "weights": asdict(cfg.m2_weights),
                 "rtol": cfg.ode_rtol,
                 "atol": cfg.ode_atol,
+            }
+        else:  # M2v2: the M2 setup from m2v2_n_starts prior draws (PLAN T5 method declarations)
+            settings["m2v2"] = {
+                "train": asdict(cfg.m2_train),
+                "weights": asdict(cfg.m2_weights),
+                "rtol": cfg.ode_rtol,
+                "atol": cfg.ode_atol,
+                "n_starts": cfg.m2v2_n_starts,
+                "selection": M2_V2_SELECTION,
+                "method_version": M2_V2_METHOD_VERSION,
             }
     else:
         settings["profile"] = {
@@ -619,6 +658,8 @@ def _settings(cfg: StudyConfig, spec: RunSpec) -> dict[str, Any]:
             "bounds": {g: list(v) for g, v in sorted(S1C_BOUNDS.items())},
             "max_steps": _ode_max_steps(),
             "method_version": PROFILE_METHOD_VERSION,
+            "refine_xtol": REFINE_XTOL,
+            "refine_max_iter": REFINE_MAX_ITER,
         }
     return settings
 
@@ -708,6 +749,15 @@ _DIAG_QUANTITY = {
 }
 
 
+def _rel_errors(estimates: Mapping[str, float], truth: Mapping[str, float]) -> dict[str, float | None]:
+    """(estimate - truth) / truth per name, None where the estimate is not finite."""
+    out: dict[str, float | None] = {}
+    for n, v in estimates.items():
+        finite = v is not None and math.isfinite(float(v))
+        out[n] = (float(v) - float(truth[n])) / float(truth[n]) if finite else None
+    return out
+
+
 def build_fit_record(
     cfg: StudyConfig,
     spec: RunSpec,
@@ -728,10 +778,8 @@ def build_fit_record(
     if spec.kind != "fit":
         raise ValueError(f"spec must be a fit run, got kind {spec.kind!r}")
     tol = cfg.tolerance_map
-    finite = {n: v is not None and math.isfinite(float(v)) for n, v in estimates.items()}
-    rel_error = {
-        n: (float(estimates[n]) - float(truth[n])) / float(truth[n]) if finite[n] else None for n in estimates
-    }
+    rel_error = _rel_errors(estimates, truth)
+    finite = {n: rel_error[n] is not None for n in estimates}
     recovered = {
         n: rel_error[n] is not None and abs(rel_error[n]) <= tol[group_of(n)]
         for n in estimates
@@ -739,11 +787,21 @@ def build_fit_record(
     }
     train_cfg = cfg.m1_train if spec.model == "M1" else cfg.m2_train
     population = _population(cfg, spec, n_scored)
+    if spec.model == "M2v2":
+        init = (
+            f"init from {cfg.m2v2_n_starts} prior draws (start 0 fold_in(key({spec.seed}), {PRIOR_FOLD}), "
+            f"start i fold_in(key({spec.seed}), {START_FOLD} + i)), selection by lowest final scored "
+            "residual RMS"
+        )
+    else:
+        init = f"init from the prior draw fold_in(key({spec.seed}), {PRIOR_FOLD})"
     conditions = (
-        f"noise_s={spec.noise_s:g} s, lap time only, init from the prior draw fold_in(key({spec.seed}), "
-        f"{PRIOR_FOLD}), model={spec.model}, TrainConfig({asdict(train_cfg)}), "
+        f"noise_s={spec.noise_s:g} s, lap time only, {init}, model={spec.model}, "
+        f"TrainConfig({asdict(train_cfg)}), "
         f"dtype={'float64' if train_cfg.float64 else 'float32'}, device={_device()}"
     )
+    if spec.model == "M1" and cfg.m1_latent != "linear":
+        conditions += f", latent_mode={cfg.m1_latent}"
     model_name = "apexpinn.models.pinn.PINN" if spec.model == "M1" else "apexpinn.models.ode_model.ODEModel"
     instrument = f"apexpinn.train.s1_study.run_fit, apexpinn.train.trainer.train, {model_name}"
     records = [
@@ -788,6 +846,8 @@ def build_profile_record(
     """Profile record: MLE, Gauss-Newton spectrum, per-parameter profiles and intervals, records.
 
     status is 'nonfinite' if the MLE, the spectrum or any profile shape could not be computed.
+    wall_time_s from run_profile holds 'mle', 'spectrum', 'profiles' (coarse profiles plus refinement),
+    'refine' (the part of 'profiles' spent in refine_interval) and 'total'.
     """
     if spec.kind != "profile":
         raise ValueError(f"spec must be a profile run, got kind {spec.kind!r}")
@@ -802,12 +862,15 @@ def build_profile_record(
         f"noise_s={spec.noise_s:g} s, lap time only, exact ODE likelihood with b_s concentrated out, "
         f"log / logit coordinates, MLE from {cfg.n_starts} start(s) (start 0 = prior draw fold_in(key("
         f"{spec.seed}), {PRIOR_FOLD})), L-BFGS-B maxiter={cfg.minimize_maxiter}, free coordinates "
-        f"inside S1C_BOUNDS, profile method v{PROFILE_METHOD_VERSION}, rtol={cfg.ode_rtol:g}, "
-        f"atol={cfg.ode_atol:g}, max_steps={_ode_max_steps()}, device={_device()}"
+        f"inside S1C_BOUNDS, profile method v{PROFILE_METHOD_VERSION}, interval method v2 (brentq, "
+        f"xtol {REFINE_XTOL:g}, at most {REFINE_MAX_ITER} iterations per side; v1 linear interval kept "
+        f"as interval_linear), rtol={cfg.ode_rtol:g}, atol={cfg.ode_atol:g}, "
+        f"max_steps={_ode_max_steps()}, device={_device()}"
     )
     instrument = (
         "apexpinn.train.s1_study.run_profile, apexpinn.physics.identifiability "
-        "(ode_least_squares, ode_mle, profile_likelihood, likelihood_interval, gauss_newton_spectrum)"
+        "(ode_least_squares, ode_mle, profile_likelihood, likelihood_interval, refine_interval, "
+        "gauss_newton_spectrum)"
     )
     records = []
     for name, prof in profiles.items():
@@ -875,8 +938,74 @@ def m1_physics_diagnostics(model: PINN, batch: StintBatch, key: jax.Array, train
     }
 
 
+def select_start(rms: Sequence[float | None]) -> int:
+    """Index of the start with the lowest finite final scored residual RMS (M2 v2 selection).
+
+    Non-finite or None values are ignored, ties go to the lowest index, and 0 is returned when no value is
+    finite. The selection reads only the residual RMS, never the truth (PLAN T5, `M2` v2).
+    """
+    best: int | None = None
+    for i, value in enumerate(rms):
+        if value is None or not math.isfinite(float(value)):
+            continue
+        if best is None or float(value) < float(rms[best]):
+            best = i
+    return 0 if best is None else best
+
+
+def m2v2_starts(cfg: StudyConfig, seed: int) -> list[PhysicsParams]:
+    """Initial Theta of each M2 v2 start: start 0 the seed's prior draw, start i the profile MLE start i."""
+    extra = [sample_prior_physics(start_key(seed, i)) for i in range(1, cfg.m2v2_n_starts)]
+    return [prior_physics(seed), *extra]
+
+
+def _fit_diagnostics(cfg: StudyConfig, spec: RunSpec, fitted: Any) -> dict[str, Any]:
+    """Final scored residual RMS, residual ratio and collapse flags of a fitted M1 or M2 model."""
+    rms = float(fitted.noise_s)
+    flagged = detect_collapse(fitted.physics).flagged
+    return {
+        "scored_residual_rms_s": rms,
+        "residual_ratio": rms / spec.noise_s if spec.noise_s > 0 else None,
+        "collapse_flags": [f for f in flagged if any(f.endswith(f"[{c}]") for c in cfg.compounds)],
+    }
+
+
+def _convergence(log: Any) -> dict[str, Any]:
+    """Convergence block of a fit record from a trainer log."""
+    return {
+        "steps": log.steps,
+        "objective": log.objective,
+        "normalized": log.normalized,
+        "objective_rel_change_last20": objective_rel_change(log.objective),
+    }
+
+
+def _train_ode(
+    cfg: StudyConfig, spec: RunSpec, batch: StintBatch, physics: PhysicsParams
+) -> tuple[Any, Any]:
+    """Train the M2 setup (ODEModel, m2_train, m2_weights) from physics with the seed's train key."""
+    model = ODEModel.init(
+        physics=physics,
+        train_cfg=cfg.m2_train,
+        weights=cfg.m2_weights,
+        rtol=cfg.ode_rtol,
+        atol=cfg.ode_atol,
+    )
+    return train(model, batch, cfg.m2_weights, cfg.m2_train, train_key(spec.seed))
+
+
 def run_fit(cfg: StudyConfig, spec: RunSpec) -> dict:
-    """Train M1 or M2 on one dataset from the seed's prior draw and build the fit record."""
+    """Train M1, M2 or M2v2 on one dataset and build the fit record.
+
+    M1 and M2 start from the seed's prior draw. M2v2 trains the M2 setup from each start of m2v2_starts
+    (same train key) and keeps the start select_start picks from the final scored residual RMS; the
+    record holds that start's estimates, diagnostics and convergence, plus diagnostics['starts'] (per
+    start: index, scored_residual_rms_s, residual_ratio, objective_rel_change_last20, fit_s, estimates,
+    rel_error) and diagnostics['selected_start']. The per-start rel_error is context only: it is computed
+    after the selection and never used by it. wall_time_s['fit'] is the sum over starts.
+    """
+    if spec.model == "M2v2":
+        return _run_fit_m2v2(cfg, spec)
     start = time.perf_counter()
     ds = dataset_for(cfg, spec)
     batch = batch_from_synthetic(ds)
@@ -890,29 +1019,15 @@ def run_fit(cfg: StudyConfig, spec: RunSpec) -> dict:
             physics=prior,
             train_cfg=train_cfg,
             weights=weights,
+            latent_mode=cfg.m1_latent,
         )
+        fitted, log = train(model, batch, weights, train_cfg, train_key(spec.seed))
     else:
-        train_cfg, weights = cfg.m2_train, cfg.m2_weights
-        model = ODEModel.init(
-            physics=prior, train_cfg=train_cfg, weights=weights, rtol=cfg.ode_rtol, atol=cfg.ode_atol
-        )
-    fitted, log = train(model, batch, weights, train_cfg, train_key(spec.seed))
+        fitted, log = _train_ode(cfg, spec, batch, prior)
 
-    rms = float(fitted.noise_s)
-    flagged = detect_collapse(fitted.physics).flagged
-    diagnostics: dict[str, Any] = {
-        "scored_residual_rms_s": rms,
-        "residual_ratio": rms / spec.noise_s if spec.noise_s > 0 else None,
-        "collapse_flags": [f for f in flagged if any(f.endswith(f"[{c}]") for c in cfg.compounds)],
-    }
+    diagnostics = _fit_diagnostics(cfg, spec, fitted)
     if spec.model == "M1":
-        diagnostics.update(m1_physics_diagnostics(fitted, batch, colloc_key(spec.seed), train_cfg))
-    convergence = {
-        "steps": log.steps,
-        "objective": log.objective,
-        "normalized": log.normalized,
-        "objective_rel_change_last20": objective_rel_change(log.objective),
-    }
+        diagnostics.update(m1_physics_diagnostics(fitted, batch, colloc_key(spec.seed), cfg.m1_train))
     return build_fit_record(
         cfg,
         spec,
@@ -920,8 +1035,49 @@ def run_fit(cfg: StudyConfig, spec: RunSpec) -> dict:
         truth=variant_truth(ds, cfg.compounds),
         n_scored=int(np.asarray(batch.mask).sum()),
         diagnostics=diagnostics,
-        convergence=convergence,
+        convergence=_convergence(log),
         wall_time_s={"fit": float(log.wall_time_s), "total": time.perf_counter() - start},
+    )
+
+
+def _run_fit_m2v2(cfg: StudyConfig, spec: RunSpec) -> dict:
+    """M2 v2 multi-start fit (run_fit). Selection by select_start before the truth is read."""
+    start = time.perf_counter()
+    ds = dataset_for(cfg, spec)
+    batch = batch_from_synthetic(ds)
+    runs = [_train_ode(cfg, spec, batch, physics) for physics in m2v2_starts(cfg, spec.seed)]
+    selected = select_start([float(fitted.noise_s) for fitted, _ in runs])
+    truth = variant_truth(ds, cfg.compounds)
+    starts = []
+    for i, (fitted, log) in enumerate(runs):
+        diag = _fit_diagnostics(cfg, spec, fitted)
+        estimates = theta_values(fitted.physics, cfg.compounds)
+        starts.append(
+            {
+                "index": i,
+                "scored_residual_rms_s": diag["scored_residual_rms_s"],
+                "residual_ratio": diag["residual_ratio"],
+                "objective_rel_change_last20": objective_rel_change(log.objective),
+                "fit_s": float(log.wall_time_s),
+                "estimates": estimates,
+                "rel_error": _rel_errors(estimates, truth),
+            }
+        )
+    fitted, log = runs[selected]
+    diagnostics = _fit_diagnostics(cfg, spec, fitted)
+    diagnostics.update(starts=starts, selected_start=selected, selection=M2_V2_SELECTION)
+    return build_fit_record(
+        cfg,
+        spec,
+        estimates=theta_values(fitted.physics, cfg.compounds),
+        truth=truth,
+        n_scored=int(np.asarray(batch.mask).sum()),
+        diagnostics=diagnostics,
+        convergence=_convergence(log),
+        wall_time_s={
+            "fit": float(sum(float(lg.wall_time_s) for _, lg in runs)),
+            "total": time.perf_counter() - start,
+        },
     )
 
 
@@ -949,8 +1105,9 @@ def _to_natural(group: str, coord: float) -> float:
 class ProfileRunError(RuntimeError):
     """run_profile failed. partial is a JSON-safe dict of what was computed before the failure.
 
-    Keys: phase ('dataset', 'mle', 'sse_truth', 'spectrum' or 'profile'), param (the profiled layout name,
-    or None), mle and spectrum (None until computed), profiles (the finished profile entries), and point
+    Keys: phase ('dataset', 'mle', 'sse_truth', 'spectrum', 'profile' or 'refine', the interval method v2
+    refinement of one profile), param (the profiled layout name, or None), mle and spectrum (None until
+    computed), profiles (the finished profile entries), and point
     (the failing profile's ProfilePointError.partial: grid, grid_coord, sse, success, failed,
     n_failed_evals; None if the exception carried none). The original exception is __cause__.
     """
@@ -971,6 +1128,44 @@ def _on_box_edge(
     return out
 
 
+def _profile_deviance(prof: ProfileResult, sse_fit: float, n_obs: int) -> tuple[np.ndarray, float] | None:
+    """(deviance per grid point, sse_min) of one profile, or None when no grid point has a usable SSE.
+
+    sse_min is the lower of the profile minimum and the MLE SSE. Failed points get no deviance (NaN).
+    """
+    usable_sse = np.isfinite(prof.loss) & (prof.loss > 0)
+    if not np.any(usable_sse):
+        return None
+    sse_min = min(float(np.min(prof.loss[usable_sse])), sse_fit)
+    deviance = np.full(prof.loss.shape, np.nan)
+    deviance[usable_sse] = sse_deviance(prof.loss[usable_sse], n_obs, sse_min=sse_min)
+    return deviance, sse_min
+
+
+def _natural_interval(group: str, iv: Interval) -> Interval:
+    """iv with its endpoints moved from the grid coordinate to natural units (flags unchanged)."""
+    return replace(iv, lo=_to_natural(group, iv.lo), hi=_to_natural(group, iv.hi))
+
+
+def _side_entry(group: str, side: RefinedSide) -> dict[str, Any]:
+    """Record entry of one refined interval side: outcome, counts and every evaluation."""
+    return {
+        "refined": side.refined,
+        "reason": side.reason,
+        "n_evals": side.n_evals,
+        "n_unconverged": side.n_unconverged,
+        "coord": side.coord,
+        "value": _to_natural(group, side.coord),
+        "points": {
+            "coord": side.coords,
+            "value": [_to_natural(group, float(c)) for c in side.coords],
+            "sse": side.sse,
+            "deviance": side.deviance,
+            "success": side.success,
+        },
+    }
+
+
 def _profile_entry(
     prof: ProfileResult,
     *,
@@ -984,9 +1179,16 @@ def _profile_entry(
     n_obs: int,
     bounds: Sequence[tuple[float, float]],
     names: Sequence[str],
+    refined: tuple[Interval, RefinedSide, RefinedSide] | None = None,
 ) -> dict[str, Any]:
     """Record entry of one profile. Failed points get no deviance (NaN); they enter likelihood_interval,
-    which treats a failed point met before the threshold crossing as an unbounded side."""
+    which treats a failed point met before the threshold crossing as an unbounded side.
+
+    refined is the refine_interval result in grid coordinates (interval method v2). With it, 'interval'
+    is the v2 interval, 'interval_linear' the v1 linear interval, 'interval_method' 'v2_refined', and
+    'refinement' holds both sides (_side_entry). Without it, 'interval' is the v1 linear interval and
+    'interval_method' is 'v1_linear'. shape and covers_truth use 'interval'.
+    """
     entry: dict[str, Any] = {
         "group": group,
         "grid": natural,
@@ -1002,29 +1204,27 @@ def _profile_entry(
         "shape": None,
         "covers_truth": None,
     }
-    usable_sse = np.isfinite(prof.loss) & (prof.loss > 0)
-    if not np.any(usable_sse):
+    dev = _profile_deviance(prof, sse_fit, n_obs)
+    if dev is None:
         return entry
-    sse_min = min(float(np.min(prof.loss[usable_sse])), sse_fit)
-    deviance = np.full(prof.loss.shape, np.nan)
-    deviance[usable_sse] = sse_deviance(prof.loss[usable_sse], n_obs, sse_min=sse_min)
-    iv = likelihood_interval(coord, deviance)
-    lo, hi = _to_natural(group, iv.lo), _to_natural(group, iv.hi)
-    natural_iv = Interval(
-        lo=lo,
-        hi=hi,
-        lo_bounded=iv.lo_bounded,
-        hi_bounded=iv.hi_bounded,
-        threshold=iv.threshold,
-        lo_failed=iv.lo_failed,
-        hi_failed=iv.hi_failed,
-    )
+    deviance, sse_min = dev
+    linear = _natural_interval(group, likelihood_interval(coord, deviance))
+    if refined is None:
+        final, method = linear, "v1_linear"
+    else:
+        final, method = _natural_interval(group, refined[0]), "v2_refined"
+        entry.update(
+            interval_linear=asdict(linear),
+            refinement={"lo": _side_entry(group, refined[1]), "hi": _side_entry(group, refined[2])},
+        )
+    covers = (not final.lo_bounded or final.lo <= truth) and (not final.hi_bounded or truth <= final.hi)
     entry.update(
         deviance=deviance,
         sse_min=sse_min,
-        interval=asdict(natural_iv),
-        shape=profile_shape_label(natural_iv, truth),
-        covers_truth=(not iv.lo_bounded or lo <= truth) and (not iv.hi_bounded or truth <= hi),
+        interval=asdict(final),
+        interval_method=method,
+        shape=profile_shape_label(final, truth),
+        covers_truth=covers,
     )
     return entry
 
@@ -1035,8 +1235,11 @@ def run_profile(cfg: StudyConfig, spec: RunSpec) -> dict:
     One jitted value_and_grad of the SSE (eqx.filter_jit, so equinox runtime errors stay readable) is
     built per dataset and shared by the MLE and every profile, so the Diffrax gradient compiles once.
     The MLE and every profile solve keep the free coordinates inside S1C_BOUNDS; a failed ODE solve gives
-    a non-finite SSE, which the optimizers back off from (PLAN T5 method declarations). Any exception is
-    re-raised as ProfileRunError naming the phase (and the profiled parameter) with the partial results.
+    a non-finite SSE, which the optimizers back off from (PLAN T5 method declarations). Each bounded 95%
+    interval endpoint is then refined by refine_interval with the same value_and_grad, box and maxiter
+    (interval method v2); wall_time_s['refine'] is the part of wall_time_s['profiles'] it took. Any
+    exception is re-raised as ProfileRunError naming the phase (and the profiled parameter) with the
+    partial results.
     """
     state: dict[str, Any] = {"phase": "dataset", "param": None, "grid": None}
     done: dict[str, Any] = {"mle": None, "spectrum": None, "profiles": {}}
@@ -1110,7 +1313,7 @@ def _run_profile(cfg: StudyConfig, spec: RunSpec, state: dict[str, Any], done: d
             truth=truth,
             sse_truth=sse_truth,
             n_obs=n_obs,
-            wall_time_s={"mle": elapsed, "spectrum": 0.0, "profiles": 0.0, "total": elapsed},
+            wall_time_s={"mle": elapsed, "spectrum": 0.0, "profiles": 0.0, "refine": 0.0, "total": elapsed},
         )
 
     state["phase"] = "spectrum"
@@ -1126,6 +1329,7 @@ def _run_profile(cfg: StudyConfig, spec: RunSpec, state: dict[str, Any], done: d
 
     state["phase"] = "profile"
     profiles: dict[str, dict[str, Any]] = done["profiles"]
+    t_refine = 0.0
     for group in GROUPS:
         if group not in cfg.profile_params:
             continue
@@ -1143,6 +1347,27 @@ def _run_profile(cfg: StudyConfig, spec: RunSpec, state: dict[str, Any], done: d
                 value_and_grad=value_and_grad,
                 bounds=bounds,
             )
+            refined = None
+            dev = _profile_deviance(prof, fit.sse, n_obs)
+            if dev is not None:
+                state["phase"] = "refine"
+                t_ref = time.perf_counter()
+                deviance, sse_min = dev
+                refined = refine_interval(
+                    value_and_grad,
+                    prof,
+                    index,
+                    likelihood_interval(coord, deviance),
+                    deviance,
+                    sse_min=sse_min,
+                    n_obs=n_obs,
+                    bounds=bounds,
+                    maxiter=cfg.minimize_maxiter,
+                    xtol=REFINE_XTOL,
+                    max_iter=REFINE_MAX_ITER,
+                )
+                t_refine += time.perf_counter() - t_ref
+                state["phase"] = "profile"
             profiles[name] = _profile_entry(
                 prof,
                 group=group,
@@ -1155,11 +1380,12 @@ def _run_profile(cfg: StudyConfig, spec: RunSpec, state: dict[str, Any], done: d
                 n_obs=n_obs,
                 bounds=bounds,
                 names=layout.names,
+                refined=refined,
             )
     state.update(param=None, grid=None)
     t_end = time.perf_counter()
     wall_time_s = {"mle": t_mle - t0, "spectrum": t_spec - t_mle, "profiles": t_end - t_spec}
-    wall_time_s["total"] = t_end - t0
+    wall_time_s.update(refine=t_refine, total=t_end - t0)
     return build_profile_record(
         cfg,
         spec,
