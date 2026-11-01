@@ -1,6 +1,6 @@
 # S1 identifiability study (PLAN T5), full config
 
-Built from 40 run records in `experiments/s1/` by `apexpinn.eval.s1_report`. Every number is `Observed`, read from the record named by its run id. Labels and criterion outcomes apply the rules declared in PLAN T5 to those numbers. Config: 48 stints, compounds ['C2', 'C3', 'C4'], seeds [0, 1, 2, 3, 4], noise [0.05, 0.15] s, models ['M1', 'M2', 'M2v2'].
+Built from 85 run records in `experiments/s1/` by `apexpinn.eval.s1_report`. Every number is `Observed`, read from the record named by its run id. Labels and criterion outcomes apply the rules declared in PLAN T5 to those numbers. Config: 48 stints, compounds ['C2', 'C3', 'C4'], seeds [0, 1, 2, 3, 4], noise [0.05, 0.15] s, models ['M1', 'M2', 'M2v2'].
 
 ## S1b recovery
 
@@ -334,31 +334,31 @@ Declared clarifications (PLAN T5 method declarations, verbatim):
 
 | Variant | Model | Criterion 1 | Criterion 2 | Criterion 3 | Criterion 4 |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| wrong_phi | M1 | governed_by_criterion_4 | missing | missing | missing |
-| wrong_phi | M2 | missing | missing | missing | missing |
-| student_t | M1 | not_applicable | missing | missing | not_applicable |
-| student_t | M2 | missing | missing | missing | not_applicable |
-| piecewise_wear | M1 | not_applicable | missing | missing | not_applicable |
-| piecewise_wear | M2 | missing | missing | missing | not_applicable |
-| drop_early | M1 | not_applicable | missing | missing | not_applicable |
-| drop_early | M2 | missing | missing | missing | not_applicable |
-| traffic | M1 | not_applicable | missing | missing | not_applicable |
-| traffic | M2 | missing | missing | missing | not_applicable |
+| wrong_phi | M1 | governed_by_criterion_4 | fail | pass | fail |
+| wrong_phi | M2 | pass | fail | pass | fail |
+| student_t | M1 | not_applicable | pass | pass | not_applicable |
+| student_t | M2 | pass | pass | pass | not_applicable |
+| piecewise_wear | M1 | not_applicable | fail | pass | not_applicable |
+| piecewise_wear | M2 | fail | fail | pass | not_applicable |
+| drop_early | M1 | not_applicable | pass | pass | not_applicable |
+| drop_early | M2 | pass | pass | pass | not_applicable |
+| traffic | M1 | not_applicable | fail | pass | not_applicable |
+| traffic | M2 | pass | fail | pass | not_applicable |
 
 ### Details
 
 Criterion 2 lists each seed's misspecification profile shape next to coverage, because an open interval side counts as covering; `*` marks a shape that rests on an unconverged profile point.
 
-- **wrong_phi / M1**: C1 rho_c[C2]: governed_by_criterion_4; C1 rho_c[C3]: governed_by_criterion_4; C1 rho_c[C4]: governed_by_criterion_4; C1 k_c[C2]: not_applicable; C1 k_c[C3]: not_applicable; C1 k_c[C4]: not_applicable; C2 rho_c[C2]: not_applicable; C2 rho_c[C3]: not_applicable; C2 rho_c[C4]: not_applicable; C2 k_c[C2]: not_applicable; C2 k_c[C3]: not_applicable; C2 k_c[C4]: not_applicable; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing; C4 rho_c[C2]: missing; C4 rho_c[C3]: missing; C4 rho_c[C4]: missing.
-- **wrong_phi / M2**: C1 rho_c[C2]: governed_by_criterion_4; C1 rho_c[C3]: governed_by_criterion_4; C1 rho_c[C4]: governed_by_criterion_4; C1 k_c[C2]: not_applicable; C1 k_c[C3]: missing; C1 k_c[C4]: not_applicable; C2 rho_c[C2]: not_applicable; C2 rho_c[C3]: missing; C2 rho_c[C4]: missing; C2 k_c[C2]: not_applicable; C2 k_c[C3]: missing; C2 k_c[C4]: not_applicable; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing; C4 rho_c[C2]: missing; C4 rho_c[C3]: missing; C4 rho_c[C4]: missing.
-- **student_t / M1**: C1 rho_c[C2]: not_applicable; C1 rho_c[C3]: not_applicable; C1 rho_c[C4]: not_applicable; C1 k_c[C2]: not_applicable; C1 k_c[C3]: not_applicable; C1 k_c[C4]: not_applicable; C2 rho_c[C2]: not_applicable; C2 rho_c[C3]: not_applicable; C2 rho_c[C4]: not_applicable; C2 k_c[C2]: not_applicable; C2 k_c[C3]: not_applicable; C2 k_c[C4]: not_applicable; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
-- **student_t / M2**: C1 rho_c[C2]: not_applicable; C1 rho_c[C3]: missing; C1 rho_c[C4]: missing; C1 k_c[C2]: not_applicable; C1 k_c[C3]: missing; C1 k_c[C4]: not_applicable; C2 rho_c[C2]: not_applicable; C2 rho_c[C3]: missing; C2 rho_c[C4]: missing; C2 k_c[C2]: not_applicable; C2 k_c[C3]: missing; C2 k_c[C4]: not_applicable; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
-- **piecewise_wear / M1**: C1 rho_c[C2]: not_applicable; C1 rho_c[C3]: not_applicable; C1 rho_c[C4]: not_applicable; C1 k_c[C2]: not_applicable; C1 k_c[C3]: not_applicable; C1 k_c[C4]: not_applicable; C2 rho_c[C2]: not_applicable; C2 rho_c[C3]: not_applicable; C2 rho_c[C4]: not_applicable; C2 k_c[C2]: not_applicable; C2 k_c[C3]: not_applicable; C2 k_c[C4]: not_applicable; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
-- **piecewise_wear / M2**: C1 rho_c[C2]: not_applicable; C1 rho_c[C3]: missing; C1 rho_c[C4]: missing; C1 k_c[C2]: not_applicable; C1 k_c[C3]: missing; C1 k_c[C4]: not_applicable; C2 rho_c[C2]: not_applicable; C2 rho_c[C3]: missing; C2 rho_c[C4]: missing; C2 k_c[C2]: not_applicable; C2 k_c[C3]: missing; C2 k_c[C4]: not_applicable; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
-- **drop_early / M1**: C1 rho_c[C2]: not_applicable; C1 rho_c[C3]: not_applicable; C1 rho_c[C4]: not_applicable; C1 k_c[C2]: not_applicable; C1 k_c[C3]: not_applicable; C1 k_c[C4]: not_applicable; C2 rho_c[C2]: not_applicable; C2 rho_c[C3]: not_applicable; C2 rho_c[C4]: not_applicable; C2 k_c[C2]: not_applicable; C2 k_c[C3]: not_applicable; C2 k_c[C4]: not_applicable; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
-- **drop_early / M2**: C1 rho_c[C2]: not_applicable; C1 rho_c[C3]: missing; C1 rho_c[C4]: missing; C1 k_c[C2]: not_applicable; C1 k_c[C3]: missing; C1 k_c[C4]: not_applicable; C2 rho_c[C2]: not_applicable; C2 rho_c[C3]: missing; C2 rho_c[C4]: missing; C2 k_c[C2]: not_applicable; C2 k_c[C3]: missing; C2 k_c[C4]: not_applicable; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
-- **traffic / M1**: C1 rho_c[C2]: not_applicable; C1 rho_c[C3]: not_applicable; C1 rho_c[C4]: not_applicable; C1 k_c[C2]: not_applicable; C1 k_c[C3]: not_applicable; C1 k_c[C4]: not_applicable; C2 rho_c[C2]: not_applicable; C2 rho_c[C3]: not_applicable; C2 rho_c[C4]: not_applicable; C2 k_c[C2]: not_applicable; C2 k_c[C3]: not_applicable; C2 k_c[C4]: not_applicable; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
-- **traffic / M2**: C1 rho_c[C2]: not_applicable; C1 rho_c[C3]: missing; C1 rho_c[C4]: missing; C1 k_c[C2]: not_applicable; C1 k_c[C3]: missing; C1 k_c[C4]: not_applicable; C2 rho_c[C2]: not_applicable; C2 rho_c[C3]: missing; C2 rho_c[C4]: missing; C2 k_c[C2]: not_applicable; C2 k_c[C3]: missing; C2 k_c[C4]: not_applicable; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
+- **wrong_phi / M1**: C1 rho_c[C2]: governed_by_criterion_4; C1 rho_c[C3]: governed_by_criterion_4; C1 rho_c[C4]: governed_by_criterion_4; C1 k_c[C2]: not_applicable; C1 k_c[C3]: not_applicable; C1 k_c[C4]: not_applicable; C2 rho_c[C2]: not_applicable; C2 rho_c[C3]: not_applicable; C2 rho_c[C4]: not_applicable; C2 k_c[C2]: not_applicable; C2 k_c[C3]: not_applicable; C2 k_c[C4]: not_applicable; C2 gamma_c[C2]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp); C2 gamma_c[C3]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp); C2 gamma_c[C4]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp); C2 h_opt_c[C2]: fail (covered on 1 of 3 seeds; shapes sharp, sharp, sharp); C2 h_opt_c[C3]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp); C2 h_opt_c[C4]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp); C2 kappa: pass (covered on 2 of 3 seeds; shapes sharp, sharp, sharp); C3: pass (residual ratio seed 0 67.177, seed 1 33.694, seed 2 10.404); C4 rho_c[C2]: fail (shifts 0.0424, -0.0059, 0.0335); C4 rho_c[C3]: fail (shifts -0.0405, -0.0671, 0.0344); C4 rho_c[C4]: fail (shifts -0.0409, -0.0090, 0.0406).
+- **wrong_phi / M2**: C1 rho_c[C2]: governed_by_criterion_4; C1 rho_c[C3]: governed_by_criterion_4; C1 rho_c[C4]: governed_by_criterion_4; C1 k_c[C2]: not_applicable; C1 k_c[C3]: pass (errors -1.1%, +0.8%, -12.4%); C1 k_c[C4]: not_applicable; C2 rho_c[C2]: not_applicable; C2 rho_c[C3]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp); C2 rho_c[C4]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp*); C2 k_c[C2]: not_applicable; C2 k_c[C3]: pass (covered on 3 of 3 seeds; shapes sharp*, sharp, sharp); C2 k_c[C4]: not_applicable; C2 gamma_c[C2]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp); C2 gamma_c[C3]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp); C2 gamma_c[C4]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp); C2 h_opt_c[C2]: fail (covered on 1 of 3 seeds; shapes sharp, sharp, sharp); C2 h_opt_c[C3]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp); C2 h_opt_c[C4]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp); C2 kappa: pass (covered on 2 of 3 seeds; shapes sharp, sharp, sharp); C3: pass (residual ratio seed 0 1.664, seed 1 0.964, seed 2 1.000); C4 rho_c[C2]: fail (shifts 0.0059, 0.0100, 0.0100); C4 rho_c[C3]: pass (shifts 0.0100, 0.0101, 0.0100); C4 rho_c[C4]: pass (shifts 0.0103, 0.0083, 0.0099).
+- **student_t / M1**: C1 rho_c[C2]: not_applicable; C1 rho_c[C3]: not_applicable; C1 rho_c[C4]: not_applicable; C1 k_c[C2]: not_applicable; C1 k_c[C3]: not_applicable; C1 k_c[C4]: not_applicable; C2 rho_c[C2]: not_applicable; C2 rho_c[C3]: not_applicable; C2 rho_c[C4]: not_applicable; C2 k_c[C2]: not_applicable; C2 k_c[C3]: not_applicable; C2 k_c[C4]: not_applicable; C2 gamma_c[C2]: pass (covered on 2 of 3 seeds; shapes sharp, sharp, sharp); C2 gamma_c[C3]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp); C2 gamma_c[C4]: pass (covered on 3 of 3 seeds; shapes sharp*, sharp, sharp); C2 h_opt_c[C2]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp*); C2 h_opt_c[C3]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp); C2 h_opt_c[C4]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp); C2 kappa: pass (covered on 2 of 3 seeds; shapes sharp, sharp, sharp); C3: pass (residual ratio seed 0 87.133, seed 1 29.819, seed 2 12.421).
+- **student_t / M2**: C1 rho_c[C2]: not_applicable; C1 rho_c[C3]: pass (errors -1.3%, +0.9%, -1.0%); C1 rho_c[C4]: pass (errors +0.3%, -0.9%, -0.7%); C1 k_c[C2]: not_applicable; C1 k_c[C3]: pass (errors -3.1%, -3.0%, +0.5%); C1 k_c[C4]: not_applicable; C2 rho_c[C2]: not_applicable; C2 rho_c[C3]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp); C2 rho_c[C4]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp*); C2 k_c[C2]: not_applicable; C2 k_c[C3]: pass (covered on 3 of 3 seeds; shapes sharp, sharp*, sharp*); C2 k_c[C4]: not_applicable; C2 gamma_c[C2]: pass (covered on 2 of 3 seeds; shapes sharp, sharp, sharp); C2 gamma_c[C3]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp); C2 gamma_c[C4]: pass (covered on 3 of 3 seeds; shapes sharp*, sharp, sharp); C2 h_opt_c[C2]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp*); C2 h_opt_c[C3]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp); C2 h_opt_c[C4]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp); C2 kappa: pass (covered on 2 of 3 seeds; shapes sharp, sharp, sharp); C3: pass (residual ratio seed 0 1.748, seed 1 0.964, seed 2 0.985).
+- **piecewise_wear / M1**: C1 rho_c[C2]: not_applicable; C1 rho_c[C3]: not_applicable; C1 rho_c[C4]: not_applicable; C1 k_c[C2]: not_applicable; C1 k_c[C3]: not_applicable; C1 k_c[C4]: not_applicable; C2 rho_c[C2]: not_applicable; C2 rho_c[C3]: not_applicable; C2 rho_c[C4]: not_applicable; C2 k_c[C2]: not_applicable; C2 k_c[C3]: not_applicable; C2 k_c[C4]: not_applicable; C2 gamma_c[C2]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp); C2 gamma_c[C3]: fail (covered on 0 of 3 seeds; shapes sharp*, sharp, sharp); C2 gamma_c[C4]: fail (covered on 1 of 3 seeds; shapes sharp, sharp, sharp); C2 h_opt_c[C2]: fail (covered on 1 of 3 seeds; shapes sharp, sharp, sharp); C2 h_opt_c[C3]: fail (covered on 0 of 3 seeds; shapes sharp, wide, sharp); C2 h_opt_c[C4]: fail (covered on 1 of 3 seeds; shapes sharp, sharp, sharp); C2 kappa: pass (covered on 3 of 3 seeds; shapes flat*, flat, flat); C3: pass (residual ratio seed 0 89.607, seed 1 19.240, seed 2 9.980).
+- **piecewise_wear / M2**: C1 rho_c[C2]: not_applicable; C1 rho_c[C3]: fail (errors +27.1%, +31.2%, +25.4%); C1 rho_c[C4]: fail (errors +31.8%, +20.9%, +24.8%); C1 k_c[C2]: not_applicable; C1 k_c[C3]: fail (errors -50.7%, -44.4%, -44.4%); C1 k_c[C4]: not_applicable; C2 rho_c[C2]: not_applicable; C2 rho_c[C3]: fail (covered on 0 of 3 seeds; shapes sharp*, sharp, sharp*); C2 rho_c[C4]: fail (covered on 0 of 3 seeds; shapes sharp, sharp, sharp); C2 k_c[C2]: not_applicable; C2 k_c[C3]: fail (covered on 0 of 3 seeds; shapes wide, wide, wide); C2 k_c[C4]: not_applicable; C2 gamma_c[C2]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp); C2 gamma_c[C3]: fail (covered on 0 of 3 seeds; shapes sharp*, sharp, sharp); C2 gamma_c[C4]: fail (covered on 1 of 3 seeds; shapes sharp, sharp, sharp); C2 h_opt_c[C2]: fail (covered on 1 of 3 seeds; shapes sharp, sharp, sharp); C2 h_opt_c[C3]: fail (covered on 0 of 3 seeds; shapes sharp, wide, sharp); C2 h_opt_c[C4]: fail (covered on 1 of 3 seeds; shapes sharp, sharp, sharp); C2 kappa: pass (covered on 3 of 3 seeds; shapes flat*, flat, flat); C3: pass (residual ratio seed 0 2.206, seed 1 2.069, seed 2 1.822).
+- **drop_early / M1**: C1 rho_c[C2]: not_applicable; C1 rho_c[C3]: not_applicable; C1 rho_c[C4]: not_applicable; C1 k_c[C2]: not_applicable; C1 k_c[C3]: not_applicable; C1 k_c[C4]: not_applicable; C2 rho_c[C2]: not_applicable; C2 rho_c[C3]: not_applicable; C2 rho_c[C4]: not_applicable; C2 k_c[C2]: not_applicable; C2 k_c[C3]: not_applicable; C2 k_c[C4]: not_applicable; C2 gamma_c[C2]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp*); C2 gamma_c[C3]: pass (covered on 3 of 3 seeds; shapes sharp, sharp*, sharp*); C2 gamma_c[C4]: pass (covered on 3 of 3 seeds; shapes sharp, sharp*, sharp*); C2 h_opt_c[C2]: pass (covered on 3 of 3 seeds; shapes sharp, sharp*, sharp*); C2 h_opt_c[C3]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp*); C2 h_opt_c[C4]: pass (covered on 3 of 3 seeds; shapes sharp, sharp*, sharp); C2 kappa: pass (covered on 3 of 3 seeds; shapes sharp*, sharp, sharp*); C3: pass (residual ratio seed 0 71.733, seed 1 36.180, seed 2 8.533).
+- **drop_early / M2**: C1 rho_c[C2]: not_applicable; C1 rho_c[C3]: pass (errors +0.5%, +2.4%, -0.3%); C1 rho_c[C4]: pass (errors -1.4%, -7.1%, +1.7%); C1 k_c[C2]: not_applicable; C1 k_c[C3]: pass (errors +3.1%, +5.7%, -5.5%); C1 k_c[C4]: not_applicable; C2 rho_c[C2]: not_applicable; C2 rho_c[C3]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp*); C2 rho_c[C4]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp); C2 k_c[C2]: not_applicable; C2 k_c[C3]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp*); C2 k_c[C4]: not_applicable; C2 gamma_c[C2]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp*); C2 gamma_c[C3]: pass (covered on 3 of 3 seeds; shapes sharp, sharp*, sharp*); C2 gamma_c[C4]: pass (covered on 3 of 3 seeds; shapes sharp, sharp*, sharp*); C2 h_opt_c[C2]: pass (covered on 3 of 3 seeds; shapes sharp, sharp*, sharp*); C2 h_opt_c[C3]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp*); C2 h_opt_c[C4]: pass (covered on 3 of 3 seeds; shapes sharp, sharp*, sharp); C2 kappa: pass (covered on 3 of 3 seeds; shapes sharp*, sharp, sharp*); C3: pass (residual ratio seed 0 1.429, seed 1 0.952, seed 2 0.984).
+- **traffic / M1**: C1 rho_c[C2]: not_applicable; C1 rho_c[C3]: not_applicable; C1 rho_c[C4]: not_applicable; C1 k_c[C2]: not_applicable; C1 k_c[C3]: not_applicable; C1 k_c[C4]: not_applicable; C2 rho_c[C2]: not_applicable; C2 rho_c[C3]: not_applicable; C2 rho_c[C4]: not_applicable; C2 k_c[C2]: not_applicable; C2 k_c[C3]: not_applicable; C2 k_c[C4]: not_applicable; C2 gamma_c[C2]: pass (covered on 2 of 3 seeds; shapes sharp*, sharp, sharp); C2 gamma_c[C3]: pass (covered on 2 of 3 seeds; shapes sharp, sharp*, sharp*); C2 gamma_c[C4]: pass (covered on 2 of 3 seeds; shapes sharp, wide*, sharp*); C2 h_opt_c[C2]: fail (covered on 1 of 3 seeds; shapes sharp, sharp, sharp); C2 h_opt_c[C3]: pass (covered on 3 of 3 seeds; shapes sharp, sharp*, sharp); C2 h_opt_c[C4]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp*); C2 kappa: fail (covered on 1 of 3 seeds; shapes sharp, sharp, sharp); C3: pass (residual ratio seed 0 84.559, seed 1 18.168, seed 2 11.068).
+- **traffic / M2**: C1 rho_c[C2]: not_applicable; C1 rho_c[C3]: pass (errors +1.8%, +4.7%, -2.6%); C1 rho_c[C4]: pass (errors +0.3%, -2.6%, -3.2%); C1 k_c[C2]: not_applicable; C1 k_c[C3]: pass (errors +6.0%, -4.6%, -18.9%); C1 k_c[C4]: not_applicable; C2 rho_c[C2]: not_applicable; C2 rho_c[C3]: pass (covered on 2 of 3 seeds; shapes sharp, sharp, sharp*); C2 rho_c[C4]: pass (covered on 2 of 3 seeds; shapes sharp, sharp*, sharp); C2 k_c[C2]: not_applicable; C2 k_c[C3]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp*); C2 k_c[C4]: not_applicable; C2 gamma_c[C2]: pass (covered on 2 of 3 seeds; shapes sharp*, sharp, sharp); C2 gamma_c[C3]: pass (covered on 2 of 3 seeds; shapes sharp, sharp*, sharp*); C2 gamma_c[C4]: pass (covered on 2 of 3 seeds; shapes sharp, wide*, sharp*); C2 h_opt_c[C2]: fail (covered on 1 of 3 seeds; shapes sharp, sharp, sharp); C2 h_opt_c[C3]: pass (covered on 3 of 3 seeds; shapes sharp, sharp*, sharp); C2 h_opt_c[C4]: pass (covered on 3 of 3 seeds; shapes sharp, sharp, sharp*); C2 kappa: fail (covered on 1 of 3 seeds; shapes sharp, sharp, sharp); C3: pass (residual ratio seed 0 2.213, seed 1 1.645, seed 2 1.656).
 
 ### Silent failures
 
@@ -374,8 +374,11 @@ Measured wall time in seconds per run, read from the JSON records (`Observed`; m
 | main | fit | M2 | 10 | 15.6 | 31.8 | 186.3 | 26.2 |
 | main | fit | M2v2 | 10 | 54.3 | 68.0 | 556.0 | 65.3 |
 | main | profile | ode | 10 | 675.7 | 882.8 | 6899.5 | n/a |
+| misspec | fit | M1 | 15 | 69.7 | 109.2 | 1158.4 | 78.1 |
+| misspec | fit | M2 | 15 | 41.1 | 69.5 | 585.2 | 69.4 |
+| misspec | profile | ode | 15 | 956.5 | 1304.7 | 13234.3 | n/a |
 
-Sum over all records: 7964.8 s. Slowest main-study M2 fit: 26.2 s (run main_fit_M2_well_specified_noise0.05_seed1); the threshold for M2 in the misspecification study is 600 s.
+Sum over all records: 22942.7 s. Slowest main-study M2 fit: 26.2 s (run main_fit_M2_well_specified_noise0.05_seed1); the threshold for M2 in the misspecification study is 600 s.
 
 ## P1 trigger evidence
 
@@ -414,51 +417,7 @@ These are mechanical trigger checks against PRD section 8, not the decision. The
 
 ## Missing runs
 
-- misspec_fit_M1_drop_early_noise0.05_seed0: no record
-- misspec_fit_M1_drop_early_noise0.05_seed1: no record
-- misspec_fit_M1_drop_early_noise0.05_seed2: no record
-- misspec_fit_M1_piecewise_wear_noise0.05_seed0: no record
-- misspec_fit_M1_piecewise_wear_noise0.05_seed1: no record
-- misspec_fit_M1_piecewise_wear_noise0.05_seed2: no record
-- misspec_fit_M1_student_t_noise0.05_seed0: no record
-- misspec_fit_M1_student_t_noise0.05_seed1: no record
-- misspec_fit_M1_student_t_noise0.05_seed2: no record
-- misspec_fit_M1_traffic_noise0.05_seed0: no record
-- misspec_fit_M1_traffic_noise0.05_seed1: no record
-- misspec_fit_M1_traffic_noise0.05_seed2: no record
-- misspec_fit_M1_wrong_phi_noise0.05_seed0: no record
-- misspec_fit_M1_wrong_phi_noise0.05_seed1: no record
-- misspec_fit_M1_wrong_phi_noise0.05_seed2: no record
-- misspec_fit_M2_drop_early_noise0.05_seed0: no record
-- misspec_fit_M2_drop_early_noise0.05_seed1: no record
-- misspec_fit_M2_drop_early_noise0.05_seed2: no record
-- misspec_fit_M2_piecewise_wear_noise0.05_seed0: no record
-- misspec_fit_M2_piecewise_wear_noise0.05_seed1: no record
-- misspec_fit_M2_piecewise_wear_noise0.05_seed2: no record
-- misspec_fit_M2_student_t_noise0.05_seed0: no record
-- misspec_fit_M2_student_t_noise0.05_seed1: no record
-- misspec_fit_M2_student_t_noise0.05_seed2: no record
-- misspec_fit_M2_traffic_noise0.05_seed0: no record
-- misspec_fit_M2_traffic_noise0.05_seed1: no record
-- misspec_fit_M2_traffic_noise0.05_seed2: no record
-- misspec_fit_M2_wrong_phi_noise0.05_seed0: no record
-- misspec_fit_M2_wrong_phi_noise0.05_seed1: no record
-- misspec_fit_M2_wrong_phi_noise0.05_seed2: no record
-- misspec_profile_ode_drop_early_noise0.05_seed0: no record
-- misspec_profile_ode_drop_early_noise0.05_seed1: no record
-- misspec_profile_ode_drop_early_noise0.05_seed2: no record
-- misspec_profile_ode_piecewise_wear_noise0.05_seed0: no record
-- misspec_profile_ode_piecewise_wear_noise0.05_seed1: no record
-- misspec_profile_ode_piecewise_wear_noise0.05_seed2: no record
-- misspec_profile_ode_student_t_noise0.05_seed0: no record
-- misspec_profile_ode_student_t_noise0.05_seed1: no record
-- misspec_profile_ode_student_t_noise0.05_seed2: no record
-- misspec_profile_ode_traffic_noise0.05_seed0: no record
-- misspec_profile_ode_traffic_noise0.05_seed1: no record
-- misspec_profile_ode_traffic_noise0.05_seed2: no record
-- misspec_profile_ode_wrong_phi_noise0.05_seed0: no record
-- misspec_profile_ode_wrong_phi_noise0.05_seed1: no record
-- misspec_profile_ode_wrong_phi_noise0.05_seed2: no record
+- None: every planned run has a finished record.
 
 ## How to run
 
