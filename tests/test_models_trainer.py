@@ -281,7 +281,8 @@ def test_anchor_offset_and_build_prediction():
     assert isinstance(out, PredictionOutput)
     assert out.member_means_s.shape == (1, 2)
     np.testing.assert_allclose(out.mean_s, [4.0, 4.5])
-    # Offset-estimate variance resid_var / n_hist with n_hist = 3, not the raw residual variance.
+    # Offset-estimate variance max(resid_var, noise^2) / n_hist with n_hist = 3, not the raw residual
+    # variance. Here resid_var = 1/6 > noise^2 = 0.04, so the misfit widens the offset term.
     np.testing.assert_allclose(out.sigma_s, np.sqrt(1.0 / 18.0 + 0.04))
     assert out.latent_h is None and out.latent_w_s is None
 
@@ -289,6 +290,13 @@ def test_anchor_offset_and_build_prediction():
     np.testing.assert_allclose(two.member_means_s, [[4.0, 4.5], [3.0, 3.5]])
     np.testing.assert_allclose(two.mean_s, [3.5, 4.0])
     np.testing.assert_allclose(two.sigma_s, np.sqrt(1.0 / 18.0 + 0.04 + 0.25))
+
+    # resid_var = 1/6 < noise^2 = 0.25: the offset term is floored at noise^2 / n_hist = 0.25 / 3.
+    noisy = build_prediction(shape[None, :], future, y, noise_s=0.5)
+    np.testing.assert_allclose(noisy.sigma_s, np.sqrt(0.25 / 3.0 + 0.25))
+    # A perfect history fit (resid_var = 0) still keeps the offset term at noise^2 / n_hist.
+    exact = build_prediction(shape[None, :], future, shape + 1.0, noise_s=0.2)
+    np.testing.assert_allclose(exact.sigma_s, np.sqrt(0.04 / 3.0 + 0.04))
 
 
 @pytest.mark.parametrize("model_name", ["pinn", "ode"])
@@ -420,12 +428,23 @@ def test_normalized_terms_start_at_one(request, small_ds, model_name):
     assert log.steps[0] == 0
     assert expected <= set(log.normalizers)
     assert set(log.normalized) == set(log.normalizers) == set(log.coefficients)
+    defaults = TrainConfig()  # both runs keep the default norm_floor and norm_rel_floor
+    data0 = log.terms["data"][0]
     for term, normalizer in log.normalizers.items():
         assert log.coefficients[term] == pytest.approx(getattr(weights, term) / normalizer)
+        raw0 = log.terms[term][0]
         if term in log.floored_terms:
-            assert normalizer >= log.terms[term][0]
+            # Accepted exception (PLAN T4 AT2): a floored term starts at raw0 / floor, not at 1.
+            floor = (
+                defaults.norm_floor
+                if term == "data"
+                else max(defaults.norm_floor, defaults.norm_rel_floor * data0)
+            )
+            assert raw0 <= floor
+            assert normalizer == pytest.approx(floor)
+            assert log.normalized[term][0] == pytest.approx(raw0 / floor, rel=1e-6, abs=1e-12), term
             continue
-        assert normalizer == pytest.approx(log.terms[term][0])
+        assert normalizer == pytest.approx(raw0)
         assert abs(log.normalized[term][0] - 1.0) <= 1e-6, term
     # The jitted objective Adam differentiates (not a host recomputation): at step 0 with no warm-up and no
     # ramp, every non-floored term contributes exactly its weight. Dropping the normalizers fails this.

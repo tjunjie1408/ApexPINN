@@ -335,13 +335,14 @@ def build_prediction(
 
     shape_hist is (E, n_hist) and shape_future is (E, horizon). Member e has offset b_e and residual
     variance var_e from anchor_offset. member_means = b_e + shape_future[e], mean_s is their mean, and
-    sigma_s = sqrt(mean_e(var_e / n_hist) + noise_s^2 + variance of the member means).
+    sigma_s = sqrt(mean_e(max(var_e, noise_s^2) / n_hist) + noise_s^2 + variance of the member means)
+    (PROJECT 4.6 "Uncertainty").
 
-    var_e / n_hist is the variance of the anchored offset b_e, the uncertainty that offset anchoring adds.
-    The raw residual variance var_e is not added on top of noise_s^2, because both estimate the same
-    observation noise and their sum would be about sqrt(2) too wide (review v1, issue 3). This is one
-    reading of PROJECT 4.6 "offset-anchoring residual variance ... plus observation noise"; the spec owner
-    still has to confirm it before T11 scores sigma_s.
+    max(var_e, noise_s^2) / n_hist is the variance of the anchored offset b_e, the uncertainty that offset
+    anchoring adds. The raw residual variance var_e is not added on top of noise_s^2, because both
+    estimate the same observation noise and their sum would be about sqrt(2) too wide (review v1,
+    issue 3). The max keeps the term stable when n_hist is tiny (t0 = k_min = 3), where var_e can be
+    near zero by chance, and still widens sigma_s when the shape misfits the history (var_e > noise_s^2).
     """
     sh = np.asarray(shape_hist, dtype=np.float64)
     sf = np.asarray(shape_future, dtype=np.float64)
@@ -354,7 +355,7 @@ def build_prediction(
         raise ValueError(f"noise_s must be >= 0, got {noise}")
     anchored = [anchor_offset(y_hist, member) for member in sh]
     offsets = np.array([b for b, _ in anchored])
-    offset_var = np.array([v for _, v in anchored]) / sh.shape[1]
+    offset_var = np.maximum(np.array([v for _, v in anchored]), noise**2) / sh.shape[1]
     members = offsets[:, None] + sf
     sigma = np.sqrt(np.mean(offset_var) + noise**2 + np.var(members, axis=0))
     return PredictionOutput(
