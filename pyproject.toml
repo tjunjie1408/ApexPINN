@@ -20,6 +20,7 @@ dependencies = [
     "scipy>=1.14",
     "pyyaml>=6.0",
     "fastf1>=3.4",
+    "matplotlib>=3.11.2",
 ]
 
 [project.optional-dependencies]

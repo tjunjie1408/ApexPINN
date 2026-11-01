@@ -1,6 +1,6 @@
 # S1 identifiability study (PLAN T5), full config
 
-Built from 1 run records in `experiments/s1/` by `apexpinn.eval.s1_report`. Every number is `Observed`, read from the record named by its run id. Labels and criterion outcomes apply the rules declared in PLAN T5 to those numbers. Config: 48 stints, compounds ['C2', 'C3', 'C4'], seeds [0, 1, 2, 3, 4], noise [0.05, 0.15] s, models ['M1', 'M2'].
+Built from 2 run records in `experiments/s1/` by `apexpinn.eval.s1_report`. Every number is `Observed`, read from the record named by its run id. Labels and criterion outcomes apply the rules declared in PLAN T5 to those numbers. Config: 48 stints, compounds ['C2', 'C3', 'C4'], seeds [0, 1, 2, 3, 4], noise [0.05, 0.15] s, models ['M1', 'M2'].
 
 ## S1b recovery
 
@@ -8,7 +8,7 @@ Relative error (estimate - truth) / truth of the trained `M1` and `M2` estimates
 
 | Run id | Model | Noise s | Seed | Status | rho_c[C2] | rho_c[C3] | rho_c[C4] | k_c[C2] | k_c[C3] | k_c[C4] | Recovered | Max abs err, ungated | Residual ratio | Collapse flags |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| main_fit_M1_well_specified_noise0.05_seed0 | M1 | 0.05 | 0 | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
+| main_fit_M1_well_specified_noise0.05_seed0 | M1 | 0.05 | 0 | ok | +140.2% | +462.2% | +216.6% | -99.5% | -95.3% | -96.3% | no | +117.8% | 54.080 | none |
 | main_fit_M1_well_specified_noise0.05_seed1 | M1 | 0.05 | 1 | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
 | main_fit_M1_well_specified_noise0.05_seed2 | M1 | 0.05 | 2 | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
 | main_fit_M1_well_specified_noise0.05_seed3 | M1 | 0.05 | 3 | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
@@ -41,18 +41,18 @@ Labels follow the PLAN T5 method declarations: identifiable if every seed recove
 | h_opt_c[C2] | 0.05 | profile | **missing** | sharp | n/a |
 | h_opt_c[C3] | 0.05 | profile | **missing** | sharp | n/a |
 | h_opt_c[C4] | 0.05 | profile | **missing** | sharp | n/a |
-| k_c[C2] | 0.05 | M1 | **missing** | sharp |  |
+| k_c[C2] | 0.05 | M1 | **missing** | sharp | no |
 | k_c[C2] | 0.05 | M2 | **missing** | sharp |  |
-| k_c[C3] | 0.05 | M1 | **missing** | sharp |  |
+| k_c[C3] | 0.05 | M1 | **missing** | sharp | no |
 | k_c[C3] | 0.05 | M2 | **missing** | sharp |  |
-| k_c[C4] | 0.05 | M1 | **missing** | sharp |  |
+| k_c[C4] | 0.05 | M1 | **missing** | sharp | no |
 | k_c[C4] | 0.05 | M2 | **missing** | sharp |  |
 | kappa | 0.05 | profile | **missing** | sharp | n/a |
-| rho_c[C2] | 0.05 | M1 | **missing** | sharp |  |
+| rho_c[C2] | 0.05 | M1 | **missing** | sharp | no |
 | rho_c[C2] | 0.05 | M2 | **missing** | sharp |  |
-| rho_c[C3] | 0.05 | M1 | **missing** | sharp |  |
+| rho_c[C3] | 0.05 | M1 | **missing** | sharp | no |
 | rho_c[C3] | 0.05 | M2 | **missing** | sharp |  |
-| rho_c[C4] | 0.05 | M1 | **missing** | sharp |  |
+| rho_c[C4] | 0.05 | M1 | **missing** | sharp | no |
 | rho_c[C4] | 0.05 | M2 | **missing** | sharp |  |
 | gamma_c[C2] | 0.15 | profile | **missing** | n/a | n/a |
 | gamma_c[C3] | 0.15 | profile | **missing** | n/a | n/a |
@@ -290,9 +290,10 @@ Measured wall time in seconds per run, read from the JSON records (`Observed`; m
 
 | Part | Kind | Model | Runs | Median total s | Max total s | Sum total s | Max fit s |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| main | fit | M1 | 1 | 40.4 | 40.4 | 40.4 | 30.7 |
 | main | profile | ode | 1 | 255.2 | 255.2 | 255.2 | n/a |
 
-Sum over all records: 255.2 s. Slowest main-study M2 fit: n/a (no measured main-study M2 fit); the threshold for M2 in the misspecification study is 600 s.
+Sum over all records: 295.6 s. Slowest main-study M2 fit: n/a (no measured main-study M2 fit); the threshold for M2 in the misspecification study is 600 s.
 
 ## P1 trigger evidence
 
@@ -305,7 +306,7 @@ These are mechanical trigger checks against PRD section 8, not the decision. The
 
 | Run id | Model | Noise s | Seed | Status | Stalled | Objective change, last 20% | Residual ratio | Final normalized terms | Not recovered |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| main_fit_M1_well_specified_noise0.05_seed0 | M1 | 0.05 | 0 | missing | n/a | n/a | n/a | n/a | n/a |
+| main_fit_M1_well_specified_noise0.05_seed0 | M1 | 0.05 | 0 | ok | no | -0.4861 | 54.080 | data 0.023, mono 0.000, reg 6.255, thermal 0.009, wear 2.21e-04 | rho_c[C2], rho_c[C3], rho_c[C4], k_c[C2], k_c[C3], k_c[C4] |
 | main_fit_M1_well_specified_noise0.05_seed1 | M1 | 0.05 | 1 | missing | n/a | n/a | n/a | n/a | n/a |
 | main_fit_M1_well_specified_noise0.05_seed2 | M1 | 0.05 | 2 | missing | n/a | n/a | n/a | n/a | n/a |
 | main_fit_M1_well_specified_noise0.05_seed3 | M1 | 0.05 | 3 | missing | n/a | n/a | n/a | n/a | n/a |
@@ -332,7 +333,6 @@ These are mechanical trigger checks against PRD section 8, not the decision. The
 
 M2 misspecification runs are listed once every main-study M2 fit has a record.
 
-- main_fit_M1_well_specified_noise0.05_seed0: no record
 - main_fit_M1_well_specified_noise0.05_seed1: no record
 - main_fit_M1_well_specified_noise0.05_seed2: no record
 - main_fit_M1_well_specified_noise0.05_seed3: no record
