@@ -5,7 +5,9 @@ the T5 'Method declarations' block, which this module implements:
 
 - S1b: M1 (PINN) and M2 (ODE model) are trained on lap time only from a prior draw, never from the truth.
 - S1c: profiles and the Gauss-Newton spectrum use the exact ODE likelihood with b_s concentrated out
-  (physics.identifiability.ode_least_squares), per dataset, in log / logit coordinates.
+  (physics.identifiability.ode_least_squares), per dataset, in log / logit coordinates. The MLE and the
+  profile solves keep the free coordinates inside identifiability.S1C_BOUNDS, and a failed ODE solve
+  gives a failed point instead of stopping the run (PROFILE_METHOD_VERSION 2).
 - Keys: the data key is jax.random.key(seed), shared by every noise level and variant of a seed (paired
   design); the prior initialization draw comes from fold_in(key, 101) and is shared by M1, M2 and the
   first profile start of that seed.
@@ -14,10 +16,12 @@ the T5 'Method declarations' block, which this module implements:
   adds the M2 runs on a later call, once every main M2 fit has finished.
 
 Every run writes one JSON record <out_dir>/<run_id>.json (atomic: tmp file plus os.replace). A record
-stores the config hash of the settings the run used (including a digest of the synthetic generator
-source, the prior ranges and the key fold offsets), so a rerun skips completed runs and refuses to mix
-records from a changed config unless force=True. Runs can be split across machines with shards, and
-`only` restricts a call to named runs (for example to time one full profile run).
+stores the config hash of the settings the run used (including a digest of the synthetic generator and
+residual equation sources, the prior ranges and the key fold offsets; for profile runs also the optimizer
+box, the ODE max_steps and the profile method version), so a rerun skips completed runs and refuses to
+mix finished records from a changed config unless force=True. Error records never block and are rerun.
+Runs can be split across machines with shards, and `only` restricts a call to named runs (for example to
+time one full profile run).
 
 Paths in StudyConfig are relative to the repository root; run_study and scripts/run_s1.py resolve them
 against a root argument. Call jax.config.update('jax_enable_x64', True) before running: the configs train
@@ -33,11 +37,13 @@ import json
 import math
 import os
 import time
+import traceback
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, fields
 from pathlib import Path
 from typing import Any
 
+import equinox as eqx
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -49,7 +55,9 @@ from apexpinn.models.stints import StintBatch, batch_from_synthetic
 from apexpinn.physics.diagnostics import detect_collapse, residual_rms, wear_violation_rate
 from apexpinn.physics.identifiability import (
     PRIOR_RANGES,
+    S1C_BOUNDS,
     Interval,
+    ProfileResult,
     ThetaLayout,
     gauss_newton_spectrum,
     likelihood_interval,
@@ -89,6 +97,10 @@ M2_WEIGHTS = LossWeights(data=1.0)  # M2 returns only the 'data' term
 CONVERGENCE_TAIL = 0.2  # relative objective change over the last 20% of logged steps
 # Key derivation (PLAN T5 method declarations): fold_in offsets of jax.random.key(seed).
 PRIOR_FOLD, NET_FOLD, TRAIN_FOLD, COLLOC_FOLD, START_FOLD = 101, 102, 103, 104, 200
+# Profile method version, part of every profile run's config_hash. 1 = unbounded L-BFGS-B, a failed ODE
+# solve stops the run. 2 = box bounds S1C_BOUNDS and failed-solve handling, declared in PLAN T5.
+PROFILE_METHOD_VERSION = 2
+AT_BOUND_TOL = 1e-9  # a coordinate within this distance of a box edge counts as on the edge
 O6_NAMES = {"rho_c": "rho", "k_c": "k"}
 
 Log = Callable[[str], Any]
@@ -501,25 +513,64 @@ def _jsonable(value: Any) -> Any:
     return value
 
 
+def _json_partial(value: Any) -> Any:
+    """_jsonable(value) if json.dumps accepts it, else repr(value), so an error record always writes.
+
+    A runner that raises ProfilePointError itself leaves a ProfileResult dataclass in .partial.
+    """
+    safe = _jsonable(value)
+    try:
+        json.dumps(safe, sort_keys=True, allow_nan=False)
+    except (TypeError, ValueError):
+        return repr(value)
+    return safe
+
+
+def generator_sources() -> tuple[Path, ...]:
+    """Source files whose text enters every run's config_hash: the synthetic generator and residuals.
+
+    apexpinn.physics.synthetic holds make_synthetic_dataset, default_theta_true and MISSPEC_VARIANTS;
+    apexpinn.physics.residuals holds the ODE right-hand sides and the observation equation that both the
+    generator and the fitted models use.
+    """
+    return (Path(inspect.getfile(make_synthetic_dataset)), Path(inspect.getfile(thermal_residual)))
+
+
+def source_digest(paths: Sequence[str | Path]) -> str:
+    """sha256 over the files in order (file name and text), with line endings normalized."""
+    digest = hashlib.sha256()
+    for item in paths:
+        path = Path(item)
+        text = path.read_text(encoding="utf-8").replace("\r\n", "\n").replace("\r", "\n")
+        digest.update(f"--- {path.name}\n".encode())
+        digest.update(text.encode("utf-8"))
+    return digest.hexdigest()
+
+
 @functools.lru_cache(maxsize=1)
 def generator_digest() -> str:
-    """sha256 of the synthetic generator source (apexpinn.physics.synthetic), line endings normalized.
+    """source_digest of generator_sources(): the synthetic generator and the residual equations.
 
-    The file holds make_synthetic_dataset, default_theta_true and MISSPEC_VARIANTS, so an edit to any of
-    them changes every run's config_hash and old records are never mixed with new ones. Line endings are
-    normalized so Windows and Linux checkouts of the same commit give the same digest.
+    An edit to the generator, the misspecification variants, the ODE right-hand sides or the observation
+    equation changes every run's config_hash, so old records are never mixed with new ones. Line endings
+    are normalized so Windows and Linux checkouts of the same commit give the same digest.
     """
-    text = Path(inspect.getfile(make_synthetic_dataset)).read_text(encoding="utf-8")
-    text = text.replace("\r\n", "\n").replace("\r", "\n")
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+    return source_digest(generator_sources())
+
+
+def _ode_max_steps() -> int:
+    """ODEModel.max_steps class default: the step budget of every ODE solve in the S1c likelihood."""
+    return int(next(f.default for f in fields(ODEModel) if f.name == "max_steps"))
 
 
 def _settings(cfg: StudyConfig, spec: RunSpec) -> dict[str, Any]:
     """Only the settings that the run uses, so unrelated config changes keep its hash.
 
-    Every run also hashes the data and initialization code it depends on: the generator source digest,
-    the variant's Misspecification fields, PRIOR_RANGES and the key fold offsets. The O6 tolerance is not
-    hashed: the report recomputes recovery from rel_error, so a tolerance edit needs no rerun.
+    Every run also hashes the data and initialization code it depends on: the source digest of the
+    generator and the residual equations, the variant's Misspecification fields, PRIOR_RANGES and the key
+    fold offsets. Profile runs also hash the optimizer box S1C_BOUNDS, the ODE max_steps and
+    PROFILE_METHOD_VERSION. The O6 tolerance is not hashed: the report recomputes recovery from
+    rel_error, so a tolerance edit needs no rerun.
     """
     settings: dict[str, Any] = {
         "schema": SCHEMA_VERSION,
@@ -565,6 +616,9 @@ def _settings(cfg: StudyConfig, spec: RunSpec) -> dict[str, Any]:
             "maxiter": cfg.minimize_maxiter,
             "rtol": cfg.ode_rtol,
             "atol": cfg.ode_atol,
+            "bounds": {g: list(v) for g, v in sorted(S1C_BOUNDS.items())},
+            "max_steps": _ode_max_steps(),
+            "method_version": PROFILE_METHOD_VERSION,
         }
     return settings
 
@@ -747,8 +801,9 @@ def build_profile_record(
     conditions = (
         f"noise_s={spec.noise_s:g} s, lap time only, exact ODE likelihood with b_s concentrated out, "
         f"log / logit coordinates, MLE from {cfg.n_starts} start(s) (start 0 = prior draw fold_in(key("
-        f"{spec.seed}), {PRIOR_FOLD})), L-BFGS-B maxiter={cfg.minimize_maxiter}, rtol={cfg.ode_rtol:g}, "
-        f"atol={cfg.ode_atol:g}, device={_device()}"
+        f"{spec.seed}), {PRIOR_FOLD})), L-BFGS-B maxiter={cfg.minimize_maxiter}, free coordinates "
+        f"inside S1C_BOUNDS, profile method v{PROFILE_METHOD_VERSION}, rtol={cfg.ode_rtol:g}, "
+        f"atol={cfg.ode_atol:g}, max_steps={_ode_max_steps()}, device={_device()}"
     )
     instrument = (
         "apexpinn.train.s1_study.run_profile, apexpinn.physics.identifiability "
@@ -891,29 +946,137 @@ def _to_natural(group: str, coord: float) -> float:
     return float(1.0 / (1.0 + np.exp(-coord))) if group == "h_opt" else float(np.exp(coord))
 
 
+class ProfileRunError(RuntimeError):
+    """run_profile failed. partial is a JSON-safe dict of what was computed before the failure.
+
+    Keys: phase ('dataset', 'mle', 'sse_truth', 'spectrum' or 'profile'), param (the profiled layout name,
+    or None), mle and spectrum (None until computed), profiles (the finished profile entries), and point
+    (the failing profile's ProfilePointError.partial: grid, grid_coord, sse, success, failed,
+    n_failed_evals; None if the exception carried none). The original exception is __cause__.
+    """
+
+    def __init__(self, message: str, partial: Mapping[str, Any]) -> None:
+        super().__init__(message)
+        self.partial = dict(partial)
+
+
+def _on_box_edge(
+    theta: np.ndarray, bounds: Sequence[tuple[float, float]], names: Sequence[str], skip: int | None = None
+) -> list[str]:
+    """Names of the finite coordinates within AT_BOUND_TOL of a box edge (index skip excluded)."""
+    out = []
+    for j, (name, (lo, hi), x) in enumerate(zip(names, bounds, np.asarray(theta, float), strict=True)):
+        if j != skip and math.isfinite(x) and (abs(x - lo) <= AT_BOUND_TOL or abs(x - hi) <= AT_BOUND_TOL):
+            out.append(name)
+    return out
+
+
+def _profile_entry(
+    prof: ProfileResult,
+    *,
+    group: str,
+    index: int,
+    natural: np.ndarray,
+    coord: np.ndarray,
+    mle_value: float,
+    truth: float,
+    sse_fit: float,
+    n_obs: int,
+    bounds: Sequence[tuple[float, float]],
+    names: Sequence[str],
+) -> dict[str, Any]:
+    """Record entry of one profile. Failed points get no deviance (NaN); they enter likelihood_interval,
+    which treats a failed point met before the threshold crossing as an unbounded side."""
+    entry: dict[str, Any] = {
+        "group": group,
+        "grid": natural,
+        "grid_coord": coord,
+        "sse": prof.loss,
+        "success": prof.success,
+        "failed": prof.failed,
+        "n_failed_evals": prof.n_failed_evals,
+        "at_bound": [_on_box_edge(theta, bounds, names, skip=index) for theta in prof.thetas],
+        "mle": mle_value,
+        "truth": truth,
+        "interval": None,
+        "shape": None,
+        "covers_truth": None,
+    }
+    usable_sse = np.isfinite(prof.loss) & (prof.loss > 0)
+    if not np.any(usable_sse):
+        return entry
+    sse_min = min(float(np.min(prof.loss[usable_sse])), sse_fit)
+    deviance = np.full(prof.loss.shape, np.nan)
+    deviance[usable_sse] = sse_deviance(prof.loss[usable_sse], n_obs, sse_min=sse_min)
+    iv = likelihood_interval(coord, deviance)
+    lo, hi = _to_natural(group, iv.lo), _to_natural(group, iv.hi)
+    natural_iv = Interval(
+        lo=lo,
+        hi=hi,
+        lo_bounded=iv.lo_bounded,
+        hi_bounded=iv.hi_bounded,
+        threshold=iv.threshold,
+        lo_failed=iv.lo_failed,
+        hi_failed=iv.hi_failed,
+    )
+    entry.update(
+        deviance=deviance,
+        sse_min=sse_min,
+        interval=asdict(natural_iv),
+        shape=profile_shape_label(natural_iv, truth),
+        covers_truth=(not iv.lo_bounded or lo <= truth) and (not iv.hi_bounded or truth <= hi),
+    )
+    return entry
+
+
 def run_profile(cfg: StudyConfig, spec: RunSpec) -> dict:
     """S1c on one dataset: ODE-likelihood MLE, Gauss-Newton spectrum, and profiles of profile_params.
 
-    One jitted value_and_grad of the SSE is built per dataset and shared by the MLE and every profile, so
-    the Diffrax gradient compiles once.
+    One jitted value_and_grad of the SSE (eqx.filter_jit, so equinox runtime errors stay readable) is
+    built per dataset and shared by the MLE and every profile, so the Diffrax gradient compiles once.
+    The MLE and every profile solve keep the free coordinates inside S1C_BOUNDS; a failed ODE solve gives
+    a non-finite SSE, which the optimizers back off from (PLAN T5 method declarations). Any exception is
+    re-raised as ProfileRunError naming the phase (and the profiled parameter) with the partial results.
     """
+    state: dict[str, Any] = {"phase": "dataset", "param": None, "grid": None}
+    done: dict[str, Any] = {"mle": None, "spectrum": None, "profiles": {}}
+    try:
+        return _run_profile(cfg, spec, state, done)
+    except Exception as exc:
+        where = f" for {state['param']}" if state["param"] else ""
+        point = getattr(exc, "partial", None)
+        partial = {**state, **done, "point": None}
+        del partial["grid"]
+        if isinstance(point, ProfileResult):
+            partial["point"] = {
+                "grid": state["grid"],
+                "grid_coord": point.grid,
+                "sse": point.loss,
+                "success": point.success,
+                "failed": point.failed,
+                "n_failed_evals": point.n_failed_evals,
+            }
+        message = f"run_profile failed in phase {state['phase']}{where}: {type(exc).__name__}: {exc}"
+        raise ProfileRunError(message, _jsonable(partial)) from exc
+
+
+def _run_profile(cfg: StudyConfig, spec: RunSpec, state: dict[str, Any], done: dict[str, Any]) -> dict:
+    """Body of run_profile. state tracks the phase and parameter; done collects finished results."""
     t0 = time.perf_counter()
     ds = dataset_for(cfg, spec)
     batch = batch_from_synthetic(ds)
     layout = ThetaLayout.from_compounds(cfg.compounds)
+    bounds = layout.coordinate_bounds(S1C_BOUNDS)
     base = init_physics(spec)
     sse_fn, residual_fn, n_obs = ode_least_squares(batch, layout, base, rtol=cfg.ode_rtol, atol=cfg.ode_atol)
-    value_and_grad = jax.jit(jax.value_and_grad(sse_fn))
+    value_and_grad = eqx.filter_jit(jax.value_and_grad(sse_fn))
     starts = [layout.to_vector(base)]
     for i in range(1, cfg.n_starts):
         starts.append(layout.to_vector(sample_prior_physics(start_key(spec.seed, i))))
-    fit = ode_mle(sse_fn, starts, maxiter=cfg.minimize_maxiter, value_and_grad=value_and_grad)
+
+    state["phase"] = "mle"
+    fit = ode_mle(sse_fn, starts, maxiter=cfg.minimize_maxiter, value_and_grad=value_and_grad, bounds=bounds)
     values = layout.constrained(fit.theta)
-    truth = variant_truth(ds, cfg.compounds)
-    v_truth = layout.to_vector(ds.theta_true)
-    m = len(layout.compound_idx)
-    v_truth[m : 2 * m] = np.log(np.asarray(ds.rho_target, dtype=np.float64)[list(layout.compound_idx)])
-    sse_truth = float(sse_fn(jnp.asarray(v_truth)))
     mle = {
         "theta": fit.theta,
         "values": values,
@@ -921,7 +1084,20 @@ def run_profile(cfg: StudyConfig, spec: RunSpec) -> dict:
         "start_sse": fit.start_sse,
         "best_index": fit.best_index,
         "success": fit.success,
+        "start_failed": fit.start_failed,
+        "n_failed_evals": fit.n_failed_evals,
+        "at_bound": _on_box_edge(fit.theta, bounds, layout.names),
     }
+    done["mle"] = mle
+
+    state["phase"] = "sse_truth"
+    truth = variant_truth(ds, cfg.compounds)
+    v_truth = layout.to_vector(ds.theta_true)
+    m = len(layout.compound_idx)
+    v_truth[m : 2 * m] = np.log(np.asarray(ds.rho_target, dtype=np.float64)[list(layout.compound_idx)])
+    sse_truth: float | None = float(sse_fn(jnp.asarray(v_truth)))
+    if not math.isfinite(sse_truth):
+        sse_truth = None
     t_mle = time.perf_counter()
     if not (np.all(np.isfinite(fit.theta)) and math.isfinite(fit.sse)):
         elapsed = t_mle - t0
@@ -937,6 +1113,7 @@ def run_profile(cfg: StudyConfig, spec: RunSpec) -> dict:
             wall_time_s={"mle": elapsed, "spectrum": 0.0, "profiles": 0.0, "total": elapsed},
         )
 
+    state["phase"] = "spectrum"
     spec_result = gauss_newton_spectrum(residual_fn, fit.theta, mode="rev")
     spectrum = {
         "eigenvalues": spec_result.eigenvalues,
@@ -944,47 +1121,42 @@ def run_profile(cfg: StudyConfig, spec: RunSpec) -> dict:
         "smallest_relative": float(spec_result.relative[-1]),
         "weakest_loadings": dict(zip(layout.names, spec_result.eigenvectors[:, -1].tolist(), strict=True)),
     }
+    done["spectrum"] = spectrum
     t_spec = time.perf_counter()
 
-    profiles: dict[str, dict[str, Any]] = {}
+    state["phase"] = "profile"
+    profiles: dict[str, dict[str, Any]] = done["profiles"]
     for group in GROUPS:
         if group not in cfg.profile_params:
             continue
         for name in param_names(group, cfg.compounds):
+            state["param"] = name
             index = layout.names.index(name)
             natural, coord = profile_grid(cfg, group, values[name])
+            state["grid"] = natural
             prof = profile_likelihood(
-                sse_fn, fit.theta, index, coord, maxiter=cfg.minimize_maxiter, value_and_grad=value_and_grad
+                sse_fn,
+                fit.theta,
+                index,
+                coord,
+                maxiter=cfg.minimize_maxiter,
+                value_and_grad=value_and_grad,
+                bounds=bounds,
             )
-            entry: dict[str, Any] = {
-                "group": group,
-                "grid": natural,
-                "grid_coord": coord,
-                "sse": prof.loss,
-                "success": prof.success,
-                "mle": values[name],
-                "truth": truth[name],
-                "interval": None,
-                "shape": None,
-                "covers_truth": None,
-            }
-            if np.all(np.isfinite(prof.loss)) and np.all(prof.loss > 0):
-                sse_min = min(float(np.min(prof.loss)), fit.sse)
-                deviance = sse_deviance(prof.loss, n_obs, sse_min=sse_min)
-                iv = likelihood_interval(coord, deviance)
-                lo, hi = _to_natural(group, iv.lo), _to_natural(group, iv.hi)
-                natural_iv = Interval(
-                    lo=lo, hi=hi, lo_bounded=iv.lo_bounded, hi_bounded=iv.hi_bounded, threshold=iv.threshold
-                )
-                t = truth[name]
-                entry.update(
-                    deviance=deviance,
-                    sse_min=sse_min,
-                    interval=asdict(natural_iv),
-                    shape=profile_shape_label(natural_iv, t),
-                    covers_truth=(not iv.lo_bounded or lo <= t) and (not iv.hi_bounded or t <= hi),
-                )
-            profiles[name] = entry
+            profiles[name] = _profile_entry(
+                prof,
+                group=group,
+                index=index,
+                natural=natural,
+                coord=coord,
+                mle_value=values[name],
+                truth=truth[name],
+                sse_fit=fit.sse,
+                n_obs=n_obs,
+                bounds=bounds,
+                names=layout.names,
+            )
+    state.update(param=None, grid=None)
     t_end = time.perf_counter()
     wall_time_s = {"mle": t_mle - t0, "spectrum": t_spec - t_mle, "profiles": t_end - t_spec}
     wall_time_s["total"] = t_end - t0
@@ -1069,9 +1241,12 @@ def run_study(
     """Run the planned runs of this shard that have no completed record, one JSON file per run.
 
     part 'all' runs main, then misspec. An existing record with the same config_hash and status ok or
-    nonfinite is skipped; status error is rerun. A record whose config_hash differs raises ValueError
-    naming the run, before anything runs, unless force=True, which reruns and overwrites it. A runner
-    exception is written as status 'error' with its text, and the study continues.
+    nonfinite is skipped; status error is rerun. A finished record whose config_hash differs raises
+    ValueError naming the run, before anything runs, unless force=True, which reruns and overwrites it.
+    An error record never blocks: it is rerun and overwritten whatever its config_hash. A runner
+    exception is written as status 'error' with its text, its traceback and its partial attribute (the
+    results computed before the failure, see ProfileRunError, or None), the log line shows the start of
+    the error text, and the study continues.
 
     Misspec planning reads the main M2 fit records first (m2_misspec_decision). It raises ValueError if no
     main M2 fit record exists at all (part main has not run in this out_dir). While M2 is undecided (some
@@ -1135,7 +1310,9 @@ def run_study(
         hashes = {s.run_id: config_hash(cfg, s) for s in specs}
         existing = {s.run_id: _read_json(out / f"{s.run_id}.json") for s in specs}
         mismatched = [
-            rid for rid, rec in existing.items() if rec is not None and rec.get("config_hash") != hashes[rid]
+            rid
+            for rid, rec in existing.items()
+            if rec is not None and rec.get("status") != "error" and rec.get("config_hash") != hashes[rid]
         ]
         if mismatched and not force:
             raise ValueError(
@@ -1154,7 +1331,13 @@ def run_study(
             try:
                 record = _check_runner_record(runner(cfg, spec))
             except Exception as exc:  # one failed run must not stop the study
-                record = {"status": "error", "error": f"{type(exc).__name__}: {exc}", "records": []}
+                record = {
+                    "status": "error",
+                    "error": f"{type(exc).__name__}: {exc}",
+                    "traceback": traceback.format_exc(),
+                    "partial": _json_partial(getattr(exc, "partial", None)),
+                    "records": [],
+                }
             elapsed = time.perf_counter() - t0
             record = dict(record)
             wall = dict(record.get("wall_time_s") or {})
@@ -1173,6 +1356,9 @@ def run_study(
             _write_json_atomic(out / f"{rid}.json", record)
             summary["run"] += 1
             summary["errors"] += record["status"] == "error"
-            log(f"{rid}  {record['status']}  {elapsed:.1f} s")
+            line = f"{rid}  {record['status']}  {elapsed:.1f} s"
+            if record["status"] == "error":
+                line += ": " + " ".join(str(record.get("error", "")).split())[:300]
+            log(line)
     summary["wall_time_s"] = time.perf_counter() - start
     return summary

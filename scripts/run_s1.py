@@ -20,6 +20,11 @@ any main M2 fit record is missing or failed, part misspec runs only the M1 and p
 after every main M2 fit has finished to add the M2 runs. `--report-only` rebuilds the report from the
 records.
 
+Changed configs: every record stores the config_hash of the settings and code it ran with. A finished
+record whose config_hash differs (for example after a code change that alters the profile method, the
+synthetic generator or the residual equations) stops the run unless --force reruns it. Records with
+status error never block and are rerun.
+
 No full-study wall time has been measured yet. The report's wall-time table shows measured times only.
 Before committing a machine overnight, time one full profile run (the record is kept and reused):
 

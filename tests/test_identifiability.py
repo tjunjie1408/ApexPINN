@@ -3,6 +3,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 import pytest
+import scipy.optimize
 from scipy.stats import chi2
 
 from apexpinn.models.ode_model import ODEModel
@@ -10,7 +11,10 @@ from apexpinn.models.pinn import PINN
 from apexpinn.models.stints import batch_from_synthetic
 from apexpinn.physics.identifiability import (
     PRIOR_RANGES,
+    S1C_BOUNDS,
     Interval,
+    ProfilePointError,
+    ProfileResult,
     ThetaLayout,
     gauss_newton_spectrum,
     identifiability_label,
@@ -193,6 +197,207 @@ def test_sse_deviance_is_the_gaussian_profile_likelihood_ratio():
     np.testing.assert_allclose(sse_deviance(sse, n_obs=10, sse_min=0.5), 10 * np.log(sse / 0.5))
 
 
+# --- optimizer failures and bounds ---
+
+
+def _nan_beyond(theta):
+    """Quadratic with its minimum at theta0 = 2, but NaN wherever theta0 > 1.5 (a failed ODE solve)."""
+    loss = (theta[0] - 2.0) ** 2 + theta[1] ** 2
+    return jnp.where(theta[0] > 1.5, jnp.nan, loss)
+
+
+def test_minimize_backtracks_from_non_finite_evaluations(x64):
+    start = [0.0, 0.3]
+    theta, loss, _ok = minimize(_nan_beyond, start)
+    assert np.all(np.isfinite(theta)) and np.isfinite(loss)
+    assert theta[0] <= 1.5
+    assert loss == pytest.approx(float(_nan_beyond(jnp.asarray(theta))), rel=1e-12)
+    assert loss < float(_nan_beyond(jnp.asarray(start)))
+
+    fit = ode_mle(_nan_beyond, [start])
+    assert fit.start_failed == [False] and fit.n_failed_evals[0] > 0
+    assert np.isfinite(fit.sse) and fit.theta[0] <= 1.5
+
+    profile = profile_likelihood(_nan_beyond, start, index=1, grid=[-0.1, 0.0, 0.1])
+    assert profile.failed.dtype == bool and not np.any(profile.failed)
+    assert np.all(np.isfinite(profile.loss)) and np.all(profile.thetas[:, 0] <= 1.5)
+    assert np.all(profile.n_failed_evals > 0)
+
+
+def _scripted_lbfgs(monkeypatch, trials, final, stale_fun=False, success=True):
+    """Replace scipy's L-BFGS-B by a script: evaluate x0 and trials, then return the iterate final.
+
+    Trials and final are clipped into the bounds first. The returned fun is the value of the last
+    evaluation when stale_fun (as scipy does after restoring an iterate), else the value at final.
+    """
+
+    def fake(fun, x0, bounds=None, **kwargs):
+        def clip(x):
+            x = np.asarray(x, dtype=np.float64)
+            if bounds is None:
+                return x
+            lo = [-np.inf if b[0] is None else b[0] for b in bounds]
+            hi = [np.inf if b[1] is None else b[1] for b in bounds]
+            return np.clip(x, lo, hi)
+
+        values = {}
+        last = None
+        for x in [x0, *trials]:
+            x = clip(x)
+            last, _ = fun(x)
+            values[x.tobytes()] = last
+        x_final = clip(final)
+        f_final = last if stale_fun else values[x_final.tobytes()]
+        return scipy.optimize.OptimizeResult(x=x_final, fun=f_final, success=success)
+
+    monkeypatch.setattr(scipy.optimize, "minimize", fake)
+
+
+def test_minimize_falls_back_to_the_best_finite_iterate(x64, monkeypatch):
+    """A penalty point accepted as the final iterate, or a stale penalty in res.fun, is not a failure."""
+    start, good, bad = [0.0, 0.3], [1.0, 0.1], [1.8, 0.0]  # _nan_beyond: 4.09, 1.01, NaN
+    _scripted_lbfgs(monkeypatch, trials=[good, bad], final=bad)  # the line search accepted the penalty
+    theta, loss, ok = minimize(_nan_beyond, start)
+    np.testing.assert_array_equal(theta, good)
+    assert loss == pytest.approx(1.01, rel=1e-12) and ok is False
+    fit = ode_mle(_nan_beyond, [start])
+    assert fit.start_failed == [False] and fit.n_failed_evals == [1] and fit.sse == pytest.approx(1.01)
+
+    _scripted_lbfgs(monkeypatch, trials=[good, bad], final=good, stale_fun=True, success=False)
+    theta, loss, ok = minimize(_nan_beyond, start)  # scipy restored good but kept the penalty in fun
+    np.testing.assert_array_equal(theta, good)
+    assert loss == pytest.approx(1.01, rel=1e-12) and ok is False
+
+    _scripted_lbfgs(monkeypatch, trials=[good], final=good)
+    theta, loss, ok = minimize(_nan_beyond, start)  # a clean finish is unchanged
+    np.testing.assert_array_equal(theta, good)
+    assert loss == pytest.approx(1.01, rel=1e-12) and ok is True
+
+    _scripted_lbfgs(monkeypatch, trials=[bad], final=bad)  # no finite iterate beyond the start
+    theta, loss, ok = minimize(_nan_beyond, start)
+    assert np.isnan(loss) and ok is False
+    fit = ode_mle(_nan_beyond, [start])
+    assert fit.start_failed == [True] and np.isnan(fit.sse)
+
+    grid = np.array([-0.1, 0.0, 0.1])  # profile of theta[1]; each point accepts the penalty
+    _scripted_lbfgs(monkeypatch, trials=[good, bad], final=bad)
+    profile = profile_likelihood(_nan_beyond, start, index=1, grid=grid)
+    assert not np.any(profile.failed) and not np.any(profile.success)
+    np.testing.assert_allclose(profile.thetas, np.stack([np.ones(3), grid], axis=1))
+    np.testing.assert_allclose(profile.loss, 1.0 + grid**2, rtol=1e-12)
+    assert np.all(profile.n_failed_evals == 1)
+
+
+def test_minimize_marks_a_restored_start_as_failed(x64, monkeypatch):
+    """scipy restores x0 when every trial of its first line search fails: that solve is failed."""
+    start, good, bad = [0.0, 0.3], [1.0, 0.1], [1.8, 0.0]  # _nan_beyond: 4.09, 1.01, NaN
+    _scripted_lbfgs(monkeypatch, trials=[bad], final=start, stale_fun=True, success=False)
+    theta, loss, ok = minimize(_nan_beyond, start)
+    np.testing.assert_array_equal(theta, start)
+    assert np.isnan(loss) and ok is False
+    fit = ode_mle(_nan_beyond, [start])
+    assert fit.start_failed == [True] and fit.n_failed_evals == [1] and np.isnan(fit.sse)
+
+    grid = np.array([-0.1, 0.0, 0.1])  # profile of theta[1]; every point restores its start
+    profile = profile_likelihood(_nan_beyond, start, index=1, grid=grid)
+    assert np.all(profile.failed) and not np.any(profile.success)
+    assert np.all(np.isnan(profile.loss)) and np.all(profile.n_failed_evals == 1)
+
+    _scripted_lbfgs(monkeypatch, trials=[], final=start)  # a clean stop at the start is not failed
+    theta, loss, ok = minimize(_nan_beyond, start)
+    assert loss == pytest.approx(4.09, rel=1e-12) and ok is True
+
+    for trials in ([bad, start], [good, bad]):  # a finite evaluation after the start, then x0 restored
+        _scripted_lbfgs(monkeypatch, trials=trials, final=start, stale_fun=True, success=False)
+        theta, loss, ok = minimize(_nan_beyond, start)
+        np.testing.assert_array_equal(theta, start)
+        assert loss == pytest.approx(4.09, rel=1e-12) and ok is False
+
+
+def test_minimize_reports_a_non_finite_start_as_failed(x64):
+    def loss_fn(theta):
+        return jnp.where(theta[0] > 0.0, jnp.nan, jnp.sum(theta**2))
+
+    theta, loss, ok = minimize(loss_fn, [1.0, 2.0])
+    assert np.isnan(loss) and ok is False
+    np.testing.assert_array_equal(theta, [1.0, 2.0])
+
+    fit = ode_mle(loss_fn, [[1.0, 2.0], [-1.0, 2.0]])
+    assert fit.start_failed == [True, False] and fit.best_index == 1
+    assert np.isnan(fit.start_sse[0]) and np.isfinite(fit.sse)
+    assert fit.n_failed_evals[0] == 1
+
+
+def test_bounds_keep_free_coordinates_inside_the_box(x64):
+    def loss_fn(theta):
+        return (theta[0] - 3.0) ** 2 + (theta[1] + 2.0) ** 2
+
+    box = [(-1.0, 1.0), (-1.0, 1.0)]
+    fit = ode_mle(loss_fn, [[0.0, 0.0], [5.0, -5.0]], bounds=box)
+    np.testing.assert_allclose(fit.theta, [1.0, -1.0], atol=1e-8)
+    for theta in fit.start_theta:
+        np.testing.assert_allclose(theta, [1.0, -1.0], atol=1e-8)
+
+    grid = [-2.0, 0.0, 2.0]  # the outer grid values lie outside the box of theta[0]
+    profile = profile_likelihood(loss_fn, fit.theta, 0, grid, bounds=box)
+    np.testing.assert_array_equal(profile.thetas[:, 0], grid)
+    np.testing.assert_allclose(profile.thetas[:, 1], -1.0, atol=1e-8)
+    np.testing.assert_allclose(profile.loss, [(g - 3.0) ** 2 + 1.0 for g in grid], atol=1e-8)
+    with pytest.raises(ValueError, match="bounds"):
+        ode_mle(loss_fn, [[0.0, 0.0]], bounds=[(-1.0, 1.0)])
+    with pytest.raises(ValueError, match="bounds"):
+        profile_likelihood(loss_fn, [0.0, 0.0], 0, grid, bounds=[(1.0, -1.0), (None, None)])
+
+
+def _valley(theta):
+    return (theta[0] - 1.0) ** 2 + (theta[1] - 0.5 * theta[0]) ** 2
+
+
+def test_profile_restarts_after_a_failed_point_from_the_last_finite_solution(x64):
+    def holed(theta):
+        return jnp.where(theta[0] == 1.5, jnp.nan, _valley(theta))
+
+    grid = np.linspace(0.0, 2.0, 5)  # the walk starts at 1.0 and meets the hole at grid[3] = 1.5
+    theta_hat = [1.0, 0.5]
+    reference = profile_likelihood(_valley, theta_hat, 0, grid)
+    profile = profile_likelihood(holed, theta_hat, 0, grid)
+    assert np.isnan(profile.loss[3]) and not profile.success[3] and profile.failed[3]
+    assert profile.n_failed_evals[3] == 1
+    keep = [0, 1, 2, 4]
+    assert not np.any(profile.failed[keep])
+    np.testing.assert_allclose(profile.loss[keep], reference.loss[keep], atol=1e-10)
+    np.testing.assert_allclose(profile.thetas[keep], reference.thetas[keep], atol=1e-6)
+    np.testing.assert_allclose(profile.loss[keep], (grid[keep] - 1.0) ** 2, atol=1e-10)
+
+
+def test_profile_point_error_names_the_point_and_keeps_the_partial_result(x64):
+    jitted = jax.jit(jax.value_and_grad(_valley))
+
+    def raising(theta):
+        if float(theta[0]) == 0.5:
+            raise RuntimeError("solver exploded")
+        return jitted(theta)
+
+    grid = np.linspace(0.0, 2.0, 5)  # walk order 2, 3, 4, then 1 (value 0.5) raises
+    with pytest.raises(ProfilePointError) as info:
+        profile_likelihood(_valley, [1.0, 0.5], 0, grid, value_and_grad=raising)
+    err = info.value
+    assert isinstance(err, RuntimeError)
+    message = str(err)
+    assert "index 0" in message and "grid point 1" in message and "value 0.5" in message
+    assert "RuntimeError: solver exploded" in message
+    assert isinstance(err.__cause__, RuntimeError) and str(err.__cause__) == "solver exploded"
+    partial = err.partial
+    assert isinstance(partial, ProfileResult)
+    np.testing.assert_array_equal(partial.grid, grid)
+    solved, unsolved = [2, 3, 4], [0, 1]
+    assert np.all(np.isfinite(partial.loss[solved])) and np.all(partial.success[solved])
+    np.testing.assert_allclose(partial.thetas[solved, 0], grid[solved])
+    assert np.all(np.isnan(partial.loss[unsolved])) and not np.any(partial.success[unsolved])
+    assert np.all(np.isnan(partial.thetas[unsolved]))
+    assert not np.any(partial.failed)
+
+
 # --- likelihood_interval ---
 
 
@@ -235,6 +440,35 @@ def test_likelihood_interval_level_and_input_validation():
     with pytest.raises(ValueError, match="deviance"):
         likelihood_interval(grid, [1.0, 0.0])
     assert likelihood_interval(grid, deviance, level=0.5).threshold == pytest.approx(chi2.ppf(0.5, 1))
+
+
+def test_likelihood_interval_with_non_finite_entries():
+    nan = np.nan
+    grid = np.arange(7.0)
+    clean = likelihood_interval(grid, [8.0, 8.0, 2.0, 0.0, 2.0, 8.0, 8.0])
+    beyond = likelihood_interval(grid, [nan, 8.0, 2.0, 0.0, 2.0, 8.0, nan])
+    assert beyond == clean and not clean.lo_failed and not clean.hi_failed
+
+    hi = likelihood_interval(grid, [8.0, 8.0, 2.0, 0.0, 1.0, nan, 0.5])
+    assert not hi.hi_bounded and hi.hi_failed and hi.hi == 4.0
+    assert hi.lo_bounded and not hi.lo_failed
+    assert hi.lo == pytest.approx(clean.lo)
+    assert profile_shape_label(hi, truth=3.0) == "flat"
+
+    lo = likelihood_interval(grid, [0.5, nan, 1.0, 0.0, 2.0, 8.0, 8.0])
+    assert not lo.lo_bounded and lo.lo_failed and lo.lo == 2.0
+    assert lo.hi_bounded and not lo.hi_failed
+    assert lo.hi == pytest.approx(clean.hi)
+    assert profile_shape_label(lo, truth=3.0) == "flat"
+
+    with pytest.raises(ValueError, match="deviance"):
+        likelihood_interval(grid, [nan] * 7)
+
+    # The minimum is taken over the finite entries only (np.argmin alone would pick the NaN).
+    first_nan = likelihood_interval(np.arange(5.0), [nan, 8.0, 0.0, 8.0, 8.0])
+    assert first_nan.lo_bounded and first_nan.hi_bounded
+    assert first_nan.lo == pytest.approx(2.0 - THRESHOLD_95 / 8.0)
+    assert first_nan.hi == pytest.approx(2.0 + THRESHOLD_95 / 8.0)
 
 
 # --- labels ---
@@ -361,6 +595,37 @@ def test_prior_ranges_cover_the_synthetic_truth():
         assert np.all(values > low) and np.all(values < high), name
 
 
+def test_coordinate_bounds_follow_the_layout_order(x64):
+    assert S1C_BOUNDS == {
+        "k": (0.01, 10.0),
+        "rho": (0.002, 2.0),
+        "gamma": (0.1, 60.0),
+        "h_opt": (0.02, 0.98),
+        "kappa": (0.03, 30.0),
+    }
+    layout = ThetaLayout.from_compounds(("C2", "C3", "C4"))
+    bounds = layout.coordinate_bounds(S1C_BOUNDS)
+    assert len(bounds) == 13 and all(lo < hi for lo, hi in bounds)
+    for i, group in enumerate(GROUPS):
+        low, high = S1C_BOUNDS[group]
+        if group == "h_opt":
+            expected = (np.log(low / (1.0 - low)), np.log(high / (1.0 - high)))
+        else:
+            expected = (np.log(low), np.log(high))
+        for j in range(3):
+            assert bounds[3 * i + j] == pytest.approx(expected, rel=1e-12), layout.names[3 * i + j]
+    assert bounds[12] == pytest.approx((np.log(0.03), np.log(30.0)), rel=1e-12)
+    assert layout.coordinate_bounds() == bounds
+    v = layout.to_vector(default_theta_true())
+    assert all(lo < x < hi for x, (lo, hi) in zip(v, bounds, strict=True))
+    with pytest.raises(ValueError, match="box"):
+        layout.coordinate_bounds({**S1C_BOUNDS, "k": (1.0, 0.5)})
+    with pytest.raises(ValueError, match="box"):
+        layout.coordinate_bounds({**S1C_BOUNDS, "h_opt": (0.1, 1.0)})
+    with pytest.raises(ValueError, match="box"):
+        layout.coordinate_bounds({"k": (0.01, 10.0)})
+
+
 # --- ODE likelihood adapter ---
 
 
@@ -387,6 +652,30 @@ def test_ode_least_squares_concentrates_offsets_on_noise_free_data(x64):
     shifted = eqx.tree_at(lambda b: b.y, batch, batch.y.at[0].add(5.0))
     sse_shifted, _, _ = ode_least_squares(shifted, layout, ds.theta_true)
     assert float(sse_shifted(v_off)) == pytest.approx(sse_off, rel=1e-9)
+
+
+def test_ode_least_squares_returns_nan_when_the_solver_hits_max_steps(x64):
+    """A huge k_c makes the thermal ODE stiff: Tsit5 runs out of max_steps, the SSE is NaN, no raise."""
+    ds = make_synthetic_dataset(jax.random.key(0), n_stints=2)
+    batch = batch_from_synthetic(ds)
+    layout = ThetaLayout.from_compounds(("C2", "C3", "C4"))
+    sse_fn, _, _ = ode_least_squares(batch, layout, ds.theta_true)
+    v_true = layout.to_vector(ds.theta_true)
+    assert np.isfinite(float(sse_fn(v_true)))
+    c0 = int(batch.compound_idx[0])
+    assert c0 in layout.compound_idx
+    v_stiff = v_true.copy()
+    v_stiff[layout.compound_idx.index(c0)] = np.log(1e6)  # log k_c of the first stint's compound
+    assert not np.isfinite(float(sse_fn(v_stiff)))
+
+    good = ODEModel.init(physics=layout.to_physics(v_true, ds.theta_true))
+    stiff = ODEModel.init(physics=layout.to_physics(v_stiff, ds.theta_true))
+    h, w, ok = good.solve_with_status(c0, batch.q[0], batch.tau)
+    assert bool(ok) and np.all(np.isfinite(np.asarray(h))) and np.all(np.isfinite(np.asarray(w)))
+    _, _, ok = stiff.solve_with_status(c0, batch.q[0], batch.tau)
+    assert not bool(ok)
+    with pytest.raises(Exception, match="maximum number of solver steps"):
+        jax.block_until_ready(stiff.solve(c0, batch.q[0], batch.tau))  # solve keeps throw=True
 
 
 # --- slow: optimization through Diffrax ---

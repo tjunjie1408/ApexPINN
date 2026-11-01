@@ -45,12 +45,16 @@ def _diffeqsolve(
     rtol: float,
     atol: float,
     max_steps: int,
+    *,
+    throw: bool = True,
 ) -> diffrax.Solution:
     """Solve both ODEs on tau in [0, K] from h(0) = w(0) = 0, with q linear between knots tau = 0..K.
 
     The interior knots are jump times, so no step spans a slope change of q and the error estimate stays
     valid (the synthetic generator solves the same way). This also keeps knots past a saved time out of
     the steps that produce it, up to a few ULPs at the knot itself.
+
+    throw=False returns a failed solve (for example max_steps reached) in sol.result instead of raising.
     """
     knots = jnp.arange(q_knots.shape[0], dtype=q_knots.dtype)
     q_of_tau = diffrax.LinearInterpolation(ts=knots, ys=q_knots)
@@ -69,6 +73,7 @@ def _diffeqsolve(
         ),
         adjoint=diffrax.RecursiveCheckpointAdjoint(),
         max_steps=max_steps,
+        throw=throw,
     )
 
 
@@ -76,6 +81,14 @@ def _diffeqsolve(
 def _solve_at(physics, compound_idx, q_knots, ts, rtol, atol, max_steps):
     sol = _diffeqsolve(physics, compound_idx, q_knots, diffrax.SaveAt(ts=ts), rtol, atol, max_steps)
     return sol.ys
+
+
+@eqx.filter_jit
+def _solve_at_status(physics, compound_idx, q_knots, ts, rtol, atol, max_steps):
+    """(ys, ok) without raising: ok is False when the solve failed (ys is then not usable)."""
+    saveat = diffrax.SaveAt(ts=ts)
+    sol = _diffeqsolve(physics, compound_idx, q_knots, saveat, rtol, atol, max_steps, throw=False)
+    return sol.ys, sol.result == diffrax.RESULTS.successful
 
 
 def _as_knots(q_knots: ArrayLike) -> jax.Array:
@@ -146,6 +159,23 @@ class ODEModel(eqx.Module):
             self.physics, jnp.asarray(compound_idx), q_knots, ts, self.rtol, self.atol, self.max_steps
         )
         return h, w
+
+    def solve_with_status(
+        self, compound_idx: ArrayLike, q_knots: ArrayLike, ts: ArrayLike
+    ) -> tuple[jax.Array, jax.Array, jax.Array]:
+        """(h, w, ok) like solve, but a failed solve (e.g. max_steps reached) gives ok False, no raise.
+
+        h and w are not usable where ok is False. The S1c ODE likelihood uses this so that an optimizer
+        step into a stiff region (very large k_c) reads as a failed evaluation instead of aborting.
+        """
+        q_knots = _as_knots(q_knots)
+        ts = jnp.asarray(ts, dtype=q_knots.dtype)
+        if ts.ndim != 1:
+            raise ValueError(f"ts must be 1-D, got shape {ts.shape}")
+        (h, w), ok = _solve_at_status(
+            self.physics, jnp.asarray(compound_idx), q_knots, ts, self.rtol, self.atol, self.max_steps
+        )
+        return h, w, ok
 
     def dense_latent(
         self, compound_idx: ArrayLike, q_knots: ArrayLike

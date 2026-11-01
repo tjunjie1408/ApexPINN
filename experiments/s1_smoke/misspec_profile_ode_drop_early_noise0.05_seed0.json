@@ -1,0 +1,708 @@
+{
+  "config_hash": "5675b0aa05c8c73b21d7a9034f193823d2b671825212ea1f0d5b17d4c64cf45a",
+  "config_name": "smoke",
+  "meta": {
+    "data_hash": null,
+    "devices": [
+      "cpu:0"
+    ],
+    "dtype": "float64",
+    "git_commit": "06dbb9d8809c5f30b565e24036e10d522a9a7126",
+    "packages": {
+      "diffrax": "0.7.2",
+      "equinox": "0.13.8",
+      "jax": "0.12.0.1",
+      "jaxlib": "0.12.0.1",
+      "optax": "0.2.8"
+    },
+    "python": "3.12.13",
+    "seeds": [
+      0
+    ],
+    "timestamp_utc": "2026-11-01T07:05:20.301904+00:00"
+  },
+  "mle": {
+    "at_bound": [],
+    "best_index": 0,
+    "n_failed_evals": [
+      0
+    ],
+    "sse": 0.6825357870219454,
+    "start_failed": [
+      false
+    ],
+    "start_sse": [
+      0.6825357870219454
+    ],
+    "success": false,
+    "theta": [
+      -1.2670584482654226,
+      -1.0366026040603629,
+      -0.7478878296857722,
+      -3.067713777282906,
+      -2.807950206417159,
+      -2.500676887463693,
+      1.2290368105993403,
+      1.0030633069997905,
+      1.1673144435580713,
+      0.6246823171612754,
+      0.4115954480191373,
+      0.3525839395217776,
+      -0.38288052455363364
+    ],
+    "values": {
+      "gamma_c[C2]": 3.4179358307488688,
+      "gamma_c[C3]": 2.7266215272188217,
+      "gamma_c[C4]": 3.213351403897453,
+      "h_opt_c[C2]": 0.6512827180601702,
+      "h_opt_c[C3]": 0.601470375583567,
+      "h_opt_c[C4]": 0.5872440369612512,
+      "k_c[C2]": 0.28165891869435417,
+      "k_c[C3]": 0.3546575496119651,
+      "k_c[C4]": 0.47336532576920304,
+      "kappa": 0.6818943640528938,
+      "rho_c[C2]": 0.04652740536610408,
+      "rho_c[C3]": 0.06032852676616371,
+      "rho_c[C4]": 0.0820294551178452
+    }
+  },
+  "n_obs": 301,
+  "profiles": {
+    "k_c[C2]": {
+      "at_bound": [
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "covers_truth": true,
+      "deviance": [
+        24.85820743078586,
+        5.008709572904034,
+        0.0,
+        6.267814135600693,
+        41.110785384539355
+      ],
+      "failed": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "grid": [
+        0.14082945934717708,
+        0.21124418902076564,
+        0.28165891869435417,
+        0.37460636186349106,
+        0.5633178373887083
+      ],
+      "grid_coord": [
+        -1.960205628825368,
+        -1.5547405207172034,
+        -1.2670584482654226,
+        -0.9818795060317601,
+        -0.5739112677054773
+      ],
+      "group": "k",
+      "interval": {
+        "hi": 0.33545209570511975,
+        "hi_bounded": true,
+        "hi_failed": false,
+        "lo": 0.2258920880658782,
+        "lo_bounded": true,
+        "lo_failed": false,
+        "threshold": 3.841458820694124
+      },
+      "mle": 0.28165891869435417,
+      "n_failed_evals": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "shape": "sharp",
+      "sse": [
+        0.7412621350981331,
+        0.693956407891596,
+        0.6825043594822279,
+        0.6968653571885641,
+        0.7823870734336573
+      ],
+      "sse_min": 0.6825043594822279,
+      "success": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "truth": 0.28
+    },
+    "k_c[C3]": {
+      "at_bound": [
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "covers_truth": true,
+      "deviance": [
+        8.743052943226074,
+        1.7142626258005282,
+        0.0,
+        1.7665796057028071,
+        14.235272194105317
+      ],
+      "failed": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "grid": [
+        0.17732877480598255,
+        0.26599316220897384,
+        0.3546575496119651,
+        0.4716945409839136,
+        0.7093150992239302
+      ],
+      "grid_coord": [
+        -1.7297497846203083,
+        -1.3242846765121437,
+        -1.0366026040603629,
+        -0.7514236618267004,
+        -0.3434554235004175
+      ],
+      "group": "k",
+      "interval": {
+        "hi": 0.5048293424696333,
+        "hi_bounded": true,
+        "hi_failed": false,
+        "lo": 0.23527627542225002,
+        "lo_bounded": true,
+        "lo_failed": false,
+        "threshold": 3.841458820694124
+      },
+      "mle": 0.3546575496119651,
+      "n_failed_evals": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "shape": "sharp",
+      "sse": [
+        0.7026428735331498,
+        0.6864252244291824,
+        0.682526989754538,
+        0.6865445427539919,
+        0.7155813826014161
+      ],
+      "sse_min": 0.682526989754538,
+      "success": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "truth": 0.35
+    },
+    "k_c[C4]": {
+      "at_bound": [
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "covers_truth": true,
+      "deviance": [
+        5.614546180431177,
+        1.3537822962165798,
+        0.0,
+        2.217766278731509,
+        15.466708646342857
+      ],
+      "failed": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "grid": [
+        0.23668266288460152,
+        0.3550239943269023,
+        0.47336532576920304,
+        0.62957588327304,
+        0.9467306515384061
+      ],
+      "grid_coord": [
+        -1.4410350102457175,
+        -1.035569902137553,
+        -0.7478878296857722,
+        -0.46270888745210975,
+        -0.05474064912582686
+      ],
+      "group": "k",
+      "interval": {
+        "hi": 0.6618533238758988,
+        "hi_bounded": true,
+        "hi_failed": false,
+        "lo": 0.28018546622315277,
+        "lo_bounded": true,
+        "lo_failed": false,
+        "threshold": 3.841458820694124
+      },
+      "mle": 0.47336532576920304,
+      "n_failed_evals": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "shape": "wide",
+      "sse": [
+        0.6953577263273483,
+        0.6855840245130677,
+        0.6825074549078403,
+        0.6875547372728767,
+        0.7184943659256952
+      ],
+      "sse_min": 0.6825074549078403,
+      "success": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "truth": 0.4300000000000001
+    },
+    "rho_c[C2]": {
+      "at_bound": [
+        [],
+        [],
+        [],
+        [],
+        [
+          "k_c[C2]"
+        ]
+      ],
+      "covers_truth": false,
+      "deviance": [
+        85.74856834016484,
+        44.05950424923674,
+        0.0,
+        137.7055950240834,
+        273.4289831954019
+      ],
+      "failed": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "grid": [
+        0.02326370268305204,
+        0.03489555402457806,
+        0.04652740536610408,
+        0.061881449136918426,
+        0.09305481073220816
+      ],
+      "grid_coord": [
+        -3.7608609578428513,
+        -3.3553958497346867,
+        -3.067713777282906,
+        -2.7825348350492436,
+        -2.3745665967229606
+      ],
+      "group": "rho",
+      "interval": {
+        "hi": 0.0468990257457837,
+        "hi_bounded": true,
+        "hi_failed": false,
+        "lo": 0.04537489984161541,
+        "lo_bounded": true,
+        "lo_failed": false,
+        "threshold": 3.841458820694124
+      },
+      "mle": 0.04652740536610408,
+      "n_failed_evals": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "shape": "sharp",
+      "sse": [
+        0.9074601821855379,
+        0.7900907519430342,
+        0.6825055945794816,
+        1.0784330591066236,
+        1.692856574446358
+      ],
+      "sse_min": 0.6825055945794816,
+      "success": [
+        true,
+        true,
+        true,
+        true,
+        false
+      ],
+      "truth": 0.045
+    },
+    "rho_c[C3]": {
+      "at_bound": [
+        [
+          "h_opt_c[C3]"
+        ],
+        [],
+        [],
+        [],
+        [
+          "k_c[C3]"
+        ]
+      ],
+      "covers_truth": true,
+      "deviance": [
+        39.313428654265024,
+        37.61704946970871,
+        0.0,
+        67.2831451961105,
+        143.89062089810884
+      ],
+      "failed": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "grid": [
+        0.030164263383081855,
+        0.04524639507462278,
+        0.06032852676616371,
+        0.08023694059899773,
+        0.12065705353232742
+      ],
+      "grid_coord": [
+        -3.5010973869771043,
+        -3.0956322788689397,
+        -2.807950206417159,
+        -2.5227712641834965,
+        -2.1148030258572135
+      ],
+      "group": "rho",
+      "interval": {
+        "hi": 0.061318835151528306,
+        "hi_bounded": true,
+        "hi_failed": false,
+        "lo": 0.058581967976276864,
+        "lo_bounded": true,
+        "lo_failed": false,
+        "threshold": 3.841458820694124
+      },
+      "mle": 0.06032852676616371,
+      "n_failed_evals": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "shape": "sharp",
+      "sse": [
+        0.7777525970451932,
+        0.7733816586745079,
+        0.6825249460820128,
+        0.8534876917938077,
+        1.100853434285188
+      ],
+      "sse_min": 0.6825249460820128,
+      "success": [
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "truth": 0.059999999999999984
+    },
+    "rho_c[C4]": {
+      "at_bound": [
+        [
+          "k_c[C4]",
+          "h_opt_c[C4]"
+        ],
+        [],
+        [],
+        [],
+        [
+          "k_c[C4]"
+        ]
+      ],
+      "covers_truth": true,
+      "deviance": [
+        40.62089604294191,
+        37.57131041962532,
+        0.0,
+        108.90198601811576,
+        248.08001774552523
+      ],
+      "failed": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "grid": [
+        0.0410147275589226,
+        0.061522091338383905,
+        0.0820294551178452,
+        0.10909917530673413,
+        0.1640589102356904
+      ],
+      "grid_coord": [
+        -3.1938240680236385,
+        -2.788358959915474,
+        -2.500676887463693,
+        -2.2154979452300307,
+        -1.807529706903748
+      ],
+      "group": "rho",
+      "interval": {
+        "hi": 0.08285879756476504,
+        "hi_bounded": true,
+        "hi_failed": false,
+        "lo": 0.07965178843125015,
+        "lo_bounded": true,
+        "lo_failed": false,
+        "threshold": 3.841458820694124
+      },
+      "mle": 0.0820294551178452,
+      "n_failed_evals": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "shape": "sharp",
+      "sse": [
+        0.7811400063363231,
+        0.7732658316710399,
+        0.6825264331840905,
+        0.9800483177243418,
+        1.5561768603078359
+      ],
+      "sse_min": 0.6825264331840905,
+      "success": [
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "truth": 0.07999999999999999
+    }
+  },
+  "records": [
+    {
+      "conditions": "noise_s=0.05 s, lap time only, exact ODE likelihood with b_s concentrated out, log / logit coordinates, MLE from 1 start(s) (start 0 = prior draw fold_in(key(0), 101)), L-BFGS-B maxiter=100, free coordinates inside S1C_BOUNDS, profile method v2, rtol=1e-06, atol=1e-06, max_steps=4096, device=cpu:0",
+      "instrument": "apexpinn.train.s1_study.run_profile, apexpinn.physics.identifiability (ode_least_squares, ode_mle, profile_likelihood, likelihood_interval, gauss_newton_spectrum)",
+      "population": "synthetic stints from make_synthetic_dataset(key(seed=0)), n_stints=12, n_scored=301 laps, compounds=['C2', 'C3', 'C4'], variant=drop_early",
+      "quantity": "95% profile-likelihood interval lower endpoint of rho_c[C2] (deviance n log(SSE / SSE_min) <= 3.841), natural units; an unbounded side reports the grid edge",
+      "status": "Observed",
+      "value": 0.04537489984161541
+    },
+    {
+      "conditions": "noise_s=0.05 s, lap time only, exact ODE likelihood with b_s concentrated out, log / logit coordinates, MLE from 1 start(s) (start 0 = prior draw fold_in(key(0), 101)), L-BFGS-B maxiter=100, free coordinates inside S1C_BOUNDS, profile method v2, rtol=1e-06, atol=1e-06, max_steps=4096, device=cpu:0",
+      "instrument": "apexpinn.train.s1_study.run_profile, apexpinn.physics.identifiability (ode_least_squares, ode_mle, profile_likelihood, likelihood_interval, gauss_newton_spectrum)",
+      "population": "synthetic stints from make_synthetic_dataset(key(seed=0)), n_stints=12, n_scored=301 laps, compounds=['C2', 'C3', 'C4'], variant=drop_early",
+      "quantity": "95% profile-likelihood interval upper endpoint of rho_c[C2] (deviance n log(SSE / SSE_min) <= 3.841), natural units; an unbounded side reports the grid edge",
+      "status": "Observed",
+      "value": 0.0468990257457837
+    },
+    {
+      "conditions": "noise_s=0.05 s, lap time only, exact ODE likelihood with b_s concentrated out, log / logit coordinates, MLE from 1 start(s) (start 0 = prior draw fold_in(key(0), 101)), L-BFGS-B maxiter=100, free coordinates inside S1C_BOUNDS, profile method v2, rtol=1e-06, atol=1e-06, max_steps=4096, device=cpu:0",
+      "instrument": "apexpinn.train.s1_study.run_profile, apexpinn.physics.identifiability (ode_least_squares, ode_mle, profile_likelihood, likelihood_interval, gauss_newton_spectrum)",
+      "population": "synthetic stints from make_synthetic_dataset(key(seed=0)), n_stints=12, n_scored=301 laps, compounds=['C2', 'C3', 'C4'], variant=drop_early",
+      "quantity": "95% profile-likelihood interval lower endpoint of rho_c[C3] (deviance n log(SSE / SSE_min) <= 3.841), natural units; an unbounded side reports the grid edge",
+      "status": "Observed",
+      "value": 0.058581967976276864
+    },
+    {
+      "conditions": "noise_s=0.05 s, lap time only, exact ODE likelihood with b_s concentrated out, log / logit coordinates, MLE from 1 start(s) (start 0 = prior draw fold_in(key(0), 101)), L-BFGS-B maxiter=100, free coordinates inside S1C_BOUNDS, profile method v2, rtol=1e-06, atol=1e-06, max_steps=4096, device=cpu:0",
+      "instrument": "apexpinn.train.s1_study.run_profile, apexpinn.physics.identifiability (ode_least_squares, ode_mle, profile_likelihood, likelihood_interval, gauss_newton_spectrum)",
+      "population": "synthetic stints from make_synthetic_dataset(key(seed=0)), n_stints=12, n_scored=301 laps, compounds=['C2', 'C3', 'C4'], variant=drop_early",
+      "quantity": "95% profile-likelihood interval upper endpoint of rho_c[C3] (deviance n log(SSE / SSE_min) <= 3.841), natural units; an unbounded side reports the grid edge",
+      "status": "Observed",
+      "value": 0.061318835151528306
+    },
+    {
+      "conditions": "noise_s=0.05 s, lap time only, exact ODE likelihood with b_s concentrated out, log / logit coordinates, MLE from 1 start(s) (start 0 = prior draw fold_in(key(0), 101)), L-BFGS-B maxiter=100, free coordinates inside S1C_BOUNDS, profile method v2, rtol=1e-06, atol=1e-06, max_steps=4096, device=cpu:0",
+      "instrument": "apexpinn.train.s1_study.run_profile, apexpinn.physics.identifiability (ode_least_squares, ode_mle, profile_likelihood, likelihood_interval, gauss_newton_spectrum)",
+      "population": "synthetic stints from make_synthetic_dataset(key(seed=0)), n_stints=12, n_scored=301 laps, compounds=['C2', 'C3', 'C4'], variant=drop_early",
+      "quantity": "95% profile-likelihood interval lower endpoint of rho_c[C4] (deviance n log(SSE / SSE_min) <= 3.841), natural units; an unbounded side reports the grid edge",
+      "status": "Observed",
+      "value": 0.07965178843125015
+    },
+    {
+      "conditions": "noise_s=0.05 s, lap time only, exact ODE likelihood with b_s concentrated out, log / logit coordinates, MLE from 1 start(s) (start 0 = prior draw fold_in(key(0), 101)), L-BFGS-B maxiter=100, free coordinates inside S1C_BOUNDS, profile method v2, rtol=1e-06, atol=1e-06, max_steps=4096, device=cpu:0",
+      "instrument": "apexpinn.train.s1_study.run_profile, apexpinn.physics.identifiability (ode_least_squares, ode_mle, profile_likelihood, likelihood_interval, gauss_newton_spectrum)",
+      "population": "synthetic stints from make_synthetic_dataset(key(seed=0)), n_stints=12, n_scored=301 laps, compounds=['C2', 'C3', 'C4'], variant=drop_early",
+      "quantity": "95% profile-likelihood interval upper endpoint of rho_c[C4] (deviance n log(SSE / SSE_min) <= 3.841), natural units; an unbounded side reports the grid edge",
+      "status": "Observed",
+      "value": 0.08285879756476504
+    },
+    {
+      "conditions": "noise_s=0.05 s, lap time only, exact ODE likelihood with b_s concentrated out, log / logit coordinates, MLE from 1 start(s) (start 0 = prior draw fold_in(key(0), 101)), L-BFGS-B maxiter=100, free coordinates inside S1C_BOUNDS, profile method v2, rtol=1e-06, atol=1e-06, max_steps=4096, device=cpu:0",
+      "instrument": "apexpinn.train.s1_study.run_profile, apexpinn.physics.identifiability (ode_least_squares, ode_mle, profile_likelihood, likelihood_interval, gauss_newton_spectrum)",
+      "population": "synthetic stints from make_synthetic_dataset(key(seed=0)), n_stints=12, n_scored=301 laps, compounds=['C2', 'C3', 'C4'], variant=drop_early",
+      "quantity": "95% profile-likelihood interval lower endpoint of k_c[C2] (deviance n log(SSE / SSE_min) <= 3.841), natural units; an unbounded side reports the grid edge",
+      "status": "Observed",
+      "value": 0.2258920880658782
+    },
+    {
+      "conditions": "noise_s=0.05 s, lap time only, exact ODE likelihood with b_s concentrated out, log / logit coordinates, MLE from 1 start(s) (start 0 = prior draw fold_in(key(0), 101)), L-BFGS-B maxiter=100, free coordinates inside S1C_BOUNDS, profile method v2, rtol=1e-06, atol=1e-06, max_steps=4096, device=cpu:0",
+      "instrument": "apexpinn.train.s1_study.run_profile, apexpinn.physics.identifiability (ode_least_squares, ode_mle, profile_likelihood, likelihood_interval, gauss_newton_spectrum)",
+      "population": "synthetic stints from make_synthetic_dataset(key(seed=0)), n_stints=12, n_scored=301 laps, compounds=['C2', 'C3', 'C4'], variant=drop_early",
+      "quantity": "95% profile-likelihood interval upper endpoint of k_c[C2] (deviance n log(SSE / SSE_min) <= 3.841), natural units; an unbounded side reports the grid edge",
+      "status": "Observed",
+      "value": 0.33545209570511975
+    },
+    {
+      "conditions": "noise_s=0.05 s, lap time only, exact ODE likelihood with b_s concentrated out, log / logit coordinates, MLE from 1 start(s) (start 0 = prior draw fold_in(key(0), 101)), L-BFGS-B maxiter=100, free coordinates inside S1C_BOUNDS, profile method v2, rtol=1e-06, atol=1e-06, max_steps=4096, device=cpu:0",
+      "instrument": "apexpinn.train.s1_study.run_profile, apexpinn.physics.identifiability (ode_least_squares, ode_mle, profile_likelihood, likelihood_interval, gauss_newton_spectrum)",
+      "population": "synthetic stints from make_synthetic_dataset(key(seed=0)), n_stints=12, n_scored=301 laps, compounds=['C2', 'C3', 'C4'], variant=drop_early",
+      "quantity": "95% profile-likelihood interval lower endpoint of k_c[C3] (deviance n log(SSE / SSE_min) <= 3.841), natural units; an unbounded side reports the grid edge",
+      "status": "Observed",
+      "value": 0.23527627542225002
+    },
+    {
+      "conditions": "noise_s=0.05 s, lap time only, exact ODE likelihood with b_s concentrated out, log / logit coordinates, MLE from 1 start(s) (start 0 = prior draw fold_in(key(0), 101)), L-BFGS-B maxiter=100, free coordinates inside S1C_BOUNDS, profile method v2, rtol=1e-06, atol=1e-06, max_steps=4096, device=cpu:0",
+      "instrument": "apexpinn.train.s1_study.run_profile, apexpinn.physics.identifiability (ode_least_squares, ode_mle, profile_likelihood, likelihood_interval, gauss_newton_spectrum)",
+      "population": "synthetic stints from make_synthetic_dataset(key(seed=0)), n_stints=12, n_scored=301 laps, compounds=['C2', 'C3', 'C4'], variant=drop_early",
+      "quantity": "95% profile-likelihood interval upper endpoint of k_c[C3] (deviance n log(SSE / SSE_min) <= 3.841), natural units; an unbounded side reports the grid edge",
+      "status": "Observed",
+      "value": 0.5048293424696333
+    },
+    {
+      "conditions": "noise_s=0.05 s, lap time only, exact ODE likelihood with b_s concentrated out, log / logit coordinates, MLE from 1 start(s) (start 0 = prior draw fold_in(key(0), 101)), L-BFGS-B maxiter=100, free coordinates inside S1C_BOUNDS, profile method v2, rtol=1e-06, atol=1e-06, max_steps=4096, device=cpu:0",
+      "instrument": "apexpinn.train.s1_study.run_profile, apexpinn.physics.identifiability (ode_least_squares, ode_mle, profile_likelihood, likelihood_interval, gauss_newton_spectrum)",
+      "population": "synthetic stints from make_synthetic_dataset(key(seed=0)), n_stints=12, n_scored=301 laps, compounds=['C2', 'C3', 'C4'], variant=drop_early",
+      "quantity": "95% profile-likelihood interval lower endpoint of k_c[C4] (deviance n log(SSE / SSE_min) <= 3.841), natural units; an unbounded side reports the grid edge",
+      "status": "Observed",
+      "value": 0.28018546622315277
+    },
+    {
+      "conditions": "noise_s=0.05 s, lap time only, exact ODE likelihood with b_s concentrated out, log / logit coordinates, MLE from 1 start(s) (start 0 = prior draw fold_in(key(0), 101)), L-BFGS-B maxiter=100, free coordinates inside S1C_BOUNDS, profile method v2, rtol=1e-06, atol=1e-06, max_steps=4096, device=cpu:0",
+      "instrument": "apexpinn.train.s1_study.run_profile, apexpinn.physics.identifiability (ode_least_squares, ode_mle, profile_likelihood, likelihood_interval, gauss_newton_spectrum)",
+      "population": "synthetic stints from make_synthetic_dataset(key(seed=0)), n_stints=12, n_scored=301 laps, compounds=['C2', 'C3', 'C4'], variant=drop_early",
+      "quantity": "95% profile-likelihood interval upper endpoint of k_c[C4] (deviance n log(SSE / SSE_min) <= 3.841), natural units; an unbounded side reports the grid edge",
+      "status": "Observed",
+      "value": 0.6618533238758988
+    },
+    {
+      "conditions": "noise_s=0.05 s, lap time only, exact ODE likelihood with b_s concentrated out, log / logit coordinates, MLE from 1 start(s) (start 0 = prior draw fold_in(key(0), 101)), L-BFGS-B maxiter=100, free coordinates inside S1C_BOUNDS, profile method v2, rtol=1e-06, atol=1e-06, max_steps=4096, device=cpu:0",
+      "instrument": "apexpinn.train.s1_study.run_profile, apexpinn.physics.identifiability (ode_least_squares, ode_mle, profile_likelihood, likelihood_interval, gauss_newton_spectrum)",
+      "population": "synthetic stints from make_synthetic_dataset(key(seed=0)), n_stints=12, n_scored=301 laps, compounds=['C2', 'C3', 'C4'], variant=drop_early",
+      "quantity": "smallest relative Gauss-Newton eigenvalue (eigenvalue / largest) of J^T J at the MLE, dimensionless",
+      "status": "Observed",
+      "value": 0.0001361272004000495
+    }
+  ],
+  "run_id": "misspec_profile_ode_drop_early_noise0.05_seed0",
+  "schema": "apexpinn.s1_run/v1",
+  "spec": {
+    "kind": "profile",
+    "model": null,
+    "noise_s": 0.05,
+    "part": "misspec",
+    "seed": 0,
+    "variant": "drop_early"
+  },
+  "spectrum": {
+    "eigenvalues": [
+      39.8927049410589,
+      31.017458185280866,
+      16.25398034871785,
+      2.1507265578947465,
+      1.0317100886020723,
+      0.8642772424321943,
+      0.38371508278683747,
+      0.25761599532300294,
+      0.1693786866872407,
+      0.10789451770446412,
+      0.027147229317828207,
+      0.024203778510017676,
+      0.00543048224001157
+    ],
+    "relative": [
+      1.0,
+      0.7775220615174847,
+      0.4074424226868785,
+      0.05391277831554478,
+      0.025862124168476774,
+      0.021665044867455234,
+      0.009618677985204887,
+      0.006457721924437768,
+      0.004245856151832676,
+      0.0027046177456223454,
+      0.0006805061065159152,
+      0.0006067219193528875,
+      0.0001361272004000495
+    ],
+    "smallest_relative": 0.0001361272004000495,
+    "weakest_loadings": {
+      "gamma_c[C2]": -0.013628603573138578,
+      "gamma_c[C3]": 0.10139178673579279,
+      "gamma_c[C4]": 0.093123136369597,
+      "h_opt_c[C2]": 0.109157664334464,
+      "h_opt_c[C3]": 0.1705772956527005,
+      "h_opt_c[C4]": 0.18712896446511787,
+      "k_c[C2]": 0.10475401218280532,
+      "k_c[C3]": 0.2634371166055161,
+      "k_c[C4]": 0.2603231623668191,
+      "kappa": 0.8697525085808159,
+      "rho_c[C2]": -0.01296175334839724,
+      "rho_c[C3]": -0.006664151885066326,
+      "rho_c[C4]": -0.0032060741739874457
+    }
+  },
+  "sse_truth": 0.7095836342628625,
+  "status": "ok",
+  "truth": {
+    "gamma_c[C2]": 3.2,
+    "gamma_c[C3]": 3.0,
+    "gamma_c[C4]": 2.8,
+    "h_opt_c[C2]": 0.64,
+    "h_opt_c[C3]": 0.6,
+    "h_opt_c[C4]": 0.57,
+    "k_c[C2]": 0.28,
+    "k_c[C3]": 0.35,
+    "k_c[C4]": 0.4300000000000001,
+    "kappa": 1.0,
+    "rho_c[C2]": 0.045,
+    "rho_c[C3]": 0.059999999999999984,
+    "rho_c[C4]": 0.07999999999999999
+  },
+  "wall_time_s": {
+    "mle": 3.870268099999521,
+    "profiles": 34.81969110001228,
+    "spectrum": 0.31971539999358356,
+    "total": 39.00967460000538
+  }
+}

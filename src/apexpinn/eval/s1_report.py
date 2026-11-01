@@ -35,8 +35,11 @@ __all__ = [
     "MISSPEC_READING_V1",
     "P1_DECISION_SENTENCE",
     "R2_DECLARATION",
+    "S1C_SOLVER_DECLARATIONS",
+    "at_bound_points",
     "classify",
     "evaluate_misspec",
+    "failed_points",
     "load_records",
     "p1_evidence",
     "render_report",
@@ -111,6 +114,30 @@ R2_DECLARATION = (
     "seeds exist. `M1` and `M2` recovery and the final normalized loss terms are shown as context. "
     "The `R4` remedies and the tuning budget of `PRD §8` are not checked by code."
 )
+# PLAN T5 method declarations of the S1c optimizer box and failed ODE solves, verbatim.
+S1C_SOLVER_DECLARATIONS = (
+    "**Optimizer box for `S1c`** (added 2026-11-01 after the first smoke run stopped on `max_steps` in "
+    "two profile runs, before any full-config result was read): the MLE and every profile solve keep each "
+    "free coordinate inside a box: `k_c` [0.01, 10], `ρ_c` [0.002, 2], `γ_c` [0.1, 60], `h_opt,c` "
+    "[0.02, 0.98], `κ` [0.03, 30] (`physics.identifiability.S1C_BOUNDS`: the prior ranges widened 10× on "
+    "each side, and the `h_opt` grid clip). The profiled coordinate is held at its grid value even "
+    "outside the box. A solution with a free coordinate on the box edge is recorded and counted in the "
+    "report. Reason: the likely cause of the stops (`Inferred`, not confirmed) is the unbounded L-BFGS-B "
+    "line search in log coordinates reaching very large `k_c`, where the explicit Tsit5 solve needs more "
+    "than 4096 steps.",
+    "**Failed ODE solves in `S1c`** (added with the optimizer box; the fallback to the lowest finite "
+    "evaluation added after review v1 of this change, before any result was read): an ODE solve that "
+    "stops without success gives a non-finite SSE instead of stopping the run. Inside an L-BFGS-B solve, "
+    "such an evaluation returns a large finite penalty with a zero gradient, so the line search "
+    "backtracks. If the final iterate of a solve is still non-finite, the solve falls back to its lowest "
+    "finite evaluation and counts as unconverged. A profile grid point whose solve found no finite "
+    "evaluation after its start is a failed point: it has no deviance, it is not counted as unconverged, "
+    "and the next grid point starts from the last finite solution. The 95% interval is read outward from "
+    "the minimum; if that walk reaches a failed point before the deviance crosses 3.841, that side counts "
+    "as unbounded, so the profile is `flat`. The report counts failed points per profile next to the "
+    "unconverged points. Reason: a failed point gives no evidence, and reading it as unbounded can only "
+    "make a profile look flatter than it is, never sharper.",
+)
 REALISTIC_NOISE_S = 0.15  # PLAN T5 method declarations: realistic noise for the P1 trigger (Assumed)
 E5_REL_EIGENVALUE = 1e-6  # PLAN section 2, E5
 RESIDUAL_RATIO_FLAG = 1.2  # criterion 3: residual RMS at least 20% above noise_s
@@ -162,10 +189,13 @@ def _not_recovered(record: Mapping[str, Any], cfg: StudyConfig) -> list[str]:
 def unconverged_points(entry: Mapping[str, Any] | None) -> tuple[int | None, bool]:
     """(number of unconverged profile points, whether the interval rests on one) of one profile entry.
 
-    A point is unconverged when its stored L-BFGS-B success flag is not true. The interval rests on such a
-    point if it lies inside the interval or at a grid point bracketing an endpoint (the grid point at or
-    below lo, the one at or above hi, or the grid edge), since those points decide where the deviance
-    crosses the threshold. The count is None when the entry stores no per-point success flags.
+    A point is unconverged when its stored L-BFGS-B success flag is not true and it is not a failed point
+    (entry['failed'], when stored per grid point): failed points have no deviance, so the "Unconverged
+    profile points" declaration does not cover them (failed_points counts them). The interval rests on
+    an unconverged point if it lies inside the interval or at a grid point bracketing an endpoint (the
+    grid point at or below lo, the one at or above hi, or the grid edge), since those points decide where
+    the deviance crosses the threshold. The count is None when the entry stores no per-point success
+    flags.
     """
     grid = (entry or {}).get("grid")
     success = (entry or {}).get("success")
@@ -173,7 +203,8 @@ def unconverged_points(entry: Mapping[str, Any] | None) -> tuple[int | None, boo
         return None, False
     if not grid or len(grid) != len(success):
         return None, False
-    bad = [g for g, ok in zip(grid, success, strict=True) if ok is not True]
+    failed = _per_point(entry, "failed") or [False] * len(grid)
+    bad = [g for g, ok, f in zip(grid, success, failed, strict=True) if ok is not True and f is not True]
     interval = (entry or {}).get("interval") or {}
     lo, hi = interval.get("lo"), interval.get("hi")
     points = [g for g in grid if _finite(g)]
@@ -182,6 +213,31 @@ def unconverged_points(entry: Mapping[str, Any] | None) -> tuple[int | None, boo
     lo_bracket = max((g for g in points if g <= lo), default=min(points))
     hi_bracket = min((g for g in points if g >= hi), default=max(points))
     return len(bad), any(_finite(g) and lo_bracket <= g <= hi_bracket for g in bad)
+
+
+def _per_point(entry: Mapping[str, Any] | None, key: str) -> list | None:
+    """entry[key] if it is a list with one item per grid point, else None."""
+    grid = (entry or {}).get("grid")
+    values = (entry or {}).get(key)
+    if not isinstance(grid, list | tuple) or not isinstance(values, list | tuple):
+        return None
+    return list(values) if grid and len(grid) == len(values) else None
+
+
+def failed_points(entry: Mapping[str, Any] | None) -> int | None:
+    """Number of failed profile points (no finite ODE-likelihood value after the start) of one profile entry.
+
+    Failed points have no deviance (PLAN T5 method declarations). None when the entry stores no per-point
+    failed flags (records from before profile method version 2) or their count differs from the grid.
+    """
+    failed = _per_point(entry, "failed")
+    return None if failed is None else sum(f is True for f in failed)
+
+
+def at_bound_points(entry: Mapping[str, Any] | None) -> int | None:
+    """Number of profile points with a free coordinate on the S1C_BOUNDS box edge, or None if not stored."""
+    at_bound = _per_point(entry, "at_bound")
+    return None if at_bound is None else sum(bool(names) for names in at_bound)
 
 
 # --- S1c labels ---
@@ -666,18 +722,27 @@ def _spectrum_table(records: Records, cfg: StudyConfig) -> list[str]:
         record = usable(records.get(spec.run_id))
         row: list[Any] = [spec.run_id, _fmt(spec.noise_s, 2), spec.seed]
         if record is None:
-            rows.append([*row, "missing", "n/a", "n/a", "n/a"])
+            rows.append([*row, "missing", "n/a", "n/a", "n/a", "n/a"])
             continue
         spectrum = record.get("spectrum") or {}
         loadings = [(n, v) for n, v in (spectrum.get("weakest_loadings") or {}).items() if _finite(v)]
         top = sorted(loadings, key=lambda kv: -abs(kv[1]))[:3]
         weakest = ", ".join(f"{n} {_fmt(v, 2)}" for n, v in top) or "n/a"
-        mle_sse = (record.get("mle") or {}).get("sse")
-        row += [_fmt(mle_sse, 4), _fmt(record.get("sse_truth"), 4)]
-        row += [_fmt(spectrum.get("smallest_relative")), weakest]
+        mle = record.get("mle") or {}
+        at_bound = mle.get("at_bound")
+        edge = "n/a" if not isinstance(at_bound, list) else (", ".join(map(str, at_bound)) or "none")
+        row += [_fmt(mle.get("sse"), 4), _fmt(record.get("sse_truth"), 4)]
+        row += [_fmt(spectrum.get("smallest_relative")), weakest, edge]
         rows.append(row)
     header = ["Run id", "Noise s", "Seed", "MLE SSE", "SSE at truth", "Smallest relative eigenvalue"]
-    return _table([*header, "Weakest direction"], rows)
+    return _table([*header, "Weakest direction", "MLE at box edge"], rows)
+
+
+def _side_text(interval: Mapping[str, Any], side: str) -> str:
+    """Prefix of one interval endpoint: 'open at failed point ', 'open ' or ''."""
+    if interval.get(f"{side}_bounded"):
+        return ""
+    return "open at failed point " if interval.get(f"{side}_failed") is True else "open "
 
 
 def _interval_table(records: Records, cfg: StudyConfig) -> list[str]:
@@ -690,10 +755,10 @@ def _interval_table(records: Records, cfg: StudyConfig) -> list[str]:
             entry = _profile_entry(record, name)
             iv = entry.get("interval")
             if not iv:
-                rows.append([spec.run_id, name, "n/a", "n/a", "n/a", "missing", "n/a", "n/a"])
+                rows.append([spec.run_id, name, "n/a", "n/a", "n/a", "missing", *["n/a"] * 4])
                 continue
-            lo = ("open " if not iv.get("lo_bounded") else "") + _fmt(iv.get("lo"), 4)
-            hi = ("open " if not iv.get("hi_bounded") else "") + _fmt(iv.get("hi"), 4)
+            lo = _side_text(iv, "lo") + _fmt(iv.get("lo"), 4)
+            hi = _side_text(iv, "hi") + _fmt(iv.get("hi"), 4)
             truth, mle = _fmt(entry.get("truth"), 4), _fmt(entry.get("mle"), 4)
             covers = _fmt(entry.get("covers_truth"))
             n_bad, rests = unconverged_points(entry)
@@ -701,9 +766,11 @@ def _interval_table(records: Records, cfg: StudyConfig) -> list[str]:
             unconverged = "n/a" if n_bad is None else str(n_bad)
             if rests:
                 unconverged += ", interval rests on one"
-            rows.append([spec.run_id, name, truth, mle, f"[{lo}, {hi}]", shape, covers, unconverged])
+            n_failed, n_edge = failed_points(entry), at_bound_points(entry)
+            counts = [unconverged, *("n/a" if n is None else str(n) for n in (n_failed, n_edge))]
+            rows.append([spec.run_id, name, truth, mle, f"[{lo}, {hi}]", shape, covers, *counts])
     header = ["Run id", "Parameter", "Truth", "MLE", "95% interval", "Shape", "Covers truth"]
-    return _table([*header, "Unconverged points"], rows)
+    return _table([*header, "Unconverged points", "Failed points", "At box edge"], rows)
 
 
 def _identifiability_section(records: Records, labels: Labels, cfg: StudyConfig) -> list[str]:
@@ -722,19 +789,31 @@ def _identifiability_section(records: Records, labels: Labels, cfg: StudyConfig)
         "### Gauss-Newton spectrum and MLE",
         "",
         "Smallest relative eigenvalue (eigenvalue / largest) of J^T J at the ODE-likelihood MLE, and "
-        "the three largest loadings of its eigenvector (the least resolved direction). `Observed`.",
+        "the three largest loadings of its eigenvector (the least resolved direction). MLE at box edge "
+        "lists the MLE coordinates on an edge of the optimizer box (`S1C_BOUNDS`). `Observed`.",
         "",
         *_spectrum_table(records, cfg),
         "",
         "### Profile intervals",
         "",
         "95% profile-likelihood intervals (deviance n log(SSE / SSE_min) <= 3.841) in natural units. "
-        "A side marked open is unbounded inside the grid and reports the grid edge. Unconverged points "
+        "A side marked open is unbounded inside the grid and reports the grid edge; a side marked open at "
+        "failed point met a failed point before the threshold and reports the last finite grid point "
+        "inside. Unconverged points "
         "are grid points where L-BFGS-B reported no convergence; they still enter the deviance, and a "
         "shape marked `*` rests on one (inside the interval or at a bracketing grid point), so it may be "
-        "sharper than the true profile. `Observed`.",
+        "sharper than the true profile. Failed points are grid points whose solve found no finite "
+        "ODE-likelihood value after its start (not counted among the unconverged points); they have no "
+        "deviance, and a side that reaches one before the threshold is open. At box edge counts grid "
+        "points with a free coordinate on the box edge. `n/a`: the record does not store the count. "
+        "`Observed`.",
         "",
         *_interval_table(records, cfg),
+        "",
+        "Declared treatment of the optimizer box and failed ODE solves (PLAN T5 method declarations, "
+        "verbatim):",
+        "",
+        *[f"- {text}" for text in S1C_SOLVER_DECLARATIONS],
         "",
     ]
     return lines

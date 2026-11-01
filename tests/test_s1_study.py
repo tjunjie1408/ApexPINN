@@ -3,8 +3,10 @@ records only: they never call train() or compile Diffrax. The end-to-end test is
 
 import json
 from dataclasses import asdict, replace
+from types import SimpleNamespace
 
 import jax
+import jax.numpy as jnp
 import numpy as np
 import pytest
 
@@ -14,14 +16,18 @@ from apexpinn.eval.s1_report import (
     MISSPEC_READING_V1,
     P1_DECISION_SENTENCE,
     R2_DECLARATION,
+    S1C_SOLVER_DECLARATIONS,
+    at_bound_points,
     classify,
     evaluate_misspec,
+    failed_points,
     load_records,
     p1_evidence,
     render_report,
     unconverged_points,
     write_report,
 )
+from apexpinn.physics.identifiability import S1C_BOUNDS, ProfilePointError, ProfileResult, ThetaLayout
 from apexpinn.physics.synthetic import MISSPEC_VARIANTS, default_theta_true
 from apexpinn.train import s1_study
 from apexpinn.train.s1_study import (
@@ -254,6 +260,56 @@ def test_config_hash_tracks_the_generator_priors_and_key_folds(monkeypatch):
     assert {s: config_hash(cfg, s) for s in specs} == base
 
 
+def test_profile_hash_tracks_the_optimizer_box_max_steps_and_method_version(monkeypatch):
+    cfg = smoke_config()
+    fit = RunSpec("main", "fit", "M2", "well_specified", 0.05, 0)
+    prof = RunSpec("main", "profile", None, "well_specified", 0.05, 0)
+    settings = s1_study._settings(cfg, prof)["profile"]
+    assert settings["method_version"] == s1_study.PROFILE_METHOD_VERSION == 2
+    assert settings["bounds"] == {g: list(v) for g, v in sorted(S1C_BOUNDS.items())}
+    assert settings["max_steps"] == 4096  # ODEModel.max_steps class default
+    assert "profile" not in s1_study._settings(cfg, fit)
+    base = {s: config_hash(cfg, s) for s in (fit, prof)}
+    with monkeypatch.context() as m:
+        m.setitem(s1_study.S1C_BOUNDS, "k", (0.01, 20.0))
+        assert config_hash(cfg, prof) != base[prof] and config_hash(cfg, fit) == base[fit]
+    with monkeypatch.context() as m:
+        m.setattr(s1_study, "PROFILE_METHOD_VERSION", 3)
+        assert config_hash(cfg, prof) != base[prof] and config_hash(cfg, fit) == base[fit]
+    with monkeypatch.context() as m:
+        m.setattr(s1_study, "_ode_max_steps", lambda: 8192)
+        assert config_hash(cfg, prof) != base[prof] and config_hash(cfg, fit) == base[fit]
+    assert {s: config_hash(cfg, s) for s in (fit, prof)} == base
+
+
+def test_generator_digest_covers_the_residual_equations(tmp_path, monkeypatch):
+    sources = s1_study.generator_sources()
+    assert [p.name for p in sources] == ["synthetic.py", "residuals.py"]
+    copies = []
+    for path in sources:
+        copy = tmp_path / path.name
+        text = path.read_text(encoding="utf-8")
+        copy.write_bytes(text.replace("\r\n", "\n").replace("\n", "\r\n").encode("utf-8"))  # CRLF copy
+        copies.append(copy)
+    assert s1_study.source_digest(copies) == s1_study.generator_digest()  # line endings do not matter
+    copies[1].write_text(copies[1].read_text(encoding="utf-8") + "# edited\n", encoding="utf-8")
+    edited = s1_study.source_digest(copies)
+    assert edited != s1_study.generator_digest()
+
+    cfg = smoke_config()
+    spec = RunSpec("main", "fit", "M1", "well_specified", 0.05, 0)
+    base = config_hash(cfg, spec)
+    try:
+        with monkeypatch.context() as m:
+            m.setattr(s1_study, "generator_sources", lambda: tuple(copies))
+            s1_study.generator_digest.cache_clear()
+            assert s1_study.generator_digest() == edited
+            assert config_hash(cfg, spec) != base
+    finally:
+        s1_study.generator_digest.cache_clear()
+    assert config_hash(cfg, spec) == base
+
+
 # --- (5) run_study with stub runners ---
 
 
@@ -348,6 +404,101 @@ def test_run_study_reruns_errors_and_keeps_nonfinite_records(tmp_path):
     assert rerun.calls == [fail_id]
     assert _read(out, fail_id)["status"] == "ok"
     assert _read(out, nonfinite_id)["status"] == "nonfinite"
+
+
+class PartialError(RuntimeError):
+    """Runner exception that carries the results computed before it, like s1_study.ProfileRunError."""
+
+    def __init__(self, message, partial):
+        super().__init__(message)
+        self.partial = partial
+
+
+def test_error_records_keep_the_traceback_and_partial_results(tmp_path):
+    cfg = _tiny_cfg()
+    target = _rid("main", "profile", None, "well_specified", 0.05, 0)
+    plain = _rid("main", "profile", None, "well_specified", 0.05, 1)
+    message = "run_profile failed in phase profile for k_c[C2]: solver stopped"
+
+    def runner(cfg, spec):
+        if spec.run_id == target:
+            sse = np.array([1.0, np.nan])
+            raise PartialError(message, {"phase": "profile", "param": "k_c[C2]", "sse": sse})
+        if spec.run_id == plain:
+            raise RuntimeError("x" * 400 + "\nsecond line")
+        return _stub_record()
+
+    lines = []
+    summary = run_study(cfg, part="main", runner=runner, root=tmp_path, log=lines.append)
+    out = tmp_path / cfg.out_dir
+    assert summary["errors"] == 2
+    record = _read(out, target)
+    assert record["status"] == "error" and record["records"] == []
+    assert record["error"] == f"PartialError: {message}"
+    assert "Traceback" in record["traceback"] and "PartialError" in record["traceback"]
+    assert record["partial"] == {"phase": "profile", "param": "k_c[C2]", "sse": [1.0, None]}
+    line = next(x for x in lines if x.startswith(target))
+    assert "  error  " in line and f"PartialError: {message}" in line
+
+    other = _read(out, plain)
+    assert other["partial"] is None and other["error"].endswith("second line")
+    line = next(x for x in lines if x.startswith(plain))
+    assert "\n" not in line and "RuntimeError: xxx" in line and "second line" not in line  # 300 chars
+    ok = _read(out, _rid("main", "fit", "M1", "well_specified", 0.05, 0))
+    assert ok["status"] == "ok" and "traceback" not in ok and "partial" not in ok
+
+
+def test_error_records_survive_a_partial_that_is_not_json(tmp_path):
+    """A runner that raises ProfilePointError itself leaves a ProfileResult in .partial."""
+    cfg = _tiny_cfg()
+    target = _rid("main", "profile", None, "well_specified", 0.05, 0)
+    nan = np.array([np.nan])
+    result = ProfileResult(nan, nan, nan[:, None], np.zeros(1, bool), np.zeros(1, bool), np.zeros(1, int))
+
+    def runner(cfg, spec):
+        if spec.run_id == target:
+            raise ProfilePointError("profile of index 0 failed at grid point 0 (value 1): boom", result)
+        return _stub_record()
+
+    summary = run_study(cfg, part="main", runner=runner, root=tmp_path, log=_quiet)
+    assert summary["errors"] == 1 and summary["run"] == len(plan_runs(cfg, "main"))
+    record = _read(tmp_path / cfg.out_dir, target)
+    assert record["status"] == "error" and record["error"].startswith("ProfilePointError: ")
+    assert isinstance(record["partial"], str) and record["partial"].startswith("ProfileResult(")
+
+
+def test_stale_error_records_never_block_but_stale_ok_records_do(tmp_path):
+    cfg = _tiny_cfg()
+    fail_id = _rid("main", "profile", None, "well_specified", 0.05, 0)
+    ok_id = _rid("main", "fit", "M1", "well_specified", 0.05, 0)
+    run_study(cfg, part="main", runner=Stub(fail={fail_id}), root=tmp_path, log=_quiet)
+    out = tmp_path / cfg.out_dir
+
+    def make_stale(run_id):
+        record = _read(out, run_id)
+        record["config_hash"] = "0" * 64
+        (out / f"{run_id}.json").write_text(json.dumps(record), encoding="utf-8")
+
+    make_stale(fail_id)
+    rerun = Stub()
+    run_study(cfg, part="main", runner=rerun, root=tmp_path, log=_quiet)  # no ValueError
+    assert rerun.calls == [fail_id]
+    assert _read(out, fail_id)["status"] == "ok"
+    profile_spec = RunSpec("main", "profile", None, "well_specified", 0.05, 0)
+    assert _read(out, fail_id)["config_hash"] == config_hash(cfg, profile_spec)
+
+    (out / f"{fail_id}.json").unlink()
+    run_study(cfg, part="main", runner=Stub(fail={fail_id}), root=tmp_path, log=_quiet)
+    assert _read(out, fail_id)["status"] == "error"
+    make_stale(fail_id)
+    make_stale(ok_id)
+    blocked = Stub()
+    with pytest.raises(ValueError, match=rf"{ok_id} \(1 run\(s\)"):
+        run_study(cfg, part="main", runner=blocked, root=tmp_path, log=_quiet)
+    assert blocked.calls == []
+    forced = Stub()
+    run_study(cfg, part="main", runner=forced, root=tmp_path, log=_quiet, force=True)
+    assert sorted(forced.calls) == sorted([fail_id, ok_id])
 
 
 def test_shards_are_disjoint_and_cover_the_plan(tmp_path):
@@ -531,6 +682,118 @@ def test_build_profile_record_status_and_records():
     for entry in record["records"]:
         assert all(entry[name] for name in FOUR_FIELDS) and entry["status"] in STATUSES
     assert build_profile_record(cfg, spec, spectrum=None, **kwargs)["status"] == "nonfinite"
+
+
+def _fake_profile_problem(monkeypatch, log_shift=None):
+    """Patch run_profile's data and likelihood with a 13-coordinate least-squares problem (no Diffrax).
+
+    Residuals 0.3 (v - v_min) plus one constant 1, so the free minimum is v_min with SSE 1 and n_obs =
+    100. v_min is the truth, with log_shift (layout name -> shift in that coordinate) added. The objective
+    is NaN where k_c[C2] < 0.6 x truth (a stand-in for an ODE solve that stopped).
+    """
+    truth = default_theta_true()
+    layout = ThetaLayout.from_compounds(smoke_config().compounds)
+    v0 = jnp.asarray(layout.to_vector(truth))
+    shift = np.zeros(layout.size)
+    for name, value in (log_shift or {}).items():
+        shift[layout.names.index(name)] = value
+    v_min = v0 + jnp.asarray(shift)
+    i_k = layout.names.index("k_c[C2]")
+    ds = SimpleNamespace(theta_true=truth, rho_target=np.asarray(truth.rho))
+
+    def fake_least_squares(batch, layout_, base, *, rtol, atol):
+        def residual_fn(v):
+            r = jnp.concatenate([0.3 * (v - v_min), jnp.ones(1, dtype=v.dtype)])
+            return jnp.where(v[i_k] < v0[i_k] + np.log(0.6), jnp.nan, r)
+
+        def sse_fn(v):
+            return jnp.sum(residual_fn(v) ** 2)
+
+        return sse_fn, residual_fn, 100
+
+    monkeypatch.setattr(s1_study, "dataset_for", lambda cfg, spec: ds)
+    monkeypatch.setattr(s1_study, "batch_from_synthetic", lambda ds_: None)
+    monkeypatch.setattr(s1_study, "init_physics", lambda spec: truth)
+    monkeypatch.setattr(s1_study, "ode_least_squares", fake_least_squares)
+
+
+def test_run_profile_records_failed_points_and_keeps_running(x64, monkeypatch):
+    _fake_profile_problem(monkeypatch)
+    spec = RunSpec("main", "profile", None, "well_specified", 0.05, 0)
+    record = s1_study._jsonable(s1_study.run_profile(smoke_config(), spec))
+    json.dumps(record, allow_nan=False)
+    assert record["status"] == "ok"
+    mle = record["mle"]
+    assert mle["start_failed"] == [False] and mle["at_bound"] == [] and len(mle["n_failed_evals"]) == 1
+    assert record["sse_truth"] == pytest.approx(1.0)
+
+    entry = record["profiles"]["k_c[C2]"]  # grid 0.5, 0.75, 1, 1.33, 2 x MLE; 0.5 x is in the NaN region
+    assert entry["failed"] == [True, False, False, False, False]
+    assert entry["success"][0] is False and entry["n_failed_evals"][0] >= 1
+    assert entry["sse"][0] is None and entry["deviance"][0] is None
+    assert all(d is not None for d in entry["deviance"][1:])
+    assert entry["at_bound"] == [[]] * 5
+    interval = entry["interval"]
+    assert interval["lo_failed"] is True and interval["lo_bounded"] is False
+    assert interval["lo"] == pytest.approx(0.75 * entry["mle"])
+    assert interval["hi_bounded"] is True and interval["hi_failed"] is False
+    assert entry["shape"] == "flat" and entry["covers_truth"] is True
+
+    other = record["profiles"]["rho_c[C2]"]
+    assert not any(other["failed"]) and other["interval"]["lo_bounded"] and other["interval"]["hi_bounded"]
+    assert other["sse_min"] == pytest.approx(1.0)
+
+
+def test_run_profile_keeps_the_mle_and_profiles_inside_the_optimizer_box(x64, monkeypatch):
+    """The free minimum of kappa (100) lies outside S1C_BOUNDS (kappa at most 30): the box must hold it."""
+    _fake_profile_problem(monkeypatch, log_shift={"kappa": float(np.log(100.0))})
+    spec = RunSpec("main", "profile", None, "well_specified", 0.05, 0)
+    record = s1_study._jsonable(s1_study.run_profile(smoke_config(), spec))
+    assert record["status"] == "ok"
+    kappa_hi = S1C_BOUNDS["kappa"][1]
+    mle = record["mle"]
+    assert mle["values"]["kappa"] == pytest.approx(kappa_hi, rel=1e-8)
+    assert mle["at_bound"] == ["kappa"]
+    entry = record["profiles"]["rho_c[C2]"]
+    assert entry["at_bound"] == [["kappa"]] * len(entry["grid"])
+    assert not any(entry["failed"])
+
+
+def test_run_profile_errors_name_the_phase_and_keep_partial_results(x64, monkeypatch):
+    _fake_profile_problem(monkeypatch)
+    spec = RunSpec("main", "profile", None, "well_specified", 0.05, 0)
+    real_profile = s1_study.profile_likelihood
+    i_k = ThetaLayout.from_compounds(smoke_config().compounds).names.index("k_c[C2]")
+
+    def failing_profile(loss_fn, theta_hat, index, grid, **kwargs):
+        result = real_profile(loss_fn, theta_hat, index, grid, **kwargs)
+        if index == i_k:
+            raise ProfilePointError("profile of index 0 failed at grid point 4 (value 1): boom", result)
+        return result
+
+    monkeypatch.setattr(s1_study, "profile_likelihood", failing_profile)
+    with pytest.raises(s1_study.ProfileRunError) as info:
+        s1_study.run_profile(smoke_config(), spec)
+    exc = info.value
+    assert str(exc).startswith("run_profile failed in phase profile for k_c[C2]: ProfilePointError: ")
+    assert isinstance(exc.__cause__, ProfilePointError)
+    partial = exc.partial
+    json.dumps(partial, allow_nan=False)
+    assert partial["phase"] == "profile" and partial["param"] == "k_c[C2]"
+    assert partial["mle"]["sse"] == pytest.approx(1.0) and partial["spectrum"] is not None
+    assert sorted(partial["profiles"]) == ["rho_c[C2]", "rho_c[C3]", "rho_c[C4]"]  # rho goes first
+    point = partial["point"]
+    assert point["failed"] == [True, False, False, False, False] and len(point["sse"]) == 5
+    k_hat = partial["mle"]["values"]["k_c[C2]"]
+    assert point["grid"] == pytest.approx([k_hat * f for f in smoke_config().grid_factors])
+
+    def no_data(cfg, spec):
+        raise ValueError("bad data")
+
+    monkeypatch.setattr(s1_study, "dataset_for", no_data)
+    with pytest.raises(s1_study.ProfileRunError, match="phase dataset: ValueError: bad data") as info:
+        s1_study.run_profile(smoke_config(), spec)
+    assert info.value.partial["mle"] is None and info.value.partial["profiles"] == {}
 
 
 def test_profile_grid_and_objective_change_helpers():
@@ -827,6 +1090,40 @@ def test_unconverged_profile_points_are_counted_and_marked():
     assert "shapes sharp, sharp*, sharp" in text
 
 
+def test_failed_and_at_bound_profile_points_are_counted_and_shown():
+    grid = [0.03, 0.045, 0.054, 0.06, 0.066, 0.075, 0.09]
+    interval = {"lo": 0.05, "hi": 0.07, "lo_bounded": True, "hi_bounded": True, "threshold": 3.841}
+    clean = {"grid": grid, "success": [True] * 7, "failed": [False] * 7, "at_bound": [[]] * 7}
+    entry = {**clean, "interval": interval, "shape": "sharp", "truth": 0.06, "mle": 0.06}
+    assert failed_points(entry) == 0 and at_bound_points(entry) == 0
+    at_bound = [[], ["k_c[C3]"], [], [], [], [], ["k_c[C3]", "kappa"]]
+    bad = {**entry, "success": [False] + [True] * 6, "failed": [True] + [False] * 6, "at_bound": at_bound}
+    assert failed_points(bad) == 1 and at_bound_points(bad) == 2
+    assert unconverged_points(bad) == (0, False)  # a failed point is not counted as unconverged
+    mixed = {**bad, "success": [False, True, True, False, True, True, True]}
+    assert unconverged_points(mixed) == (1, True)
+    assert failed_points({"grid": grid}) is None and at_bound_points({"grid": grid}) is None
+    assert failed_points({**entry, "failed": [True]}) is None
+    assert at_bound_points({**entry, "at_bound": [[]]}) is None
+    assert failed_points(None) is None and at_bound_points(None) is None
+
+    cfg = _report_cfg()
+    recs = _records(cfg)
+    rid = _main_prof(0.05, 0)
+    recs[rid]["profiles"]["rho_c[C3]"].update(bad)
+    failed_side = {**interval, "lo": 0.045, "lo_bounded": False, "lo_failed": True, "hi_failed": False}
+    recs[rid]["profiles"]["rho_c[C3]"]["interval"] = failed_side
+    recs[rid]["mle"]["at_bound"] = ["gamma_c[C3]"]
+    text = render_report(recs, cfg)
+    rows = [line for line in text.splitlines() if line.startswith(f"| {rid} | ")]
+    assert rows[0].endswith("| gamma_c[C3] |")  # spectrum and MLE table: MLE coordinates on the box edge
+    row = next(r for r in rows if r.startswith(f"| {rid} | rho_c[C3] |"))
+    assert "| [open at failed point 0.0450, 0.0700] |" in row  # a failed side shows the last finite point
+    assert row.endswith("| 0 | 1 | 2 |")  # unconverged (failed points excluded), failed, at the box edge
+    assert next(r for r in rows if r.startswith(f"| {rid} | kappa |")).endswith("| n/a | n/a | n/a |")
+    assert "| Unconverged points | Failed points | At box edge |" in text
+
+
 def test_missing_records_give_missing_never_pass():
     cfg = _report_cfg()
     recs = _records(cfg)
@@ -950,7 +1247,8 @@ def test_render_report_has_every_section_and_the_declared_text(tmp_path):
 
 def test_report_quotes_the_declared_readings_and_plan_t5_holds_them_verbatim():
     text = render_report(_records(_report_cfg()), _report_cfg())
-    for reading in (*MISSPEC_READING_V1, R2_DECLARATION):
+    assert len(S1C_SOLVER_DECLARATIONS) == 2
+    for reading in (*MISSPEC_READING_V1, R2_DECLARATION, *S1C_SOLVER_DECLARATIONS):
         assert reading in text
         assert "\u2014" not in reading
     assert "How this report applies them" not in text  # every reading is declared in PLAN T5
@@ -958,7 +1256,7 @@ def test_report_quotes_the_declared_readings_and_plan_t5_holds_them_verbatim():
     if not plan.is_file():  # PLAN.md is a local planning document, absent from clean checkouts
         pytest.skip("PLAN.md is not in this checkout")
     plan_text = plan.read_text(encoding="utf-8")
-    for text_block in (*MISSPEC_CRITERIA_V1, *MISSPEC_READING_V1, R2_DECLARATION):
+    for text_block in (*MISSPEC_CRITERIA_V1, *MISSPEC_READING_V1, R2_DECLARATION, *S1C_SOLVER_DECLARATIONS):
         assert text_block in plan_text, text_block[:60]
 
 
