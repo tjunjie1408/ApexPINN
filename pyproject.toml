@@ -52,3 +52,9 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "NPY"]
+
+[tool.ruff.format]
+# Excluded to keep the source_digest in generator_digest() and the S1b v1 frozen config_hash values
+# unchanged (PLAN T5, S1b v1 outcome; RECORD.md Decision 2). Replace with an AST-based digest at the
+# first planned physics change.
+exclude = ["src/apexpinn/physics/residuals.py"]

@@ -23,6 +23,7 @@ from apexpinn.train.m1_diag import (
     VARIANTS,
     diag_specs,
     run_diag,
+    run_true_state_ls,
     summary_line,
     variant_config,
 )
@@ -93,6 +94,9 @@ def test_each_variant_changes_only_its_own_field():
         "physics_off": {"m1_weights": replace(base.m1_weights, thermal=0.0, wear=0.0, mono=0.0)},
         "physics_x10": {"m1_weights": replace(base.m1_weights, thermal=10.0, wear=10.0)},
         "bounded_h": {"m1_latent": "tanh"},
+        "true_state_ls": {"m1_train": replace(base.m1_train, n_steps=1, log_every=1)},
+        "colloc_128": {"m1_train": replace(base.m1_train, n_colloc=128)},
+        "width_128": {"m1_width": 128},
     }
     assert list(VARIANTS) == list(changes)
     common = {"models_main", "noise_levels", "seeds_main", "out_dir", "report_path", "name"}
@@ -165,13 +169,28 @@ def test_run_diag_refuses_one_variant_and_still_runs_and_logs_the_others(tmp_pat
     summaries = run_diag(seeds=(0,), root=tmp_path, log=lines.append, runner=stub)
     assert list(summaries) == list(VARIANTS)
     assert "config changed" in summaries["physics_off"]["refused"]
-    for name in ("budget_20k", "physics_x10", "bounded_h"):  # before and after the refused variant
+    for name in (n for n in VARIANTS if n != "physics_off"):  # before and after the refused variant
         assert summaries[name]["run"] == 1 and "refused" not in summaries[name]
         assert summary_line(name, summaries[name]) in lines
     stop = summary_line("physics_off", summaries["physics_off"])
     header = f"variant physics_x10: {VARIANTS['physics_x10'][0]}"
     assert stop in lines and lines.index(stop) < lines.index(header)  # logged when it stopped
     assert json.loads(path.read_text(encoding="utf-8"))["config_hash"] == "stale"  # not overwritten
+
+
+def test_run_true_state_ls_recovers_k_and_rho_within_5_percent():
+    previous = jax.config.x64_enabled
+    jax.config.update("jax_enable_x64", True)
+    try:
+        cfg = replace(variant_config("true_state_ls"), n_stints=6)
+        spec = RunSpec("main", "fit", "M1", "well_specified", 0.05, 0)
+        rec = run_true_state_ls(cfg, spec)
+        assert rec["status"] == "ok"
+        for name in gated_names(cfg):
+            assert abs(rec["rel_error"][name]) < 0.01, (name, rec["rel_error"][name])
+            assert rec["recovered"][name] is True
+    finally:
+        jax.config.update("jax_enable_x64", previous)
 
 
 # --- report ---

@@ -1,6 +1,6 @@
 # S1 identifiability study (PLAN T5), full config
 
-Built from 31 run records in `experiments/s1/` by `apexpinn.eval.s1_report`. Every number is `Observed`, read from the record named by its run id. Labels and criterion outcomes apply the rules declared in PLAN T5 to those numbers. Config: 48 stints, compounds ['C2', 'C3', 'C4'], seeds [0, 1, 2, 3, 4], noise [0.05, 0.15] s, models ['M1', 'M2', 'M2v2'].
+Built from 40 run records in `experiments/s1/` by `apexpinn.eval.s1_report`. Every number is `Observed`, read from the record named by its run id. Labels and criterion outcomes apply the rules declared in PLAN T5 to those numbers. Config: 48 stints, compounds ['C2', 'C3', 'C4'], seeds [0, 1, 2, 3, 4], noise [0.05, 0.15] s, models ['M1', 'M2', 'M2v2'].
 
 ## S1b recovery
 
@@ -85,56 +85,56 @@ Labels follow the PLAN T5 method declarations: identifiable if every seed recove
 
 | Parameter | Noise s | Basis | Label | Profile shapes | Recovered |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| gamma_c[C2] | 0.05 | profile | **missing** | sharp | n/a |
-| gamma_c[C3] | 0.05 | profile | **missing** | sharp | n/a |
-| gamma_c[C4] | 0.05 | profile | **missing** | sharp | n/a |
-| h_opt_c[C2] | 0.05 | profile | **missing** | sharp | n/a |
-| h_opt_c[C3] | 0.05 | profile | **missing** | sharp | n/a |
-| h_opt_c[C4] | 0.05 | profile | **missing** | sharp | n/a |
-| k_c[C2] | 0.05 | M1 | **missing** | sharp | no, no, no, no, no |
-| k_c[C2] | 0.05 | M2 | **missing** | sharp | no, yes, yes, yes, yes |
-| k_c[C2] | 0.05 | M2v2 | **missing** | sharp | no, yes, yes, yes, yes |
-| k_c[C3] | 0.05 | M1 | **missing** | sharp | no, no, no, no, no |
-| k_c[C3] | 0.05 | M2 | **missing** | sharp | yes, yes, yes, yes, yes |
-| k_c[C3] | 0.05 | M2v2 | **missing** | sharp | yes, yes, yes, yes, yes |
-| k_c[C4] | 0.05 | M1 | **missing** | sharp | no, no, no, no, no |
-| k_c[C4] | 0.05 | M2 | **missing** | sharp | yes, yes, yes, no, yes |
-| k_c[C4] | 0.05 | M2v2 | **missing** | sharp | yes, yes, yes, yes, yes |
-| kappa | 0.05 | profile | **missing** | sharp | n/a |
-| rho_c[C2] | 0.05 | M1 | **missing** | sharp | no, no, no, no, no |
-| rho_c[C2] | 0.05 | M2 | **missing** | sharp | no, yes, yes, yes, yes |
-| rho_c[C2] | 0.05 | M2v2 | **missing** | sharp | no, yes, yes, yes, yes |
-| rho_c[C3] | 0.05 | M1 | **missing** | sharp | no, no, no, no, no |
-| rho_c[C3] | 0.05 | M2 | **missing** | sharp | yes, yes, yes, yes, yes |
-| rho_c[C3] | 0.05 | M2v2 | **missing** | sharp | yes, yes, yes, yes, yes |
-| rho_c[C4] | 0.05 | M1 | **missing** | sharp | no, no, no, no, no |
-| rho_c[C4] | 0.05 | M2 | **missing** | sharp | yes, yes, yes, yes, yes |
-| rho_c[C4] | 0.05 | M2v2 | **missing** | sharp | yes, yes, yes, yes, yes |
-| gamma_c[C2] | 0.15 | profile | **missing** | n/a | n/a |
-| gamma_c[C3] | 0.15 | profile | **missing** | n/a | n/a |
-| gamma_c[C4] | 0.15 | profile | **missing** | n/a | n/a |
-| h_opt_c[C2] | 0.15 | profile | **missing** | n/a | n/a |
-| h_opt_c[C3] | 0.15 | profile | **missing** | n/a | n/a |
-| h_opt_c[C4] | 0.15 | profile | **missing** | n/a | n/a |
-| k_c[C2] | 0.15 | M1 | **missing** | n/a | no, no, no, no, no |
-| k_c[C2] | 0.15 | M2 | **missing** | n/a | no, yes, yes, yes, yes |
-| k_c[C2] | 0.15 | M2v2 | **missing** | n/a | no, yes, yes, yes, yes |
-| k_c[C3] | 0.15 | M1 | **missing** | n/a | no, no, no, no, no |
-| k_c[C3] | 0.15 | M2 | **missing** | n/a | yes, yes, yes, yes, yes |
-| k_c[C3] | 0.15 | M2v2 | **missing** | n/a | yes, yes, yes, yes, yes |
-| k_c[C4] | 0.15 | M1 | **missing** | n/a | no, no, no, no, no |
-| k_c[C4] | 0.15 | M2 | **missing** | n/a | yes, yes, no, no, yes |
-| k_c[C4] | 0.15 | M2v2 | **missing** | n/a | yes, yes, yes, yes, yes |
-| kappa | 0.15 | profile | **missing** | n/a | n/a |
-| rho_c[C2] | 0.15 | M1 | **missing** | n/a | no, no, no, no, no |
-| rho_c[C2] | 0.15 | M2 | **missing** | n/a | no, yes, yes, yes, yes |
-| rho_c[C2] | 0.15 | M2v2 | **missing** | n/a | no, yes, yes, yes, yes |
-| rho_c[C3] | 0.15 | M1 | **missing** | n/a | no, no, no, no, no |
-| rho_c[C3] | 0.15 | M2 | **missing** | n/a | yes, yes, yes, yes, yes |
-| rho_c[C3] | 0.15 | M2v2 | **missing** | n/a | yes, yes, yes, yes, yes |
-| rho_c[C4] | 0.15 | M1 | **missing** | n/a | no, no, no, no, no |
-| rho_c[C4] | 0.15 | M2 | **missing** | n/a | yes, yes, yes, yes, yes |
-| rho_c[C4] | 0.15 | M2v2 | **missing** | n/a | yes, yes, yes, yes, yes |
+| gamma_c[C2] | 0.05 | profile | **identifiable** | sharp, sharp, sharp, sharp, sharp | n/a |
+| gamma_c[C3] | 0.05 | profile | **identifiable** | sharp, sharp, sharp, sharp, sharp | n/a |
+| gamma_c[C4] | 0.05 | profile | **identifiable** | sharp, sharp, sharp, sharp, sharp | n/a |
+| h_opt_c[C2] | 0.05 | profile | **identifiable** | sharp, sharp, sharp, sharp, sharp | n/a |
+| h_opt_c[C3] | 0.05 | profile | **identifiable** | sharp, sharp, sharp, sharp, sharp | n/a |
+| h_opt_c[C4] | 0.05 | profile | **identifiable** | sharp, sharp, sharp, sharp, sharp | n/a |
+| k_c[C2] | 0.05 | M1 | **weakly_identifiable** | sharp, sharp, sharp, sharp, sharp | no, no, no, no, no |
+| k_c[C2] | 0.05 | M2 | **weakly_identifiable** | sharp, sharp, sharp, sharp, sharp | no, yes, yes, yes, yes |
+| k_c[C2] | 0.05 | M2v2 | **weakly_identifiable** | sharp, sharp, sharp, sharp, sharp | no, yes, yes, yes, yes |
+| k_c[C3] | 0.05 | M1 | **weakly_identifiable** | sharp, sharp, sharp, sharp, sharp | no, no, no, no, no |
+| k_c[C3] | 0.05 | M2 | **identifiable** | sharp, sharp, sharp, sharp, sharp | yes, yes, yes, yes, yes |
+| k_c[C3] | 0.05 | M2v2 | **identifiable** | sharp, sharp, sharp, sharp, sharp | yes, yes, yes, yes, yes |
+| k_c[C4] | 0.05 | M1 | **weakly_identifiable** | sharp, sharp, sharp, sharp, sharp | no, no, no, no, no |
+| k_c[C4] | 0.05 | M2 | **weakly_identifiable** | sharp, sharp, sharp, sharp, sharp | yes, yes, yes, no, yes |
+| k_c[C4] | 0.05 | M2v2 | **identifiable** | sharp, sharp, sharp, sharp, sharp | yes, yes, yes, yes, yes |
+| kappa | 0.05 | profile | **identifiable** | sharp, sharp, sharp, sharp, sharp | n/a |
+| rho_c[C2] | 0.05 | M1 | **weakly_identifiable** | sharp, sharp, sharp, sharp, sharp | no, no, no, no, no |
+| rho_c[C2] | 0.05 | M2 | **weakly_identifiable** | sharp, sharp, sharp, sharp, sharp | no, yes, yes, yes, yes |
+| rho_c[C2] | 0.05 | M2v2 | **weakly_identifiable** | sharp, sharp, sharp, sharp, sharp | no, yes, yes, yes, yes |
+| rho_c[C3] | 0.05 | M1 | **weakly_identifiable** | sharp, sharp, sharp, sharp, sharp | no, no, no, no, no |
+| rho_c[C3] | 0.05 | M2 | **identifiable** | sharp, sharp, sharp, sharp, sharp | yes, yes, yes, yes, yes |
+| rho_c[C3] | 0.05 | M2v2 | **identifiable** | sharp, sharp, sharp, sharp, sharp | yes, yes, yes, yes, yes |
+| rho_c[C4] | 0.05 | M1 | **weakly_identifiable** | sharp, sharp, sharp, sharp, sharp | no, no, no, no, no |
+| rho_c[C4] | 0.05 | M2 | **identifiable** | sharp, sharp, sharp, sharp, sharp | yes, yes, yes, yes, yes |
+| rho_c[C4] | 0.05 | M2v2 | **identifiable** | sharp, sharp, sharp, sharp, sharp | yes, yes, yes, yes, yes |
+| gamma_c[C2] | 0.15 | profile | **identifiable** | sharp, sharp, sharp, sharp, sharp | n/a |
+| gamma_c[C3] | 0.15 | profile | **identifiable** | sharp, sharp, sharp, sharp, sharp | n/a |
+| gamma_c[C4] | 0.15 | profile | **weakly_identifiable** | wide, sharp, sharp, sharp, sharp | n/a |
+| h_opt_c[C2] | 0.15 | profile | **identifiable** | sharp, sharp, sharp, sharp, sharp | n/a |
+| h_opt_c[C3] | 0.15 | profile | **identifiable** | sharp, sharp, sharp, sharp, sharp | n/a |
+| h_opt_c[C4] | 0.15 | profile | **identifiable** | sharp, sharp, sharp, sharp, sharp | n/a |
+| k_c[C2] | 0.15 | M1 | **weakly_identifiable** | wide, wide, wide, sharp, sharp | no, no, no, no, no |
+| k_c[C2] | 0.15 | M2 | **weakly_identifiable** | wide, wide, wide, sharp, sharp | no, yes, yes, yes, yes |
+| k_c[C2] | 0.15 | M2v2 | **weakly_identifiable** | wide, wide, wide, sharp, sharp | no, yes, yes, yes, yes |
+| k_c[C3] | 0.15 | M1 | **weakly_identifiable** | sharp, wide, sharp, wide, sharp | no, no, no, no, no |
+| k_c[C3] | 0.15 | M2 | **weakly_identifiable** | sharp, wide, sharp, wide, sharp | yes, yes, yes, yes, yes |
+| k_c[C3] | 0.15 | M2v2 | **weakly_identifiable** | sharp, wide, sharp, wide, sharp | yes, yes, yes, yes, yes |
+| k_c[C4] | 0.15 | M1 | **weakly_identifiable** | wide, wide, wide, sharp, sharp | no, no, no, no, no |
+| k_c[C4] | 0.15 | M2 | **weakly_identifiable** | wide, wide, wide, sharp, sharp | yes, yes, no, no, yes |
+| k_c[C4] | 0.15 | M2v2 | **weakly_identifiable** | wide, wide, wide, sharp, sharp | yes, yes, yes, yes, yes |
+| kappa | 0.15 | profile | **weakly_identifiable** | wide, wide, sharp, wide, wide | n/a |
+| rho_c[C2] | 0.15 | M1 | **weakly_identifiable** | sharp, sharp, sharp, sharp, sharp | no, no, no, no, no |
+| rho_c[C2] | 0.15 | M2 | **weakly_identifiable** | sharp, sharp, sharp, sharp, sharp | no, yes, yes, yes, yes |
+| rho_c[C2] | 0.15 | M2v2 | **weakly_identifiable** | sharp, sharp, sharp, sharp, sharp | no, yes, yes, yes, yes |
+| rho_c[C3] | 0.15 | M1 | **weakly_identifiable** | sharp, sharp, sharp, sharp, sharp | no, no, no, no, no |
+| rho_c[C3] | 0.15 | M2 | **identifiable** | sharp, sharp, sharp, sharp, sharp | yes, yes, yes, yes, yes |
+| rho_c[C3] | 0.15 | M2v2 | **identifiable** | sharp, sharp, sharp, sharp, sharp | yes, yes, yes, yes, yes |
+| rho_c[C4] | 0.15 | M1 | **weakly_identifiable** | sharp, sharp, sharp, sharp, sharp | no, no, no, no, no |
+| rho_c[C4] | 0.15 | M2 | **identifiable** | sharp, sharp, sharp, sharp, sharp | yes, yes, yes, yes, yes |
+| rho_c[C4] | 0.15 | M2v2 | **identifiable** | sharp, sharp, sharp, sharp, sharp | yes, yes, yes, yes, yes |
 
 ### Gauss-Newton spectrum and MLE
 
@@ -143,15 +143,15 @@ Smallest relative eigenvalue (eigenvalue / largest) of J^T J at the ODE-likeliho
 | Run id | Noise s | Seed | MLE SSE | SSE at truth | Smallest relative eigenvalue | Weakest direction | MLE at box edge |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | main_profile_ode_well_specified_noise0.05_seed0 | 0.05 | 0 | 2.9241 | 2.9524 | 0.001 | k_c[C4] -0.60, kappa -0.54, h_opt_c[C4] -0.38 | none |
-| main_profile_ode_well_specified_noise0.05_seed1 | 0.05 | 1 | missing | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed2 | 0.05 | 2 | missing | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed3 | 0.05 | 3 | missing | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed4 | 0.05 | 4 | missing | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed0 | 0.15 | 0 | missing | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed1 | 0.15 | 1 | missing | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed2 | 0.15 | 2 | missing | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed3 | 0.15 | 3 | missing | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed4 | 0.15 | 4 | missing | n/a | n/a | n/a | n/a |
+| main_profile_ode_well_specified_noise0.05_seed1 | 0.05 | 1 | 2.6638 | 2.6971 | 0.002 | kappa -0.56, k_c[C4] -0.55, h_opt_c[C4] -0.38 | none |
+| main_profile_ode_well_specified_noise0.05_seed2 | 0.05 | 2 | 2.7456 | 2.7686 | 0.002 | kappa 0.56, k_c[C4] 0.49, k_c[C3] 0.41 | none |
+| main_profile_ode_well_specified_noise0.05_seed3 | 0.05 | 3 | 2.5520 | 2.5954 | 7.73e-04 | kappa 0.84, k_c[C3] 0.25, k_c[C4] 0.25 | none |
+| main_profile_ode_well_specified_noise0.05_seed4 | 0.05 | 4 | 3.1692 | 3.2220 | 0.001 | k_c[C4] -0.55, kappa -0.53, h_opt_c[C4] -0.39 | none |
+| main_profile_ode_well_specified_noise0.15_seed0 | 0.15 | 0 | 26.3053 | 26.5718 | 0.001 | kappa 0.66, k_c[C4] 0.52, h_opt_c[C4] 0.32 | none |
+| main_profile_ode_well_specified_noise0.15_seed1 | 0.15 | 1 | 23.9519 | 24.2735 | 0.002 | k_c[C4] -0.60, kappa -0.48, h_opt_c[C4] -0.38 | none |
+| main_profile_ode_well_specified_noise0.15_seed2 | 0.15 | 2 | 24.7190 | 24.9175 | 0.002 | k_c[C3] -0.52, h_opt_c[C3] -0.48, kappa -0.46 | none |
+| main_profile_ode_well_specified_noise0.15_seed3 | 0.15 | 3 | 22.9722 | 23.3582 | 8.51e-04 | kappa 0.85, k_c[C3] 0.25, h_opt_c[C3] 0.23 | none |
+| main_profile_ode_well_specified_noise0.15_seed4 | 0.15 | 4 | 28.5420 | 28.9981 | 9.82e-04 | kappa 0.63, k_c[C4] 0.43, k_c[C3] 0.40 | none |
 
 ### Profile intervals
 
@@ -163,7 +163,7 @@ Endpoints follow interval method v2 (PLAN T5 method declarations, verbatim):
 
 Interval method is `v2 refined` for records of profile method version 3 and `v1 linear` for older records. The v1 linear interval column is `Superseded` and shown for comparison only. Refinement lists the Brent evaluations per side (or why a side kept its v1 linear endpoint) and the refinement evaluations where L-BFGS-B reported no convergence.
 
-Interval method per main profile record: v2 refined 1, v1 linear 0.
+Interval method per main profile record: v2 refined 10, v1 linear 0.
 
 | Run id | Parameter | Truth | MLE | 95% interval | Shape | Covers truth | Interval method | v1 linear interval (Superseded) | Refinement | Unconverged points | Failed points | At box edge |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -180,123 +180,123 @@ Interval method per main profile record: v2 refined 1, v1 linear 0.
 | main_profile_ode_well_specified_noise0.05_seed0 | h_opt_c[C3] | 0.6000 | 0.5926 | [0.5752, 0.6098] | sharp* | yes | v2 refined | [0.5864, 0.5977] | lo 9 evals, hi 10 evals, 2 unconverged | 1, interval rests on one | 0 | 0 |
 | main_profile_ode_well_specified_noise0.05_seed0 | h_opt_c[C4] | 0.5700 | 0.5782 | [0.5550, 0.5971] | sharp* | yes | v2 refined | [0.5687, 0.5847] | lo 9 evals, hi 9 evals, 3 unconverged | 4, interval rests on one | 0 | 0 |
 | main_profile_ode_well_specified_noise0.05_seed0 | kappa | 1.0000 | 0.9181 | [0.8123, 1.0268] | sharp* | yes | v2 refined | [0.8345, 1.0028] | lo 7 evals, hi 8 evals, 2 unconverged | 1, interval rests on one | 0 | 0 |
-| main_profile_ode_well_specified_noise0.05_seed1 | rho_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed1 | rho_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed1 | rho_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed1 | k_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed1 | k_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed1 | k_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed1 | gamma_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed1 | gamma_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed1 | gamma_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed1 | h_opt_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed1 | h_opt_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed1 | h_opt_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed1 | kappa | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed2 | rho_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed2 | rho_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed2 | rho_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed2 | k_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed2 | k_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed2 | k_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed2 | gamma_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed2 | gamma_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed2 | gamma_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed2 | h_opt_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed2 | h_opt_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed2 | h_opt_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed2 | kappa | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed3 | rho_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed3 | rho_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed3 | rho_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed3 | k_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed3 | k_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed3 | k_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed3 | gamma_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed3 | gamma_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed3 | gamma_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed3 | h_opt_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed3 | h_opt_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed3 | h_opt_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed3 | kappa | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed4 | rho_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed4 | rho_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed4 | rho_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed4 | k_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed4 | k_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed4 | k_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed4 | gamma_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed4 | gamma_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed4 | gamma_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed4 | h_opt_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed4 | h_opt_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed4 | h_opt_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.05_seed4 | kappa | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed0 | rho_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed0 | rho_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed0 | rho_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed0 | k_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed0 | k_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed0 | k_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed0 | gamma_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed0 | gamma_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed0 | gamma_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed0 | h_opt_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed0 | h_opt_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed0 | h_opt_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed0 | kappa | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed1 | rho_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed1 | rho_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed1 | rho_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed1 | k_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed1 | k_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed1 | k_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed1 | gamma_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed1 | gamma_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed1 | gamma_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed1 | h_opt_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed1 | h_opt_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed1 | h_opt_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed1 | kappa | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed2 | rho_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed2 | rho_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed2 | rho_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed2 | k_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed2 | k_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed2 | k_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed2 | gamma_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed2 | gamma_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed2 | gamma_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed2 | h_opt_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed2 | h_opt_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed2 | h_opt_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed2 | kappa | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed3 | rho_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed3 | rho_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed3 | rho_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed3 | k_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed3 | k_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed3 | k_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed3 | gamma_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed3 | gamma_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed3 | gamma_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed3 | h_opt_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed3 | h_opt_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed3 | h_opt_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed3 | kappa | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed4 | rho_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed4 | rho_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed4 | rho_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed4 | k_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed4 | k_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed4 | k_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed4 | gamma_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed4 | gamma_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed4 | gamma_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed4 | h_opt_c[C2] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed4 | h_opt_c[C3] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed4 | h_opt_c[C4] | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| main_profile_ode_well_specified_noise0.15_seed4 | kappa | n/a | n/a | n/a | missing | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
+| main_profile_ode_well_specified_noise0.05_seed1 | rho_c[C2] | 0.0450 | 0.0453 | [0.0443, 0.0463] | sharp | yes | v2 refined | [0.0451, 0.0455] | lo 11 evals, hi 11 evals, 0 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed1 | rho_c[C3] | 0.0600 | 0.0609 | [0.0594, 0.0624] | sharp | yes | v2 refined | [0.0606, 0.0611] | lo 10 evals, hi 11 evals, 1 unconverged | 1 | 0 | 2 |
+| main_profile_ode_well_specified_noise0.05_seed1 | rho_c[C4] | 0.0800 | 0.0799 | [0.0786, 0.0811] | sharp | yes | v2 refined | [0.0795, 0.0800] | lo 9 evals, hi 12 evals, 0 unconverged | 0 | 0 | 8 |
+| main_profile_ode_well_specified_noise0.05_seed1 | k_c[C2] | 0.2800 | 0.3104 | [0.2852, 0.3371] | sharp | no | v2 refined | [0.2980, 0.3256] | lo 8 evals, hi 8 evals, 0 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed1 | k_c[C3] | 0.3500 | 0.3578 | [0.3224, 0.3977] | sharp | yes | v2 refined | [0.3346, 0.3876] | lo 8 evals, hi 6 evals, 1 unconverged | 1 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed1 | k_c[C4] | 0.4300 | 0.4426 | [0.3963, 0.4965] | sharp | yes | v2 refined | [0.4103, 0.4857] | lo 8 evals, hi 6 evals, 1 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed1 | gamma_c[C2] | 3.2000 | 3.1890 | [3.0215, 3.3620] | sharp | yes | v2 refined | [3.1309, 3.2501] | lo 9 evals, hi 9 evals, 1 unconverged | 0 | 0 | 2 |
+| main_profile_ode_well_specified_noise0.05_seed1 | gamma_c[C3] | 3.0000 | 2.8847 | [2.6839, 3.0979] | sharp | yes | v2 refined | [2.7902, 2.9913] | lo 9 evals, hi 8 evals, 1 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed1 | gamma_c[C4] | 2.8000 | 2.8179 | [2.5487, 3.1039] | sharp | yes | v2 refined | [2.6423, 3.0112] | lo 12 evals, hi 8 evals, 0 unconverged | 2 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed1 | h_opt_c[C2] | 0.6400 | 0.6581 | [0.6401, 0.6750] | sharp | no | v2 refined | [0.6533, 0.6629] | lo 12 evals, hi 11 evals, 0 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed1 | h_opt_c[C3] | 0.6000 | 0.6130 | [0.5927, 0.6330] | sharp | yes | v2 refined | [0.6055, 0.6199] | lo 9 evals, hi 12 evals, 0 unconverged | 1 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed1 | h_opt_c[C4] | 0.5700 | 0.5678 | [0.5492, 0.5866] | sharp | yes | v2 refined | [0.5610, 0.5729] | lo 9 evals, hi 10 evals, 0 unconverged | 1 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed1 | kappa | 1.0000 | 1.0308 | [0.9158, 1.1564] | sharp | yes | v2 refined | [0.9451, 1.1305] | lo 8 evals, hi 6 evals, 0 unconverged | 2 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed2 | rho_c[C2] | 0.0450 | 0.0455 | [0.0446, 0.0464] | sharp | yes | v2 refined | [0.0453, 0.0456] | lo 11 evals, hi 12 evals, 2 unconverged | 1 | 0 | 1 |
+| main_profile_ode_well_specified_noise0.05_seed2 | rho_c[C3] | 0.0600 | 0.0595 | [0.0578, 0.0611] | sharp | yes | v2 refined | [0.0590, 0.0597] | lo 9 evals, hi 11 evals, 1 unconverged | 0 | 0 | 3 |
+| main_profile_ode_well_specified_noise0.05_seed2 | rho_c[C4] | 0.0800 | 0.0802 | [0.0787, 0.0815] | sharp* | yes | v2 refined | [0.0796, 0.0803] | lo 9 evals, hi 12 evals, 1 unconverged | 1, interval rests on one | 0 | 6 |
+| main_profile_ode_well_specified_noise0.05_seed2 | k_c[C2] | 0.2800 | 0.3017 | [0.2785, 0.3261] | sharp | yes | v2 refined | [0.2901, 0.3153] | lo 8 evals, hi 8 evals, 3 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed2 | k_c[C3] | 0.3500 | 0.3302 | [0.2929, 0.3693] | sharp | yes | v2 refined | [0.3023, 0.3615] | lo 6 evals, hi 7 evals, 1 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed2 | k_c[C4] | 0.4300 | 0.4462 | [0.3936, 0.5047] | sharp* | yes | v2 refined | [0.4038, 0.4971] | lo 6 evals, hi 6 evals, 3 unconverged | 3, interval rests on one | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed2 | gamma_c[C2] | 3.2000 | 3.1569 | [2.9880, 3.3332] | sharp | yes | v2 refined | [3.0961, 3.2236] | lo 9 evals, hi 9 evals, 0 unconverged | 1 | 0 | 2 |
+| main_profile_ode_well_specified_noise0.05_seed2 | gamma_c[C3] | 3.0000 | 2.8130 | [2.6014, 3.0337] | sharp | yes | v2 refined | [2.7039, 2.9276] | lo 8 evals, hi 8 evals, 1 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed2 | gamma_c[C4] | 2.8000 | 2.7088 | [2.4362, 3.0080] | sharp | yes | v2 refined | [2.5229, 2.9287] | lo 8 evals, hi 7 evals, 2 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed2 | h_opt_c[C2] | 0.6400 | 0.6560 | [0.6401, 0.6711] | sharp | no | v2 refined | [0.6516, 0.6606] | lo 10 evals, hi 9 evals, 0 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed2 | h_opt_c[C3] | 0.6000 | 0.5945 | [0.5687, 0.6176] | sharp | yes | v2 refined | [0.5821, 0.6038] | lo 8 evals, hi 10 evals, 0 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed2 | h_opt_c[C4] | 0.5700 | 0.5761 | [0.5548, 0.5946] | sharp* | yes | v2 refined | [0.5633, 0.5831] | lo 7 evals, hi 9 evals, 2 unconverged | 2, interval rests on one | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed2 | kappa | 1.0000 | 1.0229 | [0.8992, 1.1430] | sharp | yes | v2 refined | [0.9228, 1.1148] | lo 7 evals, hi 7 evals, 2 unconverged | 1 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed3 | rho_c[C2] | 0.0450 | 0.0448 | [0.0439, 0.0457] | sharp | yes | v2 refined | [0.0447, 0.0450] | lo 10 evals, hi 11 evals, 0 unconverged | 0 | 0 | 2 |
+| main_profile_ode_well_specified_noise0.05_seed3 | rho_c[C3] | 0.0600 | 0.0612 | [0.0601, 0.0624] | sharp* | no | v2 refined | [0.0610, 0.0614] | lo 10 evals, hi 11 evals, 2 unconverged | 1, interval rests on one | 0 | 3 |
+| main_profile_ode_well_specified_noise0.05_seed3 | rho_c[C4] | 0.0800 | 0.0807 | [0.0794, 0.0819] | sharp | yes | v2 refined | [0.0802, 0.0808] | lo 9 evals, hi 12 evals, 2 unconverged | 0 | 0 | 6 |
+| main_profile_ode_well_specified_noise0.05_seed3 | k_c[C2] | 0.2800 | 0.2967 | [0.2729, 0.3223] | sharp | yes | v2 refined | [0.2841, 0.3116] | lo 10 evals, hi 9 evals, 3 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed3 | k_c[C3] | 0.3500 | 0.3638 | [0.3261, 0.4050] | sharp | yes | v2 refined | [0.3376, 0.3950] | lo 8 evals, hi 7 evals, 2 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed3 | k_c[C4] | 0.4300 | 0.4283 | [0.3740, 0.4879] | sharp | yes | v2 refined | [0.3822, 0.4837] | lo 7 evals, hi 6 evals, 3 unconverged | 1 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed3 | gamma_c[C2] | 3.2000 | 3.3082 | [3.1333, 3.4888] | sharp | yes | v2 refined | [3.2457, 3.3753] | lo 9 evals, hi 9 evals, 2 unconverged | 0 | 0 | 2 |
+| main_profile_ode_well_specified_noise0.05_seed3 | gamma_c[C3] | 3.0000 | 3.0850 | [2.8657, 3.3158] | sharp | yes | v2 refined | [2.9800, 3.2030] | lo 8 evals, hi 7 evals, 2 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed3 | gamma_c[C4] | 2.8000 | 2.6884 | [2.3969, 3.0113] | sharp | yes | v2 refined | [2.4779, 2.9493] | lo 7 evals, hi 6 evals, 0 unconverged | 1 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed3 | h_opt_c[C2] | 0.6400 | 0.6374 | [0.6194, 0.6548] | sharp* | yes | v2 refined | [0.6320, 0.6431] | lo 9 evals, hi 9 evals, 3 unconverged | 1, interval rests on one | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed3 | h_opt_c[C3] | 0.6000 | 0.6066 | [0.5870, 0.6249] | sharp | yes | v2 refined | [0.5994, 0.6118] | lo 9 evals, hi 10 evals, 5 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed3 | h_opt_c[C4] | 0.5700 | 0.5754 | [0.5541, 0.5938] | sharp* | yes | v2 refined | [0.5638, 0.5810] | lo 8 evals, hi 10 evals, 4 unconverged | 1, interval rests on one | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed3 | kappa | 1.0000 | 1.0399 | [0.8240, 1.2526] | sharp* | yes | v2 refined | [0.8337, 1.2394] | lo 6 evals, hi 8 evals, 1 unconverged | 1, interval rests on one | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed4 | rho_c[C2] | 0.0450 | 0.0460 | [0.0448, 0.0470] | sharp | yes | v2 refined | [0.0457, 0.0461] | lo 10 evals, hi 11 evals, 0 unconverged | 1 | 0 | 2 |
+| main_profile_ode_well_specified_noise0.05_seed4 | rho_c[C3] | 0.0600 | 0.0605 | [0.0591, 0.0617] | sharp | yes | v2 refined | [0.0601, 0.0606] | lo 9 evals, hi 11 evals, 0 unconverged | 0 | 0 | 5 |
+| main_profile_ode_well_specified_noise0.05_seed4 | rho_c[C4] | 0.0800 | 0.0801 | [0.0781, 0.0819] | sharp | yes | v2 refined | [0.0795, 0.0803] | lo 10 evals, hi 11 evals, 2 unconverged | 0 | 0 | 8 |
+| main_profile_ode_well_specified_noise0.05_seed4 | k_c[C2] | 0.2800 | 0.2601 | [0.2385, 0.2834] | sharp | yes | v2 refined | [0.2485, 0.2746] | lo 10 evals, hi 10 evals, 1 unconverged | 1 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed4 | k_c[C3] | 0.3500 | 0.3302 | [0.2960, 0.3661] | sharp* | yes | v2 refined | [0.3059, 0.3565] | lo 8 evals, hi 7 evals, 3 unconverged | 1, interval rests on one | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed4 | k_c[C4] | 0.4300 | 0.4155 | [0.3667, 0.4703] | sharp | yes | v2 refined | [0.3774, 0.4638] | lo 7 evals, hi 7 evals, 3 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed4 | gamma_c[C2] | 3.2000 | 3.2086 | [3.0286, 3.3992] | sharp | yes | v2 refined | [3.1345, 3.2828] | lo 9 evals, hi 9 evals, 2 unconverged | 1 | 0 | 2 |
+| main_profile_ode_well_specified_noise0.05_seed4 | gamma_c[C3] | 3.0000 | 2.8557 | [2.6418, 3.0813] | sharp | yes | v2 refined | [2.7462, 2.9737] | lo 10 evals, hi 8 evals, 1 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed4 | gamma_c[C4] | 2.8000 | 2.7591 | [2.4668, 3.0731] | sharp | yes | v2 refined | [2.5500, 3.0005] | lo 9 evals, hi 7 evals, 1 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed4 | h_opt_c[C2] | 0.6400 | 0.6324 | [0.6121, 0.6521] | sharp | yes | v2 refined | [0.6254, 0.6406] | lo 9 evals, hi 8 evals, 2 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed4 | h_opt_c[C3] | 0.6000 | 0.5916 | [0.5690, 0.6108] | sharp | yes | v2 refined | [0.5815, 0.5979] | lo 8 evals, hi 9 evals, 2 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed4 | h_opt_c[C4] | 0.5700 | 0.5588 | [0.5357, 0.5811] | sharp | yes | v2 refined | [0.5488, 0.5676] | lo 9 evals, hi 9 evals, 0 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.05_seed4 | kappa | 1.0000 | 0.8908 | [0.7820, 1.0000] | sharp | yes | v2 refined | [0.7998, 0.9786] | lo 9 evals, hi 6 evals, 1 unconverged | 1 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed0 | rho_c[C2] | 0.0450 | 0.0447 | [0.0419, 0.0474] | sharp* | yes | v2 refined | [0.0433, 0.0457] | lo 8 evals, hi 9 evals, 3 unconverged | 1, interval rests on one | 0 | 2 |
+| main_profile_ode_well_specified_noise0.15_seed0 | rho_c[C3] | 0.0600 | 0.0601 | [0.0562, 0.0635] | sharp | yes | v2 refined | [0.0576, 0.0612] | lo 7 evals, hi 9 evals, 1 unconverged | 0 | 0 | 4 |
+| main_profile_ode_well_specified_noise0.15_seed0 | rho_c[C4] | 0.0800 | 0.0839 | [0.0795, 0.0874] | sharp | yes | v2 refined | [0.0812, 0.0846] | lo 8 evals, hi 10 evals, 1 unconverged | 1 | 0 | 7 |
+| main_profile_ode_well_specified_noise0.15_seed0 | k_c[C2] | 0.2800 | 0.3429 | [0.2647, 0.4461] | wide* | yes | v2 refined | [0.2695, 0.4460] | lo 7 evals, hi 5 evals, 0 unconverged | 1, interval rests on one | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed0 | k_c[C3] | 0.3500 | 0.3125 | [0.2382, 0.4129] | sharp* | yes | v2 refined | [0.2413, 0.4117] | lo 6 evals, hi 5 evals, 3 unconverged | 3, interval rests on one | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed0 | k_c[C4] | 0.4300 | 0.5428 | [0.3768, 0.7577] | wide* | yes | v2 refined | [0.3775, 0.7492] | lo 5 evals, hi 6 evals, 2 unconverged | 1, interval rests on one | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed0 | gamma_c[C2] | 3.2000 | 3.6187 | [3.0324, 4.2884] | sharp* | yes | v2 refined | [3.0457, 4.2597] | lo 6 evals, hi 6 evals, 1 unconverged | 2, interval rests on one | 0 | 2 |
+| main_profile_ode_well_specified_noise0.15_seed0 | gamma_c[C3] | 3.0000 | 3.1382 | [2.5650, 3.7779] | sharp | yes | v2 refined | [2.5894, 3.7435] | lo 6 evals, hi 6 evals, 0 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed0 | gamma_c[C4] | 2.8000 | 3.7864 | [2.6784, 5.2153] | wide* | yes | v2 refined | [2.6870, 5.1699] | lo 5 evals, hi 6 evals, 1 unconverged | 1, interval rests on one | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed0 | h_opt_c[C2] | 0.6400 | 0.6379 | [0.5867, 0.6884] | sharp* | yes | v2 refined | [0.5932, 0.6840] | lo 7 evals, hi 6 evals, 2 unconverged | 1, interval rests on one | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed0 | h_opt_c[C3] | 0.6000 | 0.5806 | [0.5273, 0.6304] | sharp | yes | v2 refined | [0.5304, 0.6232] | lo 6 evals, hi 6 evals, 4 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed0 | h_opt_c[C4] | 0.5700 | 0.5979 | [0.5425, 0.6516] | sharp | yes | v2 refined | [0.5446, 0.6458] | lo 8 evals, hi 7 evals, 0 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed0 | kappa | 1.0000 | 0.7610 | [0.4872, 1.1176] | wide* | yes | v2 refined | [0.4899, 1.1118] | lo 5 evals, hi 6 evals, 0 unconverged | 1, interval rests on one | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed1 | rho_c[C2] | 0.0450 | 0.0456 | [0.0431, 0.0481] | sharp* | yes | v2 refined | [0.0444, 0.0465] | lo 8 evals, hi 9 evals, 1 unconverged | 1, interval rests on one | 0 | 2 |
+| main_profile_ode_well_specified_noise0.15_seed1 | rho_c[C3] | 0.0600 | 0.0630 | [0.0584, 0.0672] | sharp | yes | v2 refined | [0.0602, 0.0645] | lo 8 evals, hi 8 evals, 1 unconverged | 0 | 0 | 2 |
+| main_profile_ode_well_specified_noise0.15_seed1 | rho_c[C4] | 0.0800 | 0.0797 | [0.0755, 0.0833] | sharp | yes | v2 refined | [0.0765, 0.0806] | lo 8 evals, hi 10 evals, 1 unconverged | 0 | 0 | 8 |
+| main_profile_ode_well_specified_noise0.15_seed1 | k_c[C2] | 0.2800 | 0.3895 | [0.3060, 0.5065] | wide | no | v2 refined | [0.3106, 0.5064] | lo 7 evals, hi 4 evals, 0 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed1 | k_c[C3] | 0.3500 | 0.3789 | [0.2762, 0.5262] | wide | yes | v2 refined | [0.2793, 0.5225] | lo 6 evals, hi 5 evals, 0 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed1 | k_c[C4] | 0.4300 | 0.4776 | [0.3529, 0.6511] | wide | yes | v2 refined | [0.3562, 0.6462] | lo 8 evals, hi 5 evals, 0 unconverged | 2 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed1 | gamma_c[C2] | 3.2000 | 3.2617 | [2.7151, 3.9082] | sharp | yes | v2 refined | [2.7330, 3.8794] | lo 6 evals, hi 6 evals, 0 unconverged | 1 | 0 | 2 |
+| main_profile_ode_well_specified_noise0.15_seed1 | gamma_c[C3] | 3.0000 | 2.6507 | [2.0946, 3.3697] | sharp* | yes | v2 refined | [2.1276, 3.3547] | lo 6 evals, hi 6 evals, 2 unconverged | 1, interval rests on one | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed1 | gamma_c[C4] | 2.8000 | 2.8518 | [2.0173, 3.8453] | sharp* | yes | v2 refined | [2.0224, 3.8204] | lo 6 evals, hi 7 evals, 2 unconverged | 1, interval rests on one | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed1 | h_opt_c[C2] | 0.6400 | 0.6943 | [0.6476, 0.7425] | sharp | no | v2 refined | [0.6555, 0.7348] | lo 6 evals, hi 6 evals, 0 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed1 | h_opt_c[C3] | 0.6000 | 0.6450 | [0.5803, 0.6983] | sharp* | yes | v2 refined | [0.5819, 0.6927] | lo 6 evals, hi 6 evals, 2 unconverged | 1, interval rests on one | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed1 | h_opt_c[C4] | 0.5700 | 0.5675 | [0.5167, 0.6163] | sharp | yes | v2 refined | [0.5214, 0.6080] | lo 6 evals, hi 7 evals, 2 unconverged | 2 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed1 | kappa | 1.0000 | 1.1296 | [0.8109, 1.5120] | wide* | yes | v2 refined | [0.8152, 1.5007] | lo 6 evals, hi 6 evals, 2 unconverged | 1, interval rests on one | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed2 | rho_c[C2] | 0.0450 | 0.0463 | [0.0438, 0.0488] | sharp | yes | v2 refined | [0.0453, 0.0472] | lo 9 evals, hi 9 evals, 2 unconverged | 3 | 0 | 2 |
+| main_profile_ode_well_specified_noise0.15_seed2 | rho_c[C3] | 0.0600 | 0.0587 | [0.0515, 0.0640] | sharp | yes | v2 refined | [0.0525, 0.0610] | lo 7 evals, hi 7 evals, 4 unconverged | 0 | 0 | 3 |
+| main_profile_ode_well_specified_noise0.15_seed2 | rho_c[C4] | 0.0800 | 0.0804 | [0.0746, 0.0837] | sharp | yes | v2 refined | [0.0753, 0.0812] | lo 6 evals, hi 10 evals, 2 unconverged | 2 | 0 | 7 |
+| main_profile_ode_well_specified_noise0.15_seed2 | k_c[C2] | 0.2800 | 0.3480 | [0.2728, 0.4463] | wide* | yes | v2 refined | [0.2776, 0.4449] | lo 6 evals, hi 5 evals, 1 unconverged | 2, interval rests on one | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed2 | k_c[C3] | 0.3500 | 0.2943 | [0.2030, 0.4184] | sharp | yes | v2 refined | [0.2037, 0.4159] | lo 5 evals, hi 6 evals, 0 unconverged | 1 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed2 | k_c[C4] | 0.4300 | 0.4852 | [0.2901, 0.7230] | wide* | yes | v2 refined | [0.2938, 0.7218] | lo 6 evals, hi 5 evals, 1 unconverged | 3, interval rests on one | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed2 | gamma_c[C2] | 3.2000 | 3.1327 | [2.6096, 3.7461] | sharp* | yes | v2 refined | [2.6242, 3.7176] | lo 6 evals, hi 6 evals, 2 unconverged | 1, interval rests on one | 0 | 2 |
+| main_profile_ode_well_specified_noise0.15_seed2 | gamma_c[C3] | 3.0000 | 2.5104 | [1.9307, 3.1535] | sharp* | yes | v2 refined | [1.9602, 3.1260] | lo 6 evals, hi 8 evals, 2 unconverged | 1, interval rests on one | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed2 | gamma_c[C4] | 2.8000 | 2.6058 | [1.7428, 3.8149] | sharp* | yes | v2 refined | [1.7549, 3.7973] | lo 5 evals, hi 6 evals, 3 unconverged | 3, interval rests on one | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed2 | h_opt_c[C2] | 0.6400 | 0.6844 | [0.6387, 0.7359] | sharp | yes | v2 refined | [0.6490, 0.7321] | lo 7 evals, hi 11 evals, 0 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed2 | h_opt_c[C3] | 0.6000 | 0.5818 | [0.4874, 0.6608] | sharp | yes | v2 refined | [0.4925, 0.6530] | lo 6 evals, hi 9 evals, 3 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed2 | h_opt_c[C4] | 0.5700 | 0.5854 | [0.4992, 0.6359] | sharp | yes | v2 refined | [0.5010, 0.6313] | lo 6 evals, hi 7 evals, 1 unconverged | 2 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed2 | kappa | 1.0000 | 1.0354 | [0.6886, 1.4074] | sharp* | yes | v2 refined | [0.6874, 1.4029] | lo 9 evals, hi 10 evals, 1 unconverged | 1, interval rests on one | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed3 | rho_c[C2] | 0.0450 | 0.0446 | [0.0418, 0.0473] | sharp | yes | v2 refined | [0.0432, 0.0457] | lo 9 evals, hi 10 evals, 0 unconverged | 0 | 0 | 2 |
+| main_profile_ode_well_specified_noise0.15_seed3 | rho_c[C3] | 0.0600 | 0.0637 | [0.0603, 0.0672] | sharp | no | v2 refined | [0.0621, 0.0649] | lo 9 evals, hi 9 evals, 0 unconverged | 0 | 0 | 3 |
+| main_profile_ode_well_specified_noise0.15_seed3 | rho_c[C4] | 0.0800 | 0.0819 | [0.0782, 0.0853] | sharp | yes | v2 refined | [0.0780, 0.0828] | lo 6 evals, hi 10 evals, 0 unconverged | 0 | 0 | 7 |
+| main_profile_ode_well_specified_noise0.15_seed3 | k_c[C2] | 0.2800 | 0.3214 | [0.2546, 0.4126] | sharp | yes | v2 refined | [0.2588, 0.4111] | lo 6 evals, hi 6 evals, 0 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed3 | k_c[C3] | 0.3500 | 0.3861 | [0.2825, 0.5258] | wide* | yes | v2 refined | [0.2858, 0.5226] | lo 6 evals, hi 5 evals, 1 unconverged | 2, interval rests on one | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed3 | k_c[C4] | 0.4300 | 0.4125 | [0.2549, 0.6365] | sharp | yes | v2 refined | [0.2562, 0.6351] | lo 6 evals, hi 5 evals, 0 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed3 | gamma_c[C2] | 3.2000 | 3.5936 | [3.0253, 4.1918] | sharp | yes | v2 refined | [3.0346, 4.1745] | lo 5 evals, hi 5 evals, 0 unconverged | 1 | 0 | 2 |
+| main_profile_ode_well_specified_noise0.15_seed3 | gamma_c[C3] | 3.0000 | 3.3015 | [2.6408, 4.0975] | sharp | yes | v2 refined | [2.6780, 4.0674] | lo 9 evals, hi 8 evals, 0 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed3 | gamma_c[C4] | 2.8000 | 2.5011 | [1.7454, 3.6446] | sharp | yes | v2 refined | [1.7465, 3.6355] | lo 5 evals, hi 6 evals, 2 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed3 | h_opt_c[C2] | 0.6400 | 0.6248 | [0.5769, 0.6777] | sharp | yes | v2 refined | [0.5860, 0.6730] | lo 9 evals, hi 6 evals, 0 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed3 | h_opt_c[C3] | 0.6000 | 0.6144 | [0.5621, 0.6622] | sharp | yes | v2 refined | [0.5672, 0.6533] | lo 7 evals, hi 7 evals, 0 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed3 | h_opt_c[C4] | 0.5700 | 0.5806 | [0.4906, 0.6283] | sharp | yes | v2 refined | [0.4971, 0.6225] | lo 7 evals, hi 6 evals, 0 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed3 | kappa | 1.0000 | 1.0353 | [0.4888, 1.6465] | wide* | yes | v2 refined | [0.4880, 1.6324] | lo 5 evals, hi 9 evals, 2 unconverged | 2, interval rests on one | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed4 | rho_c[C2] | 0.0450 | 0.0479 | [0.0443, 0.0512] | sharp* | yes | v2 refined | [0.0458, 0.0493] | lo 8 evals, hi 8 evals, 2 unconverged | 4, interval rests on one | 0 | 2 |
+| main_profile_ode_well_specified_noise0.15_seed4 | rho_c[C3] | 0.0600 | 0.0615 | [0.0564, 0.0652] | sharp* | yes | v2 refined | [0.0581, 0.0627] | lo 8 evals, hi 9 evals, 3 unconverged | 4, interval rests on one | 0 | 5 |
+| main_profile_ode_well_specified_noise0.15_seed4 | rho_c[C4] | 0.0800 | 0.0806 | [0.0738, 0.0864] | sharp* | yes | v2 refined | [0.0753, 0.0829] | lo 7 evals, hi 8 evals, 3 unconverged | 2, interval rests on one | 0 | 7 |
+| main_profile_ode_well_specified_noise0.15_seed4 | k_c[C2] | 0.2800 | 0.2279 | [0.1784, 0.2953] | sharp* | yes | v2 refined | [0.1813, 0.2953] | lo 6 evals, hi 8 evals, 4 unconverged | 1, interval rests on one | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed4 | k_c[C3] | 0.3500 | 0.3013 | [0.2113, 0.4097] | sharp* | yes | v2 refined | [0.2115, 0.4074] | lo 5 evals, hi 6 evals, 0 unconverged | 1, interval rests on one | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed4 | k_c[C4] | 0.4300 | 0.4005 | [0.2630, 0.5997] | sharp* | yes | v2 refined | [0.2648, 0.5996] | lo 5 evals, hi 5 evals, 1 unconverged | 1, interval rests on one | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed4 | gamma_c[C2] | 3.2000 | 3.2585 | [2.7174, 3.8253] | sharp | yes | v2 refined | [2.7305, 3.8030] | lo 5 evals, hi 6 evals, 1 unconverged | 0 | 0 | 2 |
+| main_profile_ode_well_specified_noise0.15_seed4 | gamma_c[C3] | 3.0000 | 2.6107 | [2.0010, 3.2590] | sharp | yes | v2 refined | [2.0322, 3.2285] | lo 6 evals, hi 6 evals, 0 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed4 | gamma_c[C4] | 2.8000 | 2.6774 | [1.7822, 3.8532] | sharp | yes | v2 refined | [1.7938, 3.8289] | lo 6 evals, hi 6 evals, 1 unconverged | 1 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed4 | h_opt_c[C2] | 0.6400 | 0.6186 | [0.5587, 0.6857] | sharp | yes | v2 refined | [0.5592, 0.6850] | lo 5 evals, hi 9 evals, 1 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed4 | h_opt_c[C3] | 0.6000 | 0.5776 | [0.4990, 0.6391] | sharp | yes | v2 refined | [0.5033, 0.6383] | lo 6 evals, hi 5 evals, 0 unconverged | 0 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed4 | h_opt_c[C4] | 0.5700 | 0.5435 | [0.4603, 0.6145] | sharp | yes | v2 refined | [0.4610, 0.6178] | lo 5 evals, hi 6 evals, 0 unconverged | 1 | 0 | 0 |
+| main_profile_ode_well_specified_noise0.15_seed4 | kappa | 1.0000 | 0.7129 | [0.4213, 1.0308] | wide* | yes | v2 refined | [0.4230, 1.0219] | lo 7 evals, hi 7 evals, 1 unconverged | 1, interval rests on one | 0 | 0 |
 
 Declared treatment of the optimizer box and failed ODE solves (PLAN T5 method declarations, verbatim):
 
@@ -334,31 +334,31 @@ Declared clarifications (PLAN T5 method declarations, verbatim):
 
 | Variant | Model | Criterion 1 | Criterion 2 | Criterion 3 | Criterion 4 |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| wrong_phi | M1 | missing | missing | missing | missing |
+| wrong_phi | M1 | governed_by_criterion_4 | missing | missing | missing |
 | wrong_phi | M2 | missing | missing | missing | missing |
-| student_t | M1 | missing | missing | missing | not_applicable |
+| student_t | M1 | not_applicable | missing | missing | not_applicable |
 | student_t | M2 | missing | missing | missing | not_applicable |
-| piecewise_wear | M1 | missing | missing | missing | not_applicable |
+| piecewise_wear | M1 | not_applicable | missing | missing | not_applicable |
 | piecewise_wear | M2 | missing | missing | missing | not_applicable |
-| drop_early | M1 | missing | missing | missing | not_applicable |
+| drop_early | M1 | not_applicable | missing | missing | not_applicable |
 | drop_early | M2 | missing | missing | missing | not_applicable |
-| traffic | M1 | missing | missing | missing | not_applicable |
+| traffic | M1 | not_applicable | missing | missing | not_applicable |
 | traffic | M2 | missing | missing | missing | not_applicable |
 
 ### Details
 
 Criterion 2 lists each seed's misspecification profile shape next to coverage, because an open interval side counts as covering; `*` marks a shape that rests on an unconverged profile point.
 
-- **wrong_phi / M1**: C1 rho_c[C2]: governed_by_criterion_4; C1 rho_c[C3]: governed_by_criterion_4; C1 rho_c[C4]: governed_by_criterion_4; C1 k_c[C2]: missing; C1 k_c[C3]: missing; C1 k_c[C4]: missing; C2 rho_c[C2]: missing; C2 rho_c[C3]: missing; C2 rho_c[C4]: missing; C2 k_c[C2]: missing; C2 k_c[C3]: missing; C2 k_c[C4]: missing; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing; C4 rho_c[C2]: missing; C4 rho_c[C3]: missing; C4 rho_c[C4]: missing.
-- **wrong_phi / M2**: C1 rho_c[C2]: governed_by_criterion_4; C1 rho_c[C3]: governed_by_criterion_4; C1 rho_c[C4]: governed_by_criterion_4; C1 k_c[C2]: missing; C1 k_c[C3]: missing; C1 k_c[C4]: missing; C2 rho_c[C2]: missing; C2 rho_c[C3]: missing; C2 rho_c[C4]: missing; C2 k_c[C2]: missing; C2 k_c[C3]: missing; C2 k_c[C4]: missing; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing; C4 rho_c[C2]: missing; C4 rho_c[C3]: missing; C4 rho_c[C4]: missing.
-- **student_t / M1**: C1 rho_c[C2]: missing; C1 rho_c[C3]: missing; C1 rho_c[C4]: missing; C1 k_c[C2]: missing; C1 k_c[C3]: missing; C1 k_c[C4]: missing; C2 rho_c[C2]: missing; C2 rho_c[C3]: missing; C2 rho_c[C4]: missing; C2 k_c[C2]: missing; C2 k_c[C3]: missing; C2 k_c[C4]: missing; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
-- **student_t / M2**: C1 rho_c[C2]: missing; C1 rho_c[C3]: missing; C1 rho_c[C4]: missing; C1 k_c[C2]: missing; C1 k_c[C3]: missing; C1 k_c[C4]: missing; C2 rho_c[C2]: missing; C2 rho_c[C3]: missing; C2 rho_c[C4]: missing; C2 k_c[C2]: missing; C2 k_c[C3]: missing; C2 k_c[C4]: missing; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
-- **piecewise_wear / M1**: C1 rho_c[C2]: missing; C1 rho_c[C3]: missing; C1 rho_c[C4]: missing; C1 k_c[C2]: missing; C1 k_c[C3]: missing; C1 k_c[C4]: missing; C2 rho_c[C2]: missing; C2 rho_c[C3]: missing; C2 rho_c[C4]: missing; C2 k_c[C2]: missing; C2 k_c[C3]: missing; C2 k_c[C4]: missing; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
-- **piecewise_wear / M2**: C1 rho_c[C2]: missing; C1 rho_c[C3]: missing; C1 rho_c[C4]: missing; C1 k_c[C2]: missing; C1 k_c[C3]: missing; C1 k_c[C4]: missing; C2 rho_c[C2]: missing; C2 rho_c[C3]: missing; C2 rho_c[C4]: missing; C2 k_c[C2]: missing; C2 k_c[C3]: missing; C2 k_c[C4]: missing; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
-- **drop_early / M1**: C1 rho_c[C2]: missing; C1 rho_c[C3]: missing; C1 rho_c[C4]: missing; C1 k_c[C2]: missing; C1 k_c[C3]: missing; C1 k_c[C4]: missing; C2 rho_c[C2]: missing; C2 rho_c[C3]: missing; C2 rho_c[C4]: missing; C2 k_c[C2]: missing; C2 k_c[C3]: missing; C2 k_c[C4]: missing; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
-- **drop_early / M2**: C1 rho_c[C2]: missing; C1 rho_c[C3]: missing; C1 rho_c[C4]: missing; C1 k_c[C2]: missing; C1 k_c[C3]: missing; C1 k_c[C4]: missing; C2 rho_c[C2]: missing; C2 rho_c[C3]: missing; C2 rho_c[C4]: missing; C2 k_c[C2]: missing; C2 k_c[C3]: missing; C2 k_c[C4]: missing; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
-- **traffic / M1**: C1 rho_c[C2]: missing; C1 rho_c[C3]: missing; C1 rho_c[C4]: missing; C1 k_c[C2]: missing; C1 k_c[C3]: missing; C1 k_c[C4]: missing; C2 rho_c[C2]: missing; C2 rho_c[C3]: missing; C2 rho_c[C4]: missing; C2 k_c[C2]: missing; C2 k_c[C3]: missing; C2 k_c[C4]: missing; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
-- **traffic / M2**: C1 rho_c[C2]: missing; C1 rho_c[C3]: missing; C1 rho_c[C4]: missing; C1 k_c[C2]: missing; C1 k_c[C3]: missing; C1 k_c[C4]: missing; C2 rho_c[C2]: missing; C2 rho_c[C3]: missing; C2 rho_c[C4]: missing; C2 k_c[C2]: missing; C2 k_c[C3]: missing; C2 k_c[C4]: missing; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
+- **wrong_phi / M1**: C1 rho_c[C2]: governed_by_criterion_4; C1 rho_c[C3]: governed_by_criterion_4; C1 rho_c[C4]: governed_by_criterion_4; C1 k_c[C2]: not_applicable; C1 k_c[C3]: not_applicable; C1 k_c[C4]: not_applicable; C2 rho_c[C2]: not_applicable; C2 rho_c[C3]: not_applicable; C2 rho_c[C4]: not_applicable; C2 k_c[C2]: not_applicable; C2 k_c[C3]: not_applicable; C2 k_c[C4]: not_applicable; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing; C4 rho_c[C2]: missing; C4 rho_c[C3]: missing; C4 rho_c[C4]: missing.
+- **wrong_phi / M2**: C1 rho_c[C2]: governed_by_criterion_4; C1 rho_c[C3]: governed_by_criterion_4; C1 rho_c[C4]: governed_by_criterion_4; C1 k_c[C2]: not_applicable; C1 k_c[C3]: missing; C1 k_c[C4]: not_applicable; C2 rho_c[C2]: not_applicable; C2 rho_c[C3]: missing; C2 rho_c[C4]: missing; C2 k_c[C2]: not_applicable; C2 k_c[C3]: missing; C2 k_c[C4]: not_applicable; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing; C4 rho_c[C2]: missing; C4 rho_c[C3]: missing; C4 rho_c[C4]: missing.
+- **student_t / M1**: C1 rho_c[C2]: not_applicable; C1 rho_c[C3]: not_applicable; C1 rho_c[C4]: not_applicable; C1 k_c[C2]: not_applicable; C1 k_c[C3]: not_applicable; C1 k_c[C4]: not_applicable; C2 rho_c[C2]: not_applicable; C2 rho_c[C3]: not_applicable; C2 rho_c[C4]: not_applicable; C2 k_c[C2]: not_applicable; C2 k_c[C3]: not_applicable; C2 k_c[C4]: not_applicable; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
+- **student_t / M2**: C1 rho_c[C2]: not_applicable; C1 rho_c[C3]: missing; C1 rho_c[C4]: missing; C1 k_c[C2]: not_applicable; C1 k_c[C3]: missing; C1 k_c[C4]: not_applicable; C2 rho_c[C2]: not_applicable; C2 rho_c[C3]: missing; C2 rho_c[C4]: missing; C2 k_c[C2]: not_applicable; C2 k_c[C3]: missing; C2 k_c[C4]: not_applicable; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
+- **piecewise_wear / M1**: C1 rho_c[C2]: not_applicable; C1 rho_c[C3]: not_applicable; C1 rho_c[C4]: not_applicable; C1 k_c[C2]: not_applicable; C1 k_c[C3]: not_applicable; C1 k_c[C4]: not_applicable; C2 rho_c[C2]: not_applicable; C2 rho_c[C3]: not_applicable; C2 rho_c[C4]: not_applicable; C2 k_c[C2]: not_applicable; C2 k_c[C3]: not_applicable; C2 k_c[C4]: not_applicable; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
+- **piecewise_wear / M2**: C1 rho_c[C2]: not_applicable; C1 rho_c[C3]: missing; C1 rho_c[C4]: missing; C1 k_c[C2]: not_applicable; C1 k_c[C3]: missing; C1 k_c[C4]: not_applicable; C2 rho_c[C2]: not_applicable; C2 rho_c[C3]: missing; C2 rho_c[C4]: missing; C2 k_c[C2]: not_applicable; C2 k_c[C3]: missing; C2 k_c[C4]: not_applicable; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
+- **drop_early / M1**: C1 rho_c[C2]: not_applicable; C1 rho_c[C3]: not_applicable; C1 rho_c[C4]: not_applicable; C1 k_c[C2]: not_applicable; C1 k_c[C3]: not_applicable; C1 k_c[C4]: not_applicable; C2 rho_c[C2]: not_applicable; C2 rho_c[C3]: not_applicable; C2 rho_c[C4]: not_applicable; C2 k_c[C2]: not_applicable; C2 k_c[C3]: not_applicable; C2 k_c[C4]: not_applicable; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
+- **drop_early / M2**: C1 rho_c[C2]: not_applicable; C1 rho_c[C3]: missing; C1 rho_c[C4]: missing; C1 k_c[C2]: not_applicable; C1 k_c[C3]: missing; C1 k_c[C4]: not_applicable; C2 rho_c[C2]: not_applicable; C2 rho_c[C3]: missing; C2 rho_c[C4]: missing; C2 k_c[C2]: not_applicable; C2 k_c[C3]: missing; C2 k_c[C4]: not_applicable; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
+- **traffic / M1**: C1 rho_c[C2]: not_applicable; C1 rho_c[C3]: not_applicable; C1 rho_c[C4]: not_applicable; C1 k_c[C2]: not_applicable; C1 k_c[C3]: not_applicable; C1 k_c[C4]: not_applicable; C2 rho_c[C2]: not_applicable; C2 rho_c[C3]: not_applicable; C2 rho_c[C4]: not_applicable; C2 k_c[C2]: not_applicable; C2 k_c[C3]: not_applicable; C2 k_c[C4]: not_applicable; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
+- **traffic / M2**: C1 rho_c[C2]: not_applicable; C1 rho_c[C3]: missing; C1 rho_c[C4]: missing; C1 k_c[C2]: not_applicable; C1 k_c[C3]: missing; C1 k_c[C4]: not_applicable; C2 rho_c[C2]: not_applicable; C2 rho_c[C3]: missing; C2 rho_c[C4]: missing; C2 k_c[C2]: not_applicable; C2 k_c[C3]: missing; C2 k_c[C4]: not_applicable; C2 gamma_c[C2]: missing; C2 gamma_c[C3]: missing; C2 gamma_c[C4]: missing; C2 h_opt_c[C2]: missing; C2 h_opt_c[C3]: missing; C2 h_opt_c[C4]: missing; C2 kappa: missing; C3: missing.
 
 ### Silent failures
 
@@ -373,17 +373,17 @@ Measured wall time in seconds per run, read from the JSON records (`Observed`; m
 | main | fit | M1 | 10 | 28.0 | 49.7 | 323.1 | 39.0 |
 | main | fit | M2 | 10 | 15.6 | 31.8 | 186.3 | 26.2 |
 | main | fit | M2v2 | 10 | 54.3 | 68.0 | 556.0 | 65.3 |
-| main | profile | ode | 1 | 538.1 | 538.1 | 538.1 | n/a |
+| main | profile | ode | 10 | 675.7 | 882.8 | 6899.5 | n/a |
 
-Sum over all records: 1603.4 s. Slowest main-study M2 fit: 26.2 s (run main_fit_M2_well_specified_noise0.05_seed1); the threshold for M2 in the misspecification study is 600 s.
+Sum over all records: 7964.8 s. Slowest main-study M2 fit: 26.2 s (run main_fit_M2_well_specified_noise0.05_seed1); the threshold for M2 in the misspecification study is 600 s.
 
 ## P1 trigger evidence
 
 These are mechanical trigger checks against PRD section 8, not the decision. The P1 decision is made by the user in `experiments/pivots.md`. Realistic noise for R1 is 0.15 s (`Assumed`, PLAN T5 method declarations).
 
 - **R0 (plan)**: the default rung. It stays unless the user moves to R1 or R2.
-- **R1 trigger** (`k_c` or `h_opt,c` non-identifiable at realistic noise), mechanical trigger check, not the decision: `incomplete`.
-  Non-identifiable: none. Weakly identifiable: none.
+- **R1 trigger** (`k_c` or `h_opt,c` non-identifiable at realistic noise), mechanical trigger check, not the decision: `trigger_condition_not_met`.
+  Non-identifiable: none. Weakly identifiable: k_c[C2] (M1), k_c[C2] (M2), k_c[C3] (M1), k_c[C3] (M2), k_c[C4] (M1), k_c[C4] (M2).
 - **R2 indicator** (`M1` stalls on at least 3 seeds at one noise level, with the `M2` records of those seeds present), mechanical trigger check, not the decision: `indicator_absent`. Declared rule (PLAN T5, verbatim): **R2 indicator for P1** (mechanical, not the decision): an `M1` fit stalls when its objective fell by less than 1% over the last 20% of logged steps while its residual ratio stayed at or above 1.2, so the data term did not reach the noise level. The indicator is present when `M1` stalls on at least 3 seeds (all seeds if fewer) at one noise level and the `M2` records of those seeds exist. `M1` and `M2` recovery and the final normalized loss terms are shown as context. The `R4` remedies and the tuning budget of `PRD §8` are not checked by code.
 
 | Run id | Model | Noise s | Seed | Status | Stalled | Objective change, last 20% | Residual ratio | Final normalized terms | Not recovered |
@@ -409,20 +409,11 @@ These are mechanical trigger checks against PRD section 8, not the decision. The
 | main_fit_M2_well_specified_noise0.15_seed3 | M2 | 0.15 | 3 | ok | no | -0.0013 | 0.956 | data 0.143 | k_c[C4] |
 | main_fit_M2_well_specified_noise0.15_seed4 | M2 | 0.15 | 4 | ok | no | -0.0001 | 1.013 | data 0.153 | none |
 
-- **E5** (refuted if a relative Gauss-Newton eigenvalue is below 1e-06 at noise 0.05 s), mechanical trigger check, not the decision: `incomplete`. Values: main_profile_ode_well_specified_noise0.05_seed0 0.001, main_profile_ode_well_specified_noise0.05_seed1 n/a, main_profile_ode_well_specified_noise0.05_seed2 n/a, main_profile_ode_well_specified_noise0.05_seed3 n/a, main_profile_ode_well_specified_noise0.05_seed4 n/a.
-- **`M1` exploratory diagnostics** (PLAN T5, verbatim): **`M1` exploratory diagnostics** (declared 2026-11-01, after the v1 `M1` results were read): runs in `experiments/s1_m1_diag/` separate three candidate causes of the v1 `M1` failure (`k_c` collapsed on 10 of 10 main fits): (a) a longer budget (20000 steps), (b) the physics weight (thermal, wear and mono weights 0; or thermal and wear weights 10), (c) a bounded latent `h = tanh(tau * n_h)`. They use seed 0 (seed 1 optional), noise 0.05 s, and otherwise the v1 `M1` setup. They are exploratory: they are not S1b evidence, they change no v1 or v2 result or label, and no `M1` method change is declared from them. Any later `M1` method version must be declared here before its runs are read. The P1 decision stays with the user in `experiments/pivots.md`. Their runs and mechanical checks are in `reports/s1_m1_diag.md`, built by `scripts/run_m1_diag.py`.
+- **E5** (refuted if a relative Gauss-Newton eigenvalue is below 1e-06 at noise 0.05 s), mechanical trigger check, not the decision: `not_refuted`. Values: main_profile_ode_well_specified_noise0.05_seed0 0.001, main_profile_ode_well_specified_noise0.05_seed1 0.002, main_profile_ode_well_specified_noise0.05_seed2 0.002, main_profile_ode_well_specified_noise0.05_seed3 7.73e-04, main_profile_ode_well_specified_noise0.05_seed4 0.001.
+- **`M1` exploratory diagnostics** (PLAN T5, verbatim): **`M1` exploratory diagnostics** (declared 2026-11-01, after the v1 `M1` results were read; causes (d) and (e) added after the S1a slow test failure, before any diagnostic was run): runs in `experiments/s1_m1_diag/` test five candidate causes of the v1 `M1` failure (`k_c` collapsed on 10 of 10 main fits, and biased low in S1a with true states observed): (a) a longer budget (20000 steps), (b) the physics weight (thermal, wear and mono weights 0; or thermal and wear weights 10), (c) a bounded latent `h = tanh(tau * n_h)`, (d) a no-network least-squares check that fits `k_c` and `rho_c` directly from the true ODE states and rates, and (e) network smoothing and collocation resolution (`n_colloc` 128, or `m1_width` 128). They use seed 0 (seed 1 optional), noise 0.05 s, and otherwise the v1 `M1` setup. They are exploratory: they are not S1b evidence, they change no v1 or v2 result or label, and no `M1` method change is declared from them. Any later `M1` method version must be declared here before its runs are read. The P1 decision stays with the user in `experiments/pivots.md`. Their runs and mechanical checks are in `reports/s1_m1_diag.md`, built by `scripts/run_m1_diag.py`.
 
 ## Missing runs
 
-- main_profile_ode_well_specified_noise0.05_seed1: no record
-- main_profile_ode_well_specified_noise0.05_seed2: no record
-- main_profile_ode_well_specified_noise0.05_seed3: no record
-- main_profile_ode_well_specified_noise0.05_seed4: no record
-- main_profile_ode_well_specified_noise0.15_seed0: no record
-- main_profile_ode_well_specified_noise0.15_seed1: no record
-- main_profile_ode_well_specified_noise0.15_seed2: no record
-- main_profile_ode_well_specified_noise0.15_seed3: no record
-- main_profile_ode_well_specified_noise0.15_seed4: no record
 - misspec_fit_M1_drop_early_noise0.05_seed0: no record
 - misspec_fit_M1_drop_early_noise0.05_seed1: no record
 - misspec_fit_M1_drop_early_noise0.05_seed2: no record

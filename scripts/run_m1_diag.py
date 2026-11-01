@@ -1,9 +1,10 @@
 """Run the exploratory M1 diagnostics (PLAN T5 method declarations, `M1` exploratory diagnostics).
 
-Each variant is the v1 M1 setup with one change (budget_20k, physics_off, physics_x10, bounded_h), fitted
-at noise 0.05 s on seed 0 (seed 1 optional). Records go to experiments/s1_m1_diag/<variant>/ and the
-report to reports/s1_m1_diag.md, rebuilt at the end of every call. These runs are exploratory: they are
-not S1b evidence and change no S1b result, label or method. Run from the repository root:
+Each variant is the v1 M1 setup with one change (budget_20k, physics_off, physics_x10, bounded_h,
+true_state_ls, colloc_128, width_128), fitted at noise 0.05 s on seed 0 (seed 1 optional). Records go to
+experiments/s1_m1_diag/<variant>/ and the report to reports/s1_m1_diag.md, rebuilt at the end of every
+call. These runs are exploratory: they are not S1b evidence and change no S1b result, label or method. Run
+from the repository root:
 
     uv run python scripts/run_m1_diag.py                        # every variant, seed 0
     uv run python scripts/run_m1_diag.py --variant bounded_h    # one variant (repeatable)
