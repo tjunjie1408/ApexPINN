@@ -98,15 +98,13 @@ MISSPEC_READING_V1 = (
     "is a wrong fit without a flag. A parameter that is not labeled identifiable has no criterion 1 "
     "check and so no silent-failure check, because the main study gives no reliable reference for a "
     "correct fit of it.",
-    "**Missing runs**: a planned run without a finished record gives the outcome `missing`, never "
-    "`pass`.",
+    "**Missing runs**: a planned run without a finished record gives the outcome `missing`, never `pass`.",
     "**Unconverged profile points**: grid points where L-BFGS-B reports no convergence still enter "
     "the deviance, because scipy also reports failure on harmless line-search stops. The report counts "
     "them per profile and marks a shape that rests on one: an unconverged point inside the interval or "
     "at a grid point bracketing an endpoint. Such a point can only make a profile look sharper than it "
     "is.",
-    "**`M2` in the misspecification study**: included if the slowest main-study `M2` fit took under "
-    "600 s.",
+    "**`M2` in the misspecification study**: included if the slowest main-study `M2` fit took under 600 s.",
     "While any main-study `M2` fit record is missing or failed, `M2` is undecided: part misspec runs "
     "the `M1` and profile runs, and adds the `M2` runs once every main-study `M2` fit has finished. A "
     "failing `M2` fit never blocks the mandatory `M1` runs.",

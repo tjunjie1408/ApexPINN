@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-11-01T08:59:46.790440+00:00",
+  "generated_utc": "2026-11-01T11:21:38.852210+00:00",
   "main_fits": {
     "M1": {
       "config_hash": "5865e8579449d96979fe7b2b4280101eed794297b2bb391243a7d125ebd6a0b0",
@@ -64,9 +64,13 @@
   },
   "profile": {
     "chi2_95_n_params": 22.362032494826934,
-    "config_hash": "2feca7db599745e96479033774f4a1de4cefcceb54c9092bd86b2c511770d7ed",
+    "config_hash": "fd04a8eabd307a6051a648b096017bad356b4e126c070cfbba8b599ee0592b7d",
     "config_name": "full",
     "deviance_at_truth": 11.882388648702921,
+    "interval_methods": [
+      "v2_refined"
+    ],
+    "interval_note": "reported_interval is interval method v2 (refined) where interval_method is 'v2_refined' and the v1 linear interpolation where it is 'v1_linear'; linear_interval_v1 is Superseded wherever v2 is reported",
     "n_obs": 1233,
     "n_params": 13,
     "params": {
@@ -74,6 +78,15 @@
         "deviance_step_lower": 30.30992981333778,
         "deviance_step_upper": 25.966902071714085,
         "group": "gamma",
+        "interval_method": "v2_refined",
+        "linear_interval_v1": {
+          "hi": 3.39028035280825,
+          "hi_bounded": true,
+          "lo": 3.253200103201185,
+          "lo_bounded": true
+        },
+        "linear_v1_covers_truth": false,
+        "linear_v1_status": "Superseded",
         "min_index": 5,
         "mle": 3.320902860499195,
         "quadratic_covers_truth": true,
@@ -81,11 +94,11 @@
           "hi": 3.4931850851241704,
           "lo": 3.1222940638030092
         },
-        "reported_covers_truth": false,
+        "reported_covers_truth": true,
         "reported_interval": {
-          "hi": 3.39028035280825,
+          "hi": 3.505002446729576,
           "hi_bounded": true,
-          "lo": 3.253200103201185,
+          "lo": 3.1395038067091843,
           "lo_bounded": true
         },
         "shape": "sharp",
@@ -95,6 +108,15 @@
         "deviance_step_lower": 20.168914704012185,
         "deviance_step_upper": 16.740091220528925,
         "group": "gamma",
+        "interval_method": "v2_refined",
+        "linear_interval_v1": {
+          "hi": 3.1411629648340145,
+          "hi_bounded": true,
+          "lo": 2.9492973375002958,
+          "lo_bounded": true
+        },
+        "linear_v1_covers_truth": true,
+        "linear_v1_status": "Superseded",
         "min_index": 5,
         "mle": 3.0420176936674217,
         "quadratic_covers_truth": true,
@@ -104,9 +126,9 @@
         },
         "reported_covers_truth": true,
         "reported_interval": {
-          "hi": 3.1411629648340145,
+          "hi": 3.254148492408746,
           "hi_bounded": true,
-          "lo": 2.9492973375002958,
+          "lo": 2.838651064566974,
           "lo_bounded": true
         },
         "shape": "sharp",
@@ -116,6 +138,15 @@
         "deviance_step_lower": 8.317740510047186,
         "deviance_step_upper": 6.541990096533135,
         "group": "gamma",
+        "interval_method": "v2_refined",
+        "linear_interval_v1": {
+          "hi": 3.316615928312472,
+          "hi_bounded": true,
+          "lo": 2.8343682924252076,
+          "lo_bounded": true
+        },
+        "linear_v1_covers_truth": false,
+        "linear_v1_status": "Superseded",
         "min_index": 5,
         "mle": 3.055296689834051,
         "quadratic_covers_truth": true,
@@ -123,11 +154,11 @@
           "hi": 3.3988714483441074,
           "lo": 2.7337520711100387
         },
-        "reported_covers_truth": false,
+        "reported_covers_truth": true,
         "reported_interval": {
-          "hi": 3.316615928312472,
+          "hi": 3.3998501843442974,
           "hi_bounded": true,
-          "lo": 2.8343682924252076,
+          "lo": 2.7404950689635967,
           "lo_bounded": true
         },
         "shape": "sharp",
@@ -137,6 +168,15 @@
         "deviance_step_lower": 42.783723829936804,
         "deviance_step_upper": 36.7342499433791,
         "group": "h_opt",
+        "interval_method": "v2_refined",
+        "linear_interval_v1": {
+          "hi": 0.6450732312689059,
+          "hi_bounded": true,
+          "lo": 0.6336385593928593,
+          "lo_bounded": true
+        },
+        "linear_v1_covers_truth": true,
+        "linear_v1_status": "Superseded",
         "min_index": 6,
         "mle": 0.6387394520270987,
         "quadratic_covers_truth": true,
@@ -146,9 +186,9 @@
         },
         "reported_covers_truth": true,
         "reported_interval": {
-          "hi": 0.6450732312689059,
+          "hi": 0.6566162345637434,
           "hi_bounded": true,
-          "lo": 0.6336385593928593,
+          "lo": 0.6216910711011885,
           "lo_bounded": true
         },
         "shape": "sharp",
@@ -158,6 +198,15 @@
         "deviance_step_lower": 35.41485072683896,
         "deviance_step_upper": 45.31906262180666,
         "group": "h_opt",
+        "interval_method": "v2_refined",
+        "linear_interval_v1": {
+          "hi": 0.5977119494100128,
+          "hi_bounded": true,
+          "lo": 0.586405811388614,
+          "lo_bounded": true
+        },
+        "linear_v1_covers_truth": false,
+        "linear_v1_status": "Superseded",
         "min_index": 6,
         "mle": 0.5926382538651164,
         "quadratic_covers_truth": true,
@@ -165,11 +214,11 @@
           "hi": 0.60851120699564,
           "lo": 0.5719518808726679
         },
-        "reported_covers_truth": false,
+        "reported_covers_truth": true,
         "reported_interval": {
-          "hi": 0.5977119494100128,
+          "hi": 0.609841273081558,
           "hi_bounded": true,
-          "lo": 0.586405811388614,
+          "lo": 0.5751622838924886,
           "lo_bounded": true
         },
         "shape": "sharp",
@@ -179,6 +228,15 @@
         "deviance_step_lower": 23.518930234786055,
         "deviance_step_upper": 34.926614655559256,
         "group": "h_opt",
+        "interval_method": "v2_refined",
+        "linear_interval_v1": {
+          "hi": 0.5847186541741364,
+          "hi_bounded": true,
+          "lo": 0.5687386329538626,
+          "lo_bounded": true
+        },
+        "linear_v1_covers_truth": true,
+        "linear_v1_status": "Superseded",
         "min_index": 6,
         "mle": 0.5781621256958867,
         "quadratic_covers_truth": true,
@@ -188,9 +246,9 @@
         },
         "reported_covers_truth": true,
         "reported_interval": {
-          "hi": 0.5847186541741364,
+          "hi": 0.5970568099560224,
           "hi_bounded": true,
-          "lo": 0.5687386329538626,
+          "lo": 0.5549592475689128,
           "lo_bounded": true
         },
         "shape": "sharp",
@@ -200,6 +258,15 @@
         "deviance_step_lower": 14.712959610105788,
         "deviance_step_upper": 10.494130515920903,
         "group": "k",
+        "interval_method": "v2_refined",
+        "linear_interval_v1": {
+          "hi": 0.3145528222890209,
+          "hi_bounded": true,
+          "lo": 0.2864484010512129,
+          "lo_bounded": true
+        },
+        "linear_v1_covers_truth": false,
+        "linear_v1_status": "Superseded",
         "min_index": 5,
         "mle": 0.29886472992657703,
         "quadratic_covers_truth": true,
@@ -207,11 +274,11 @@
           "hi": 0.325412720500078,
           "lo": 0.2752292360575281
         },
-        "reported_covers_truth": false,
+        "reported_covers_truth": true,
         "reported_interval": {
-          "hi": 0.3145528222890209,
+          "hi": 0.3248584292631404,
           "hi_bounded": true,
-          "lo": 0.2864484010512129,
+          "lo": 0.27517800222652133,
           "lo_bounded": true
         },
         "shape": "sharp",
@@ -221,6 +288,15 @@
         "deviance_step_lower": 11.084898867726192,
         "deviance_step_upper": 8.061979876161027,
         "group": "k",
+        "interval_method": "v2_refined",
+        "linear_interval_v1": {
+          "hi": 0.3587392994495444,
+          "hi_bounded": true,
+          "lo": 0.31724676854438927,
+          "lo_bounded": true
+        },
+        "linear_v1_covers_truth": true,
+        "linear_v1_status": "Superseded",
         "min_index": 5,
         "mle": 0.33562708141782677,
         "quadratic_covers_truth": true,
@@ -230,9 +306,9 @@
         },
         "reported_covers_truth": true,
         "reported_interval": {
-          "hi": 0.3587392994495444,
+          "hi": 0.369506270579908,
           "hi_bounded": true,
-          "lo": 0.31724676854438927,
+          "lo": 0.3050664641006017,
           "lo_bounded": true
         },
         "shape": "sharp",
@@ -242,6 +318,15 @@
         "deviance_step_lower": 5.242609184596848,
         "deviance_step_upper": 5.093293727073905,
         "group": "k",
+        "interval_method": "v2_refined",
+        "linear_interval_v1": {
+          "hi": 0.5105631264460428,
+          "hi_bounded": true,
+          "lo": 0.40789891448906923,
+          "lo_bounded": true
+        },
+        "linear_v1_covers_truth": true,
+        "linear_v1_status": "Superseded",
         "min_index": 5,
         "mle": 0.45948356585369,
         "quadratic_covers_truth": true,
@@ -251,9 +336,9 @@
         },
         "reported_covers_truth": true,
         "reported_interval": {
-          "hi": 0.5105631264460428,
+          "hi": 0.5185064523894555,
           "hi_bounded": true,
-          "lo": 0.40789891448906923,
+          "lo": 0.4000803153344491,
           "lo_bounded": true
         },
         "shape": "sharp",
@@ -263,6 +348,15 @@
         "deviance_step_lower": 6.538016348481797,
         "deviance_step_upper": 6.085293695357061,
         "group": "kappa",
+        "interval_method": "v2_refined",
+        "linear_interval_v1": {
+          "hi": 1.0028327722316381,
+          "hi_bounded": true,
+          "lo": 0.8345289684149712,
+          "lo_bounded": true
+        },
+        "linear_v1_covers_truth": true,
+        "linear_v1_status": "Superseded",
         "min_index": 5,
         "mle": 0.9181461926209314,
         "quadratic_covers_truth": true,
@@ -272,9 +366,9 @@
         },
         "reported_covers_truth": true,
         "reported_interval": {
-          "hi": 1.0028327722316381,
+          "hi": 1.0268073869121852,
           "hi_bounded": true,
-          "lo": 0.8345289684149712,
+          "lo": 0.8122928096122634,
           "lo_bounded": true
         },
         "shape": "sharp",
@@ -284,6 +378,15 @@
         "deviance_step_lower": 153.6793180556708,
         "deviance_step_upper": 164.7562112043254,
         "group": "rho",
+        "interval_method": "v2_refined",
+        "linear_interval_v1": {
+          "hi": 0.04497416445940725,
+          "hi_bounded": true,
+          "lo": 0.044646105953062884,
+          "lo_bounded": true
+        },
+        "linear_v1_covers_truth": false,
+        "linear_v1_status": "Superseded",
         "min_index": 5,
         "mle": 0.04482784604257529,
         "quadratic_covers_truth": true,
@@ -291,11 +394,11 @@
           "hi": 0.04542611073953112,
           "lo": 0.043017239104981266
         },
-        "reported_covers_truth": false,
+        "reported_covers_truth": true,
         "reported_interval": {
-          "hi": 0.04497416445940725,
+          "hi": 0.0458228521286605,
           "hi_bounded": true,
-          "lo": 0.044646105953062884,
+          "lo": 0.043843099563018156,
           "lo_bounded": true
         },
         "shape": "sharp",
@@ -305,6 +408,15 @@
         "deviance_step_lower": 120.78850410822088,
         "deviance_step_upper": 236.02764036811806,
         "group": "rho",
+        "interval_method": "v2_refined",
+        "linear_interval_v1": {
+          "hi": 0.06011578872502161,
+          "hi_bounded": true,
+          "lo": 0.059669989485436385,
+          "lo_bounded": true
+        },
+        "linear_v1_covers_truth": true,
+        "linear_v1_status": "Superseded",
         "min_index": 5,
         "mle": 0.05997919934130242,
         "quadratic_covers_truth": true,
@@ -314,9 +426,9 @@
         },
         "reported_covers_truth": true,
         "reported_interval": {
-          "hi": 0.06011578872502161,
+          "hi": 0.061131238332456386,
           "hi_bounded": true,
-          "lo": 0.059669989485436385,
+          "lo": 0.05878446768735207,
           "lo_bounded": true
         },
         "shape": "sharp",
@@ -326,6 +438,15 @@
         "deviance_step_lower": 108.24798138213292,
         "deviance_step_upper": 382.4651258359856,
         "group": "rho",
+        "interval_method": "v2_refined",
+        "linear_interval_v1": {
+          "hi": 0.08137973596642187,
+          "hi_bounded": true,
+          "lo": 0.0807982359842298,
+          "lo_bounded": true
+        },
+        "linear_v1_covers_truth": false,
+        "linear_v1_status": "Superseded",
         "min_index": 5,
         "mle": 0.0812655783853424,
         "quadratic_covers_truth": true,
@@ -333,11 +454,11 @@
           "hi": 0.08152627961620855,
           "lo": 0.07305206839233454
         },
-        "reported_covers_truth": false,
+        "reported_covers_truth": true,
         "reported_interval": {
-          "hi": 0.08137973596642187,
+          "hi": 0.08263548538744517,
           "hi_bounded": true,
-          "lo": 0.0807982359842298,
+          "lo": 0.07960552462840141,
           "lo_bounded": true
         },
         "shape": "sharp",

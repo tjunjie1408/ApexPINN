@@ -50,9 +50,7 @@ def test_from_constrained_names_bad_compound():
             k=0.8, rho=[0.05, 0.05, POSITIVITY_FLOOR, 0.05, 0.05], gamma=1.2, h_opt=0.4, kappa=1.5
         )
     with pytest.raises(ValueError, match=r"h_opt.*C1"):
-        PhysicsParams.from_constrained(
-            k=0.8, rho=0.05, gamma=1.2, h_opt=[1.0, 0.4, 0.4, 0.4, 0.4], kappa=1.5
-        )
+        PhysicsParams.from_constrained(k=0.8, rho=0.05, gamma=1.2, h_opt=[1.0, 0.4, 0.4, 0.4, 0.4], kappa=1.5)
     with pytest.raises(ValueError, match=r"k must be a scalar or have shape \(5,\)"):
         PhysicsParams.from_constrained(k=[0.8, 0.8], rho=0.05, gamma=1.2, h_opt=0.4, kappa=1.5)
 

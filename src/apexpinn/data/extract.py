@@ -118,9 +118,7 @@ def pos_to_frame(pos: pd.DataFrame | None) -> pd.DataFrame | None:
     """FastF1 position data (1/10 m) to ``t_s``, ``x_m``, ``y_m``; None if absent or empty."""
     if pos is None or pos.empty:
         return None
-    return pd.DataFrame(
-        {"t_s": _seconds(pos, "SessionTime"), "x_m": pos["X"] / 10.0, "y_m": pos["Y"] / 10.0}
-    )
+    return pd.DataFrame({"t_s": _seconds(pos, "SessionTime"), "x_m": pos["X"] / 10.0, "y_m": pos["Y"] / 10.0})
 
 
 def _safe_attr(session: Any, name: str) -> Any:
@@ -155,9 +153,7 @@ def lap_telemetry_frame(
     frame = laps_to_frame(laps)
     numbers = frame["DriverNumber"].astype(str)
     parts = [
-        probe.per_lap_telemetry(
-            group, car_to_frame(car_data.get(number)), pos_to_frame(pos_data.get(number))
-        )
+        probe.per_lap_telemetry(group, car_to_frame(car_data.get(number)), pos_to_frame(pos_data.get(number)))
         for number, group in frame.groupby(numbers, sort=True)
     ]
     keys = frame[[c for c in TELEMETRY_KEYS if c in frame.columns]].copy()

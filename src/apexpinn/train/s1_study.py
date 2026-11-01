@@ -980,9 +980,7 @@ def _convergence(log: Any) -> dict[str, Any]:
     }
 
 
-def _train_ode(
-    cfg: StudyConfig, spec: RunSpec, batch: StintBatch, physics: PhysicsParams
-) -> tuple[Any, Any]:
+def _train_ode(cfg: StudyConfig, spec: RunSpec, batch: StintBatch, physics: PhysicsParams) -> tuple[Any, Any]:
     """Train the M2 setup (ODEModel, m2_train, m2_weights) from physics with the seed's train key."""
     model = ODEModel.init(
         physics=physics,

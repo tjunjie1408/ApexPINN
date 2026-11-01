@@ -1,0 +1,379 @@
+{
+  "config_hash": "80a235fde6df6b6a98bb9cb00a1878d85e0045893540d7110ed590e767f201e1",
+  "config_name": "full",
+  "convergence": {
+    "normalized": {
+      "data": [
+        1.0,
+        0.19910114210151106,
+        0.16793904083489997,
+        0.1572588253102976,
+        0.1545939245661518,
+        0.15382017839851436,
+        0.15354530933733687,
+        0.15345237261478994,
+        0.15342306579425752,
+        0.15341063153800855,
+        0.15340324051205767
+      ]
+    },
+    "objective": [
+      1.0,
+      0.19910114210151106,
+      0.16793904083489997,
+      0.15725882531029764,
+      0.1545939245661518,
+      0.1538201783985144,
+      0.15354530933733687,
+      0.15345237261478994,
+      0.15342306579425755,
+      0.15341063153800855,
+      0.1534032405120577
+    ],
+    "objective_rel_change_last20": -0.00012921969781541122,
+    "steps": [
+      0,
+      100,
+      200,
+      300,
+      400,
+      500,
+      600,
+      700,
+      800,
+      900,
+      999
+    ]
+  },
+  "diagnostics": {
+    "collapse_flags": [],
+    "residual_ratio": 1.0128594513247056,
+    "scored_residual_rms_s": 0.15192891769870584,
+    "selected_start": 0,
+    "selection": "min_final_scored_rms",
+    "starts": [
+      {
+        "estimates": {
+          "gamma_c[C2]": 3.260750190142867,
+          "gamma_c[C3]": 2.604693481985744,
+          "gamma_c[C4]": 2.3614112910420686,
+          "h_opt_c[C2]": 0.6186277504116898,
+          "h_opt_c[C3]": 0.5753432159486465,
+          "h_opt_c[C4]": 0.5236967844923237,
+          "k_c[C2]": 0.22808529158977414,
+          "k_c[C3]": 0.2978296587072447,
+          "k_c[C4]": 0.3588950351078186,
+          "kappa": 0.7110065370963657,
+          "rho_c[C2]": 0.04791971343455117,
+          "rho_c[C3]": 0.061424703588932046,
+          "rho_c[C4]": 0.07940857639845994
+        },
+        "fit_s": 12.851923800000804,
+        "index": 0,
+        "objective_rel_change_last20": -0.00012921969781541122,
+        "rel_error": {
+          "gamma_c[C2]": 0.018984434419645896,
+          "gamma_c[C3]": -0.13176883933808536,
+          "gamma_c[C4]": -0.1566388246278326,
+          "h_opt_c[C2]": -0.03339413998173467,
+          "h_opt_c[C3]": -0.041094640085589204,
+          "h_opt_c[C4]": -0.08123371141697587,
+          "k_c[C2]": -0.18540967289366386,
+          "k_c[C3]": -0.1490581179793008,
+          "k_c[C4]": -0.16536038347018947,
+          "kappa": -0.28899346290363426,
+          "rho_c[C2]": 0.06488252076780379,
+          "rho_c[C3]": 0.02374505981553438,
+          "rho_c[C4]": -0.007392795019250596
+        },
+        "residual_ratio": 1.0128594513247056,
+        "scored_residual_rms_s": 0.15192891769870584
+      },
+      {
+        "estimates": {
+          "gamma_c[C2]": 2.169714835571896,
+          "gamma_c[C3]": 3.431558032859251,
+          "gamma_c[C4]": 2.719578288105789,
+          "h_opt_c[C2]": 0.8476641026412285,
+          "h_opt_c[C3]": 0.3987383466063969,
+          "h_opt_c[C4]": 0.5395960239484652,
+          "k_c[C2]": 0.07165159856231737,
+          "k_c[C3]": 3.3827887874262315,
+          "k_c[C4]": 0.388313936862403,
+          "kappa": 0.628352317418951,
+          "rho_c[C2]": 0.0749281291651527,
+          "rho_c[C3]": 0.05268047905684729,
+          "rho_c[C4]": 0.08144844499078527
+        },
+        "fit_s": 35.467011599990656,
+        "index": 1,
+        "objective_rel_change_last20": -0.02180701719458073,
+        "rel_error": {
+          "gamma_c[C2]": -0.32196411388378254,
+          "gamma_c[C3]": 0.1438526776197504,
+          "gamma_c[C4]": -0.028722039962218213,
+          "h_opt_c[C2]": 0.3244751603769195,
+          "h_opt_c[C3]": -0.33543608898933847,
+          "h_opt_c[C4]": -0.053340308862341715,
+          "k_c[C2]": -0.7441014337060095,
+          "k_c[C3]": 8.665110821217805,
+          "k_c[C4]": -0.09694433287813276,
+          "kappa": -0.37164768258104897,
+          "rho_c[C2]": 0.6650695370033932,
+          "rho_c[C3]": -0.12199201571921155,
+          "rho_c[C4]": 0.018105562384816008
+        },
+        "residual_ratio": 1.1390270096884012,
+        "scored_residual_rms_s": 0.1708540514532602
+      },
+      {
+        "estimates": {
+          "gamma_c[C2]": 3.179476543028336,
+          "gamma_c[C3]": 2.5431905011529614,
+          "gamma_c[C4]": 1.8893159011140326,
+          "h_opt_c[C2]": 0.6315174231832063,
+          "h_opt_c[C3]": 0.588968624398302,
+          "h_opt_c[C4]": 0.49288972866764563,
+          "k_c[C2]": 0.23735690659167707,
+          "k_c[C3]": 0.31395020750876923,
+          "k_c[C4]": 0.31722180336992556,
+          "kappa": 0.794201190693201,
+          "rho_c[C2]": 0.048201499248572206,
+          "rho_c[C3]": 0.06173280039335307,
+          "rho_c[C4]": 0.07649509250075363
+        },
+        "fit_s": 16.660174399992684,
+        "index": 2,
+        "objective_rel_change_last20": -0.0025084922893768877,
+        "rel_error": {
+          "gamma_c[C2]": -0.006413580303645111,
+          "gamma_c[C3]": -0.15226983294901286,
+          "gamma_c[C4]": -0.3252443210307026,
+          "h_opt_c[C2]": -0.013254026276240255,
+          "h_opt_c[C3]": -0.018385626002829968,
+          "h_opt_c[C4]": -0.13528117777606022,
+          "k_c[C2]": -0.15229676217258195,
+          "k_c[C3]": -0.10299940711780214,
+          "k_c[C4]": -0.26227487588389425,
+          "kappa": -0.20579880930679895,
+          "rho_c[C2]": 0.07114442774604907,
+          "rho_c[C3]": 0.028880006555884772,
+          "rho_c[C4]": -0.043811343740579434
+        },
+        "residual_ratio": 1.013964241111645,
+        "scored_residual_rms_s": 0.15209463616674673
+      }
+    ]
+  },
+  "estimates": {
+    "gamma_c[C2]": 3.260750190142867,
+    "gamma_c[C3]": 2.604693481985744,
+    "gamma_c[C4]": 2.3614112910420686,
+    "h_opt_c[C2]": 0.6186277504116898,
+    "h_opt_c[C3]": 0.5753432159486465,
+    "h_opt_c[C4]": 0.5236967844923237,
+    "k_c[C2]": 0.22808529158977414,
+    "k_c[C3]": 0.2978296587072447,
+    "k_c[C4]": 0.3588950351078186,
+    "kappa": 0.7110065370963657,
+    "rho_c[C2]": 0.04791971343455117,
+    "rho_c[C3]": 0.061424703588932046,
+    "rho_c[C4]": 0.07940857639845994
+  },
+  "meta": {
+    "data_hash": null,
+    "devices": [
+      "cpu:0"
+    ],
+    "dtype": "float64",
+    "git_commit": "d63da4dfb638062c919e1f43cb5221f3a2437fae",
+    "packages": {
+      "diffrax": "0.7.2",
+      "equinox": "0.13.8",
+      "jax": "0.12.0.1",
+      "jaxlib": "0.12.0.1",
+      "optax": "0.2.8"
+    },
+    "python": "3.12.13",
+    "seeds": [
+      4
+    ],
+    "timestamp_utc": "2026-11-01T11:16:37.827307+00:00"
+  },
+  "n_scored": 1237,
+  "records": [
+    {
+      "conditions": "noise_s=0.15 s, lap time only, init from 3 prior draws (start 0 fold_in(key(4), 101), start i fold_in(key(4), 200 + i)), selection by lowest final scored residual RMS, model=M2v2, TrainConfig({'n_steps': 1000, 'learning_rate': 0.01, 'n_warm': 200, 'n_ramp': 500, 'n_colloc': 32, 'colloc_extension': 10.0, 'log_every': 100, 'float64': True, 'norm_floor': 1e-12, 'norm_rel_floor': 0.001, 'grad_clip': 1.0}), dtype=float64, device=cpu:0",
+      "instrument": "apexpinn.train.s1_study.run_fit, apexpinn.train.trainer.train, apexpinn.models.ode_model.ODEModel",
+      "population": "synthetic stints from make_synthetic_dataset(key(seed=4)), n_stints=48, n_scored=1237 laps, compounds=['C2', 'C3', 'C4'], variant=well_specified",
+      "quantity": "relative error (estimate - truth) / truth of k_c[C2], dimensionless",
+      "status": "Observed",
+      "value": -0.18540967289366386
+    },
+    {
+      "conditions": "noise_s=0.15 s, lap time only, init from 3 prior draws (start 0 fold_in(key(4), 101), start i fold_in(key(4), 200 + i)), selection by lowest final scored residual RMS, model=M2v2, TrainConfig({'n_steps': 1000, 'learning_rate': 0.01, 'n_warm': 200, 'n_ramp': 500, 'n_colloc': 32, 'colloc_extension': 10.0, 'log_every': 100, 'float64': True, 'norm_floor': 1e-12, 'norm_rel_floor': 0.001, 'grad_clip': 1.0}), dtype=float64, device=cpu:0",
+      "instrument": "apexpinn.train.s1_study.run_fit, apexpinn.train.trainer.train, apexpinn.models.ode_model.ODEModel",
+      "population": "synthetic stints from make_synthetic_dataset(key(seed=4)), n_stints=48, n_scored=1237 laps, compounds=['C2', 'C3', 'C4'], variant=well_specified",
+      "quantity": "relative error (estimate - truth) / truth of k_c[C3], dimensionless",
+      "status": "Observed",
+      "value": -0.1490581179793008
+    },
+    {
+      "conditions": "noise_s=0.15 s, lap time only, init from 3 prior draws (start 0 fold_in(key(4), 101), start i fold_in(key(4), 200 + i)), selection by lowest final scored residual RMS, model=M2v2, TrainConfig({'n_steps': 1000, 'learning_rate': 0.01, 'n_warm': 200, 'n_ramp': 500, 'n_colloc': 32, 'colloc_extension': 10.0, 'log_every': 100, 'float64': True, 'norm_floor': 1e-12, 'norm_rel_floor': 0.001, 'grad_clip': 1.0}), dtype=float64, device=cpu:0",
+      "instrument": "apexpinn.train.s1_study.run_fit, apexpinn.train.trainer.train, apexpinn.models.ode_model.ODEModel",
+      "population": "synthetic stints from make_synthetic_dataset(key(seed=4)), n_stints=48, n_scored=1237 laps, compounds=['C2', 'C3', 'C4'], variant=well_specified",
+      "quantity": "relative error (estimate - truth) / truth of k_c[C4], dimensionless",
+      "status": "Observed",
+      "value": -0.16536038347018947
+    },
+    {
+      "conditions": "noise_s=0.15 s, lap time only, init from 3 prior draws (start 0 fold_in(key(4), 101), start i fold_in(key(4), 200 + i)), selection by lowest final scored residual RMS, model=M2v2, TrainConfig({'n_steps': 1000, 'learning_rate': 0.01, 'n_warm': 200, 'n_ramp': 500, 'n_colloc': 32, 'colloc_extension': 10.0, 'log_every': 100, 'float64': True, 'norm_floor': 1e-12, 'norm_rel_floor': 0.001, 'grad_clip': 1.0}), dtype=float64, device=cpu:0",
+      "instrument": "apexpinn.train.s1_study.run_fit, apexpinn.train.trainer.train, apexpinn.models.ode_model.ODEModel",
+      "population": "synthetic stints from make_synthetic_dataset(key(seed=4)), n_stints=48, n_scored=1237 laps, compounds=['C2', 'C3', 'C4'], variant=well_specified",
+      "quantity": "relative error (estimate - truth) / truth of rho_c[C2], dimensionless",
+      "status": "Observed",
+      "value": 0.06488252076780379
+    },
+    {
+      "conditions": "noise_s=0.15 s, lap time only, init from 3 prior draws (start 0 fold_in(key(4), 101), start i fold_in(key(4), 200 + i)), selection by lowest final scored residual RMS, model=M2v2, TrainConfig({'n_steps': 1000, 'learning_rate': 0.01, 'n_warm': 200, 'n_ramp': 500, 'n_colloc': 32, 'colloc_extension': 10.0, 'log_every': 100, 'float64': True, 'norm_floor': 1e-12, 'norm_rel_floor': 0.001, 'grad_clip': 1.0}), dtype=float64, device=cpu:0",
+      "instrument": "apexpinn.train.s1_study.run_fit, apexpinn.train.trainer.train, apexpinn.models.ode_model.ODEModel",
+      "population": "synthetic stints from make_synthetic_dataset(key(seed=4)), n_stints=48, n_scored=1237 laps, compounds=['C2', 'C3', 'C4'], variant=well_specified",
+      "quantity": "relative error (estimate - truth) / truth of rho_c[C3], dimensionless",
+      "status": "Observed",
+      "value": 0.02374505981553438
+    },
+    {
+      "conditions": "noise_s=0.15 s, lap time only, init from 3 prior draws (start 0 fold_in(key(4), 101), start i fold_in(key(4), 200 + i)), selection by lowest final scored residual RMS, model=M2v2, TrainConfig({'n_steps': 1000, 'learning_rate': 0.01, 'n_warm': 200, 'n_ramp': 500, 'n_colloc': 32, 'colloc_extension': 10.0, 'log_every': 100, 'float64': True, 'norm_floor': 1e-12, 'norm_rel_floor': 0.001, 'grad_clip': 1.0}), dtype=float64, device=cpu:0",
+      "instrument": "apexpinn.train.s1_study.run_fit, apexpinn.train.trainer.train, apexpinn.models.ode_model.ODEModel",
+      "population": "synthetic stints from make_synthetic_dataset(key(seed=4)), n_stints=48, n_scored=1237 laps, compounds=['C2', 'C3', 'C4'], variant=well_specified",
+      "quantity": "relative error (estimate - truth) / truth of rho_c[C4], dimensionless",
+      "status": "Observed",
+      "value": -0.007392795019250596
+    },
+    {
+      "conditions": "noise_s=0.15 s, lap time only, init from 3 prior draws (start 0 fold_in(key(4), 101), start i fold_in(key(4), 200 + i)), selection by lowest final scored residual RMS, model=M2v2, TrainConfig({'n_steps': 1000, 'learning_rate': 0.01, 'n_warm': 200, 'n_ramp': 500, 'n_colloc': 32, 'colloc_extension': 10.0, 'log_every': 100, 'float64': True, 'norm_floor': 1e-12, 'norm_rel_floor': 0.001, 'grad_clip': 1.0}), dtype=float64, device=cpu:0",
+      "instrument": "apexpinn.train.s1_study.run_fit, apexpinn.train.trainer.train, apexpinn.models.ode_model.ODEModel",
+      "population": "synthetic stints from make_synthetic_dataset(key(seed=4)), n_stints=48, n_scored=1237 laps, compounds=['C2', 'C3', 'C4'], variant=well_specified",
+      "quantity": "relative error (estimate - truth) / truth of gamma_c[C2], dimensionless",
+      "status": "Observed",
+      "value": 0.018984434419645896
+    },
+    {
+      "conditions": "noise_s=0.15 s, lap time only, init from 3 prior draws (start 0 fold_in(key(4), 101), start i fold_in(key(4), 200 + i)), selection by lowest final scored residual RMS, model=M2v2, TrainConfig({'n_steps': 1000, 'learning_rate': 0.01, 'n_warm': 200, 'n_ramp': 500, 'n_colloc': 32, 'colloc_extension': 10.0, 'log_every': 100, 'float64': True, 'norm_floor': 1e-12, 'norm_rel_floor': 0.001, 'grad_clip': 1.0}), dtype=float64, device=cpu:0",
+      "instrument": "apexpinn.train.s1_study.run_fit, apexpinn.train.trainer.train, apexpinn.models.ode_model.ODEModel",
+      "population": "synthetic stints from make_synthetic_dataset(key(seed=4)), n_stints=48, n_scored=1237 laps, compounds=['C2', 'C3', 'C4'], variant=well_specified",
+      "quantity": "relative error (estimate - truth) / truth of gamma_c[C3], dimensionless",
+      "status": "Observed",
+      "value": -0.13176883933808536
+    },
+    {
+      "conditions": "noise_s=0.15 s, lap time only, init from 3 prior draws (start 0 fold_in(key(4), 101), start i fold_in(key(4), 200 + i)), selection by lowest final scored residual RMS, model=M2v2, TrainConfig({'n_steps': 1000, 'learning_rate': 0.01, 'n_warm': 200, 'n_ramp': 500, 'n_colloc': 32, 'colloc_extension': 10.0, 'log_every': 100, 'float64': True, 'norm_floor': 1e-12, 'norm_rel_floor': 0.001, 'grad_clip': 1.0}), dtype=float64, device=cpu:0",
+      "instrument": "apexpinn.train.s1_study.run_fit, apexpinn.train.trainer.train, apexpinn.models.ode_model.ODEModel",
+      "population": "synthetic stints from make_synthetic_dataset(key(seed=4)), n_stints=48, n_scored=1237 laps, compounds=['C2', 'C3', 'C4'], variant=well_specified",
+      "quantity": "relative error (estimate - truth) / truth of gamma_c[C4], dimensionless",
+      "status": "Observed",
+      "value": -0.1566388246278326
+    },
+    {
+      "conditions": "noise_s=0.15 s, lap time only, init from 3 prior draws (start 0 fold_in(key(4), 101), start i fold_in(key(4), 200 + i)), selection by lowest final scored residual RMS, model=M2v2, TrainConfig({'n_steps': 1000, 'learning_rate': 0.01, 'n_warm': 200, 'n_ramp': 500, 'n_colloc': 32, 'colloc_extension': 10.0, 'log_every': 100, 'float64': True, 'norm_floor': 1e-12, 'norm_rel_floor': 0.001, 'grad_clip': 1.0}), dtype=float64, device=cpu:0",
+      "instrument": "apexpinn.train.s1_study.run_fit, apexpinn.train.trainer.train, apexpinn.models.ode_model.ODEModel",
+      "population": "synthetic stints from make_synthetic_dataset(key(seed=4)), n_stints=48, n_scored=1237 laps, compounds=['C2', 'C3', 'C4'], variant=well_specified",
+      "quantity": "relative error (estimate - truth) / truth of h_opt_c[C2], dimensionless",
+      "status": "Observed",
+      "value": -0.03339413998173467
+    },
+    {
+      "conditions": "noise_s=0.15 s, lap time only, init from 3 prior draws (start 0 fold_in(key(4), 101), start i fold_in(key(4), 200 + i)), selection by lowest final scored residual RMS, model=M2v2, TrainConfig({'n_steps': 1000, 'learning_rate': 0.01, 'n_warm': 200, 'n_ramp': 500, 'n_colloc': 32, 'colloc_extension': 10.0, 'log_every': 100, 'float64': True, 'norm_floor': 1e-12, 'norm_rel_floor': 0.001, 'grad_clip': 1.0}), dtype=float64, device=cpu:0",
+      "instrument": "apexpinn.train.s1_study.run_fit, apexpinn.train.trainer.train, apexpinn.models.ode_model.ODEModel",
+      "population": "synthetic stints from make_synthetic_dataset(key(seed=4)), n_stints=48, n_scored=1237 laps, compounds=['C2', 'C3', 'C4'], variant=well_specified",
+      "quantity": "relative error (estimate - truth) / truth of h_opt_c[C3], dimensionless",
+      "status": "Observed",
+      "value": -0.041094640085589204
+    },
+    {
+      "conditions": "noise_s=0.15 s, lap time only, init from 3 prior draws (start 0 fold_in(key(4), 101), start i fold_in(key(4), 200 + i)), selection by lowest final scored residual RMS, model=M2v2, TrainConfig({'n_steps': 1000, 'learning_rate': 0.01, 'n_warm': 200, 'n_ramp': 500, 'n_colloc': 32, 'colloc_extension': 10.0, 'log_every': 100, 'float64': True, 'norm_floor': 1e-12, 'norm_rel_floor': 0.001, 'grad_clip': 1.0}), dtype=float64, device=cpu:0",
+      "instrument": "apexpinn.train.s1_study.run_fit, apexpinn.train.trainer.train, apexpinn.models.ode_model.ODEModel",
+      "population": "synthetic stints from make_synthetic_dataset(key(seed=4)), n_stints=48, n_scored=1237 laps, compounds=['C2', 'C3', 'C4'], variant=well_specified",
+      "quantity": "relative error (estimate - truth) / truth of h_opt_c[C4], dimensionless",
+      "status": "Observed",
+      "value": -0.08123371141697587
+    },
+    {
+      "conditions": "noise_s=0.15 s, lap time only, init from 3 prior draws (start 0 fold_in(key(4), 101), start i fold_in(key(4), 200 + i)), selection by lowest final scored residual RMS, model=M2v2, TrainConfig({'n_steps': 1000, 'learning_rate': 0.01, 'n_warm': 200, 'n_ramp': 500, 'n_colloc': 32, 'colloc_extension': 10.0, 'log_every': 100, 'float64': True, 'norm_floor': 1e-12, 'norm_rel_floor': 0.001, 'grad_clip': 1.0}), dtype=float64, device=cpu:0",
+      "instrument": "apexpinn.train.s1_study.run_fit, apexpinn.train.trainer.train, apexpinn.models.ode_model.ODEModel",
+      "population": "synthetic stints from make_synthetic_dataset(key(seed=4)), n_stints=48, n_scored=1237 laps, compounds=['C2', 'C3', 'C4'], variant=well_specified",
+      "quantity": "relative error (estimate - truth) / truth of kappa, dimensionless",
+      "status": "Observed",
+      "value": -0.28899346290363426
+    },
+    {
+      "conditions": "noise_s=0.15 s, lap time only, init from 3 prior draws (start 0 fold_in(key(4), 101), start i fold_in(key(4), 200 + i)), selection by lowest final scored residual RMS, model=M2v2, TrainConfig({'n_steps': 1000, 'learning_rate': 0.01, 'n_warm': 200, 'n_ramp': 500, 'n_colloc': 32, 'colloc_extension': 10.0, 'log_every': 100, 'float64': True, 'norm_floor': 1e-12, 'norm_rel_floor': 0.001, 'grad_clip': 1.0}), dtype=float64, device=cpu:0",
+      "instrument": "apexpinn.train.s1_study.run_fit, apexpinn.train.trainer.train, apexpinn.models.ode_model.ODEModel",
+      "population": "synthetic stints from make_synthetic_dataset(key(seed=4)), n_stints=48, n_scored=1237 laps, compounds=['C2', 'C3', 'C4'], variant=well_specified",
+      "quantity": "sqrt of the final data MSE on scored laps with training offsets b_s, s",
+      "status": "Observed",
+      "value": 0.15192891769870584
+    },
+    {
+      "conditions": "noise_s=0.15 s, lap time only, init from 3 prior draws (start 0 fold_in(key(4), 101), start i fold_in(key(4), 200 + i)), selection by lowest final scored residual RMS, model=M2v2, TrainConfig({'n_steps': 1000, 'learning_rate': 0.01, 'n_warm': 200, 'n_ramp': 500, 'n_colloc': 32, 'colloc_extension': 10.0, 'log_every': 100, 'float64': True, 'norm_floor': 1e-12, 'norm_rel_floor': 0.001, 'grad_clip': 1.0}), dtype=float64, device=cpu:0",
+      "instrument": "apexpinn.train.s1_study.run_fit, apexpinn.train.trainer.train, apexpinn.models.ode_model.ODEModel",
+      "population": "synthetic stints from make_synthetic_dataset(key(seed=4)), n_stints=48, n_scored=1237 laps, compounds=['C2', 'C3', 'C4'], variant=well_specified",
+      "quantity": "scored_residual_rms_s / noise_s (criterion 3 compares it with 1.2), dimensionless",
+      "status": "Observed",
+      "value": 1.0128594513247056
+    }
+  ],
+  "recovered": {
+    "k_c[C2]": true,
+    "k_c[C3]": true,
+    "k_c[C4]": true,
+    "rho_c[C2]": true,
+    "rho_c[C3]": true,
+    "rho_c[C4]": true
+  },
+  "rel_error": {
+    "gamma_c[C2]": 0.018984434419645896,
+    "gamma_c[C3]": -0.13176883933808536,
+    "gamma_c[C4]": -0.1566388246278326,
+    "h_opt_c[C2]": -0.03339413998173467,
+    "h_opt_c[C3]": -0.041094640085589204,
+    "h_opt_c[C4]": -0.08123371141697587,
+    "k_c[C2]": -0.18540967289366386,
+    "k_c[C3]": -0.1490581179793008,
+    "k_c[C4]": -0.16536038347018947,
+    "kappa": -0.28899346290363426,
+    "rho_c[C2]": 0.06488252076780379,
+    "rho_c[C3]": 0.02374505981553438,
+    "rho_c[C4]": -0.007392795019250596
+  },
+  "run_id": "main_fit_M2v2_well_specified_noise0.15_seed4",
+  "schema": "apexpinn.s1_run/v1",
+  "spec": {
+    "kind": "fit",
+    "model": "M2v2",
+    "noise_s": 0.15,
+    "part": "main",
+    "seed": 4,
+    "variant": "well_specified"
+  },
+  "status": "ok",
+  "truth": {
+    "gamma_c[C2]": 3.2,
+    "gamma_c[C3]": 3.0,
+    "gamma_c[C4]": 2.8,
+    "h_opt_c[C2]": 0.64,
+    "h_opt_c[C3]": 0.6,
+    "h_opt_c[C4]": 0.57,
+    "k_c[C2]": 0.28,
+    "k_c[C3]": 0.35,
+    "k_c[C4]": 0.4300000000000001,
+    "kappa": 1.0,
+    "rho_c[C2]": 0.045,
+    "rho_c[C3]": 0.059999999999999984,
+    "rho_c[C4]": 0.07999999999999999
+  },
+  "wall_time_s": {
+    "fit": 64.97910979998414,
+    "total": 65.0059961000079
+  }
+}

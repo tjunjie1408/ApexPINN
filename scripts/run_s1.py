@@ -65,9 +65,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--shard", type=_shard, default=(0, 1), help="i/n: run every n-th planned run from i")
     parser.add_argument("--force", action="store_true", help="rerun runs whose recorded config_hash differs")
     parser.add_argument("--report-only", action="store_true", help="rebuild the report from existing JSON")
-    parser.add_argument(
-        "--only", action="append", metavar="RUN_ID", help="run only this run id (repeatable)"
-    )
+    parser.add_argument("--only", action="append", metavar="RUN_ID", help="run only this run id (repeatable)")
     parser.add_argument("--root", type=Path, default=Path("."), help="repository root (default: .)")
     args = parser.parse_args(argv)
 

@@ -19,8 +19,8 @@ from typing import Any
 from apexpinn.train.s1_study import (
     DEFAULT_DECISIONS,
     Log,
-    RunSpec,
     Runner,
+    RunSpec,
     StudyConfig,
     full_config,
     run_study,

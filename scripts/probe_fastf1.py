@@ -124,9 +124,7 @@ def pos_to_frame(pos: pd.DataFrame | None) -> pd.DataFrame | None:
     if pos is None or pos.empty:
         return None
     # FastF1 positions are in 1/10 m.
-    return pd.DataFrame(
-        {"t_s": _seconds(pos, "SessionTime"), "x_m": pos["X"] / 10.0, "y_m": pos["Y"] / 10.0}
-    )
+    return pd.DataFrame({"t_s": _seconds(pos, "SessionTime"), "x_m": pos["X"] / 10.0, "y_m": pos["Y"] / 10.0})
 
 
 def _safe_attr(session: Any, name: str) -> Any:
@@ -302,11 +300,15 @@ def build_records(result: dict[str, Any]) -> list[dict[str, Any]]:
             continue
         population = f"{race['event_id']} race session"
         for quantity, value in (
-            ("FastF1 download size in MB (laps, telemetry, weather, messages); cache-dir size delta",
-             race["download_mb"]),
+            (
+                "FastF1 download size in MB (laps, telemetry, weather, messages); cache-dir size delta",
+                race["download_mb"],
+            ),
             ("FastF1 session.load wall time in s", race["load_time_s"]),
-            ("Share of timed laps with telemetry coverage below 0.5 on car or position stream",
-             race["telemetry_missing_fraction"]),
+            (
+                "Share of timed laps with telemetry coverage below 0.5 on car or position stream",
+                race["telemetry_missing_fraction"],
+            ),
         ):
             records.append(
                 MetricRecord(quantity, population, conditions, "scripts/probe_fastf1.py", value, "Observed")
@@ -321,10 +323,14 @@ def build_records(result: dict[str, Any]) -> list[dict[str, Any]]:
             )
             for quantity, value in (
                 ("Share of stints with an early corrected-pace dip (S4 on real data)", warm["dip_share"]),
-                ("Median gain in s of the fastest lap over the first scored lap, dip stints",
-                 warm["dip_gain_s"]["median"]),
-                ("Median gain in s of the fastest lap over the first scored lap, all stints",
-                 warm["gain_all_s"]["median"]),
+                (
+                    "Median gain in s of the fastest lap over the first scored lap, dip stints",
+                    warm["dip_gain_s"]["median"],
+                ),
+                (
+                    "Median gain in s of the fastest lap over the first scored lap, all stints",
+                    warm["gain_all_s"]["median"],
+                ),
             ):
                 records.append(
                     MetricRecord(
