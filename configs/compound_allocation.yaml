@@ -1,0 +1,358 @@
+# T7: race-weekend dry-compound nominations, not a race-eligibility decision.
+# C-numbers are season-specific labels; identical labels do not prove identical formulations.
+# Nomination lookup for the 2025 holdout does not evaluate its lap-time targets.
+version: 1
+evidence: Observed
+verified_on: "2026-11-03"
+
+events:
+  2023_austin:
+    HARD: C2
+    MEDIUM: C3
+    SOFT: C4
+    source_url: https://press.pirelli.com/two-confirmations-and-an-innovation-in-the-tyre-choices-for-the-american-continent/
+  2023_bahrain:
+    HARD: C1
+    MEDIUM: C2
+    SOFT: C3
+    source_url: https://press.pirelli.com/2023-bahrain-grand-prix---preview/
+  2023_baku:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/2023-tyre-compound-choices--azerbaijan-usa-and-italy/
+  2023_barcelona:
+    HARD: C1
+    MEDIUM: C2
+    SOFT: C3
+    source_url: https://press.pirelli.com/2023-tyre-compound-choices--monaco-and-spain/
+  2023_budapest:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/tyre-news-and-nominations-for-hungary-and-belgium/
+  2023_interlagos:
+    HARD: C2
+    MEDIUM: C3
+    SOFT: C4
+    source_url: https://press.pirelli.com/two-confirmations-and-an-innovation-in-the-tyre-choices-for-the-american-continent/
+  2023_jeddah:
+    HARD: C2
+    MEDIUM: C3
+    SOFT: C4
+    source_url: https://press.pirelli.com/2023-saudi-arabia-grand-prix---preview/
+  2023_las_vegas:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/a-soft-landing-for-the-2023-world-championship/
+  2023_lusail:
+    HARD: C1
+    MEDIUM: C2
+    SOFT: C3
+    source_url: https://press.pirelli.com/unchanged-nominations-for-singapore-japan-and-qatar--in-name-at-least/
+  2023_melbourne:
+    HARD: C2
+    MEDIUM: C3
+    SOFT: C4
+    source_url: https://press.pirelli.com/2023-australian-grand-prix---preview/
+  2023_mexico_city:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/two-confirmations-and-an-innovation-in-the-tyre-choices-for-the-american-continent/
+  2023_miami:
+    HARD: C2
+    MEDIUM: C3
+    SOFT: C4
+    source_url: https://press.pirelli.com/2023-tyre-compound-choices--azerbaijan-usa-and-italy/
+  2023_monaco:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/2023-tyre-compound-choices--monaco-and-spain/
+  2023_montreal:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/2023-tyre-compound-choices--canada-austria-and-great-britain/
+  2023_monza:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/news-and-tyre-choices-for-zandvoort-and-monza/
+  2023_silverstone:
+    HARD: C1
+    MEDIUM: C2
+    SOFT: C3
+    source_url: https://press.pirelli.com/2023-tyre-compound-choices--canada-austria-and-great-britain/
+  2023_singapore:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/unchanged-nominations-for-singapore-japan-and-qatar--in-name-at-least/
+  2023_spa:
+    HARD: C2
+    MEDIUM: C3
+    SOFT: C4
+    source_url: https://press.pirelli.com/tyre-news-and-nominations-for-hungary-and-belgium/
+  2023_spielberg:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/2023-tyre-compound-choices--canada-austria-and-great-britain/
+  2023_suzuka:
+    HARD: C1
+    MEDIUM: C2
+    SOFT: C3
+    source_url: https://press.pirelli.com/unchanged-nominations-for-singapore-japan-and-qatar--in-name-at-least/
+  2023_yas_marina:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/a-soft-landing-for-the-2023-world-championship/
+  2023_zandvoort:
+    HARD: C1
+    MEDIUM: C2
+    SOFT: C3
+    source_url: https://press.pirelli.com/news-and-tyre-choices-for-zandvoort-and-monza/
+  2024_austin:
+    HARD: C2
+    MEDIUM: C3
+    SOFT: C4
+    source_url: https://press.pirelli.com/these-are-the-tyres-for-the-americas/
+  2024_bahrain:
+    HARD: C1
+    MEDIUM: C2
+    SOFT: C3
+    source_url: https://press.pirelli.com/pirelli-nominates-the-compounds-for-the-start-of-2024/
+  2024_baku:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/a-soft-september-for-pirelli-in-f1-compounds-confirmed-for-monza-baku-and-singapore/
+  2024_barcelona:
+    HARD: C1
+    MEDIUM: C2
+    SOFT: C3
+    source_url: https://press.pirelli.com/no-surprises-for-the-compounds-for-spain-austria-and-great-britain/
+  2024_budapest:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/all-compounds-on-track-over-next-three-races/
+  2024_imola:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/same-soft-trio-for-imola-monaco-and-montreal/
+  2024_interlagos:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/these-are-the-tyres-for-the-americas/
+  2024_jeddah:
+    HARD: C2
+    MEDIUM: C3
+    SOFT: C4
+    source_url: https://press.pirelli.com/pirelli-nominates-the-compounds-for-the-start-of-2024/
+  2024_las_vegas:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/all-compounds-on-track-to-end-the-season/
+  2024_lusail:
+    HARD: C1
+    MEDIUM: C2
+    SOFT: C3
+    source_url: https://press.pirelli.com/all-compounds-on-track-to-end-the-season/
+  2024_melbourne:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/pirelli-nominates-the-compounds-for-the-start-of-2024/
+  2024_mexico_city:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/these-are-the-tyres-for-the-americas/
+  2024_miami:
+    HARD: C2
+    MEDIUM: C3
+    SOFT: C4
+    source_url: https://press.pirelli.com/these-are-the-p-zero-compounds-for-suzuka-shanghai-and-miami/
+  2024_monaco:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/same-soft-trio-for-imola-monaco-and-montreal/
+  2024_montreal:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/same-soft-trio-for-imola-monaco-and-montreal/
+  2024_monza:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/a-soft-september-for-pirelli-in-f1-compounds-confirmed-for-monza-baku-and-singapore/
+  2024_shanghai:
+    HARD: C2
+    MEDIUM: C3
+    SOFT: C4
+    source_url: https://press.pirelli.com/these-are-the-p-zero-compounds-for-suzuka-shanghai-and-miami/
+  2024_silverstone:
+    HARD: C1
+    MEDIUM: C2
+    SOFT: C3
+    source_url: https://press.pirelli.com/no-surprises-for-the-compounds-for-spain-austria-and-great-britain/
+  2024_singapore:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/a-soft-september-for-pirelli-in-f1-compounds-confirmed-for-monza-baku-and-singapore/
+  2024_spa:
+    HARD: C2
+    MEDIUM: C3
+    SOFT: C4
+    source_url: https://press.pirelli.com/all-compounds-on-track-over-next-three-races/
+  2024_spielberg:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/no-surprises-for-the-compounds-for-spain-austria-and-great-britain/
+  2024_suzuka:
+    HARD: C1
+    MEDIUM: C2
+    SOFT: C3
+    source_url: https://press.pirelli.com/these-are-the-p-zero-compounds-for-suzuka-shanghai-and-miami/
+  2024_yas_marina:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/all-compounds-on-track-to-end-the-season/
+  2024_zandvoort:
+    HARD: C1
+    MEDIUM: C2
+    SOFT: C3
+    source_url: https://press.pirelli.com/all-compounds-on-track-over-next-three-races/
+  2025_austin:
+    HARD: C1
+    MEDIUM: C3
+    SOFT: C4
+    source_url: https://press.pirelli.com/changes-and-status-quo-when-it-comes-to-compound-choices-for-the-rest-of-the-season0/
+  2025_bahrain:
+    HARD: C1
+    MEDIUM: C2
+    SOFT: C3
+    source_url: https://press.pirelli.com/2025-compounds-something-new-for-jeddah/
+  2025_baku:
+    HARD: C4
+    MEDIUM: C5
+    SOFT: C6
+    source_url: https://press.pirelli.com/changes-and-status-quo-when-it-comes-to-compound-choices-for-the-rest-of-the-season0/
+  2025_barcelona:
+    HARD: C1
+    MEDIUM: C2
+    SOFT: C3
+    source_url: https://press.pirelli.com/from-monaco-to-montreal-all-the-compounds-in-play/
+  2025_budapest:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/both-new-and-familiar-for-spielberg-to-budapest/
+  2025_imola:
+    HARD: C4
+    MEDIUM: C5
+    SOFT: C6
+    source_url: https://press.pirelli.com/pirelli-on-the-soft-side-for-miami-and-imola/
+  2025_interlagos:
+    HARD: C2
+    MEDIUM: C3
+    SOFT: C4
+    source_url: https://press.pirelli.com/changes-and-status-quo-when-it-comes-to-compound-choices-for-the-rest-of-the-season0/
+  2025_jeddah:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/2025-compounds-something-new-for-jeddah/
+  2025_las_vegas:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/changes-and-status-quo-when-it-comes-to-compound-choices-for-the-rest-of-the-season0/
+  2025_lusail:
+    HARD: C1
+    MEDIUM: C2
+    SOFT: C3
+    source_url: https://press.pirelli.com/changes-and-status-quo-when-it-comes-to-compound-choices-for-the-rest-of-the-season0/
+  2025_melbourne:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/2025-compounds-something-new-for-jeddah/
+  2025_mexico_city:
+    HARD: C2
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/changes-and-status-quo-when-it-comes-to-compound-choices-for-the-rest-of-the-season0/
+  2025_miami:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/pirelli-on-the-soft-side-for-miami-and-imola/
+  2025_monaco:
+    HARD: C4
+    MEDIUM: C5
+    SOFT: C6
+    source_url: https://press.pirelli.com/from-monaco-to-montreal-all-the-compounds-in-play/
+  2025_montreal:
+    HARD: C4
+    MEDIUM: C5
+    SOFT: C6
+    source_url: https://press.pirelli.com/from-monaco-to-montreal-all-the-compounds-in-play/
+  2025_monza:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/changes-and-status-quo-when-it-comes-to-compound-choices-for-the-rest-of-the-season0/
+  2025_shanghai:
+    HARD: C2
+    MEDIUM: C3
+    SOFT: C4
+    source_url: https://press.pirelli.com/2025-compounds-something-new-for-jeddah/
+  2025_silverstone:
+    HARD: C2
+    MEDIUM: C3
+    SOFT: C4
+    source_url: https://press.pirelli.com/both-new-and-familiar-for-spielberg-to-budapest/
+  2025_singapore:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/changes-and-status-quo-when-it-comes-to-compound-choices-for-the-rest-of-the-season0/
+  2025_spa:
+    HARD: C1
+    MEDIUM: C3
+    SOFT: C4
+    source_url: https://press.pirelli.com/both-new-and-familiar-for-spielberg-to-budapest/
+  2025_spielberg:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/both-new-and-familiar-for-spielberg-to-budapest/
+  2025_suzuka:
+    HARD: C1
+    MEDIUM: C2
+    SOFT: C3
+    source_url: https://press.pirelli.com/2025-compounds-something-new-for-jeddah/
+  2025_yas_marina:
+    HARD: C3
+    MEDIUM: C4
+    SOFT: C5
+    source_url: https://press.pirelli.com/changes-and-status-quo-when-it-comes-to-compound-choices-for-the-rest-of-the-season0/
+  2025_zandvoort:
+    HARD: C2
+    MEDIUM: C3
+    SOFT: C4
+    source_url: https://press.pirelli.com/changes-and-status-quo-when-it-comes-to-compound-choices-for-the-rest-of-the-season0/

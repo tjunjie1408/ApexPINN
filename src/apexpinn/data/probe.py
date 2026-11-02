@@ -102,6 +102,17 @@ def exclusion_reason(laps: pd.DataFrame, traffic_gap_threshold_s: float) -> pd.S
     return reason
 
 
+def is_dry_race(wet_lap_fraction: float | None) -> bool:
+    """O1 race-level dry rule: no lap on an intermediate or wet compound.
+
+    A Rainfall sample in the weather feed alone does not make a race wet (user decision 2026-11-03,
+    DECISIONS_REVIEW.md). Unknown compound data (None or NaN) cannot verify a dry race, so it is not dry.
+    """
+    if wet_lap_fraction is None or not np.isfinite(wet_lap_fraction):
+        return False
+    return bool(wet_lap_fraction == 0.0)
+
+
 def pit_lane_times(laps: pd.DataFrame, low_s: float = 5.0, high_s: float = 60.0) -> np.ndarray:
     """Pit-lane time per stop: next lap's ``pit_out_s`` minus the in-lap's ``pit_in_s`` (same driver).
 

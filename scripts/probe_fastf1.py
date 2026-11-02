@@ -205,7 +205,8 @@ def probe_race(
     compounds = laps["Compound"].astype(str).str.upper() if "Compound" in laps else pd.Series(dtype=str)
     wet = compounds.isin(probe.WET_COMPOUNDS)
     summary["wet_lap_fraction"] = float(wet.mean()) if len(compounds) else None
-    summary["is_dry"] = not summary.get("rainfall_any") and not summary["wet_lap_fraction"]
+    # rainfall_any stays reported as context; it no longer decides O1 dryness (see probe.is_dry_race).
+    summary["is_dry"] = probe.is_dry_race(summary["wet_lap_fraction"])
 
     # Per-lap telemetry aggregates, per driver, from that lap's samples only.
     tele_parts = []

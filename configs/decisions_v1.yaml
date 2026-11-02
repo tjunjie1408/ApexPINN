@@ -11,6 +11,9 @@ status: draft
 # Default: every 2023-2024 calendar event and K = 6 folds of 4 circuits. T6 drops wet races and
 # races with more than 20% missing telemetry. Every circuit belongs to exactly one fold, across all seasons.
 # Event ids are "<season>_<circuit>".
+# O1 design approved 2026-11-02; event eligibility checks remain open. See DECISIONS_REVIEW.md.
+# Wet rule (user decision 2026-11-03): a race is wet only if any lap ran on INTERMEDIATE or WET tyres.
+# A Rainfall weather flag alone does not exclude a race; 2024_spielberg (0 wet-compound laps) restored.
 o1_races:
   dev_seasons: [2023, 2024]
   folds:
@@ -97,16 +100,22 @@ o1_races:
       - "2025_lusail"
       - "2025_yas_marina"
 
-# O2: heat-load proxy formula and normalization. Default candidate; T6 compares candidates on
-# training-fold races only and records the choice.
+# O2: energy_index selected by the user 2026-11-02 for physical relevance; see DECISIONS_REVIEW.md.
+# Current metric is an acceleration-load proxy (m/s^2), not measured frictional energy in joules.
+# T6 validates proxy quality on eligible training-fold races only.
+# 2026-11-03 (delegated by the user): this choice overrides the PRD section 9 ranking rule. Validation reports
+# PRD separation/stability for all candidates; energy_index stays unless it raises the |corr| > 0.3 leak warning.
 o2_heat_load_proxy:
   formula: energy_index # mean(|a_lat| + |a_lon|) from position and speed
   candidates: [speed_trap, energy_index, brake_fraction_weighted]
   normalization: per_fold_minmax # statistics fitted on each fold's training circuits only
 
 # O3: race-lap trend phi (s per race lap, fuel burn-off plus track evolution) and traffic threshold.
+# Approved 2026-11-02: fixed phi per run; gap < 1.0 s excludes scoring, without a traffic penalty.
 # Default: phi_mid near the literature fuel effect (about 0.03 s/kg at about 1.8 kg/lap); low and high
 # bracket it for the sensitivity sweep. Must satisfy phi_low <= phi_mid <= phi_high.
+# Probe check (2026-11-03): phi_low keeps every probed race's corrected median slope >= 0. phi is confounded
+# with rho_c inside a stint, so wear claims are compound-relative; absolute rho_c is reported per phi.
 o3_race_lap_trend:
   phi_low: 0.03
   phi_mid: 0.06
@@ -114,16 +123,19 @@ o3_race_lap_trend:
   traffic_gap_threshold_s: 1.0
 
 # O4: target definition (PROJECT section 4.2): y = lap_time_s - phi * (L_race - race_lap).
+# User explicitly confirmed this unchanged target on 2026-11-02; see DECISIONS_REVIEW.md.
 o4_target:
   definition: race_lap_trend_corrected
 
-# O5: forecasting protocol (PROJECT section 4.5). Chosen before any model results are seen.
+# O5: approved 2026-11-02 before real-data evaluation; synthetic S1 is already complete.
+# Real-data origins require laps t0-2, t0-1, t0 clean in the same stint (T9/T11 guard not yet built).
 o5_protocol:
   horizons: [1, 3, 5, 10]
   primary_horizon: 5
   k_min: 3
 
 # O6: synthetic study (S1b) ranges, noise, identifiable subset, and pass tolerance (relative error).
+# Approved unchanged 2026-11-02; existing synthetic results frozen. Future revisions use new versions/outputs.
 o6_synthetic:
   n_seeds: 5
   noise_levels_s: [0.05, 0.15]
@@ -133,6 +145,10 @@ o6_synthetic:
     k_c: 0.25
 
 # O7: ensemble size and tuning budget. The budget is equal for all models.
+# Approved 2026-11-02: exactly 20 trials/model, training-only inner split, per-trial status/wall time.
+# Real-data tuner/logging not implemented; see DECISIONS_REVIEW.md for accounting requirements.
+# Unit (2026-11-03, delegated): 20 trials per (model, outer fold, phi); failed trials count; final ensemble
+# training is not a trial. A model with fewer than 20 distinct configurations enumerates each once.
 o7_ensemble:
   ensemble_size: 5
   tuning_budget:
@@ -140,6 +156,10 @@ o7_ensemble:
     per_model: 20
 
 # O8: pit-loss estimation and strategy candidate set.
+# Approved 2026-11-03: relative pit delta over matched race segments, not raw pit-lane duration.
+# Historical per-circuit median/IQR; retrospective 1/2-stop candidates, not a live optimizer.
+# Estimation rules (2026-11-03, delegated): green-flag stops only (no SC/VSC/red flag on in- or out-lap);
+# 2023-2024 development seasons only; report the stop count per circuit.
 o8_strategy:
   pit_loss: per_circuit_median_iqr
   max_stops: 2

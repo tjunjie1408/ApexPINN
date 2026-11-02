@@ -28,6 +28,14 @@ def test_column_report_flags_absent_and_missing():
     assert probe.column_report(None, ["a"])["a"]["present"] is False
 
 
+def test_is_dry_race_counts_only_wet_compound_laps():
+    # 2024_spielberg case: Rainfall flagged in the weather feed, but no wet-compound lap.
+    assert probe.is_dry_race(0.0) is True
+    assert probe.is_dry_race(0.01) is False
+    assert probe.is_dry_race(None) is False
+    assert probe.is_dry_race(float("nan")) is False
+
+
 @pytest.mark.parametrize(
     ("status", "green"), [("1", True), ("11", True), ("12", False), ("4", False), (None, False)]
 )
