@@ -172,6 +172,7 @@ class PredictionOutput:
     sigma_s: np.ndarray  # (horizon,), total predictive std
     latent_h: np.ndarray | None  # None for models without latent states (B0-B3)
     latent_w_s: np.ndarray | None
+    member_sigma_s: np.ndarray | None = None  # optional exact Gaussian component scales, (E, horizon)
 
     def __post_init__(self) -> None:
         mean = _float_array("mean_s", self.mean_s)
@@ -189,6 +190,16 @@ class PredictionOutput:
         object.__setattr__(self, "mean_s", mean)
         object.__setattr__(self, "member_means_s", members)
         object.__setattr__(self, "sigma_s", sigma)
+        if self.member_sigma_s is not None:
+            component = _float_array("member_sigma_s", self.member_sigma_s)
+            if component.shape != members.shape or np.any(component < 0):
+                raise ValueError("member_sigma_s must match member_means_s and be nonnegative")
+            variance = np.mean(component**2, axis=0) + np.var(members, axis=0)
+            if not np.allclose(mean, members.mean(axis=0), rtol=1e-6, atol=1e-8):
+                raise ValueError("member_sigma_s mixture mean disagrees with mean_s")
+            if not np.allclose(sigma**2, variance, rtol=1e-6, atol=1e-8):
+                raise ValueError("member_sigma_s mixture variance disagrees with sigma_s")
+            object.__setattr__(self, "member_sigma_s", component)
         for name in ("latent_h", "latent_w_s"):
             value = getattr(self, name)
             if value is None:
