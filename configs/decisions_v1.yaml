@@ -1,17 +1,17 @@
 # ApexPINN frozen decisions O1-O8 (PRD section 9).
 #
-# status: draft means the structure is final but the values are documented defaults.
-# T6 (data probe) replaces the defaults with probe-backed values and sets status: frozen.
+# O1-O8 values approved by the user; status frozen after full development G0 verification.
+# Freeze checkpoint: experiments/g0_development_20261103/. L2 is refuted, not redefined.
 # Loaded and validated by apexpinn.contracts.load_decisions.
 
 version: 1
-status: draft
+status: frozen
 
 # O1: race list and circuit-to-fold map (leave-one-circuit-group-out).
 # Default: every 2023-2024 calendar event and K = 6 folds of 4 circuits. T6 drops wet races and
 # races with more than 20% missing telemetry. Every circuit belongs to exactly one fold, across all seasons.
 # Event ids are "<season>_<circuit>".
-# O1 design approved 2026-11-02; event eligibility checks remain open. See DECISIONS_REVIEW.md.
+# O1 approved 2026-11-02; full candidate coverage and conservative eligibility checked 2026-11-03.
 # Wet rule (user decision 2026-11-03): a race is wet only if any lap ran on INTERMEDIATE or WET tyres.
 # A Rainfall weather flag alone does not exclude a race; 2024_spielberg (0 wet-compound laps) restored.
 o1_races:
@@ -146,7 +146,7 @@ o6_synthetic:
 
 # O7: ensemble size and tuning budget. The budget is equal for all models.
 # Approved 2026-11-02: exactly 20 trials/model, training-only inner split, per-trial status/wall time.
-# Real-data tuner/logging not implemented; see DECISIONS_REVIEW.md for accounting requirements.
+# Baseline tuner/logging implemented in T12; full real evaluation remains pending. See DECISIONS_REVIEW.md.
 # Unit (2026-11-03, delegated): 20 trials per (model, outer fold, phi); failed trials count; final ensemble
 # training is not a trial. A model with fewer than 20 distinct configurations enumerates each once.
 o7_ensemble:
