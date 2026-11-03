@@ -1,0 +1,201 @@
+{
+  "checks": {
+    "cli_noop": "pass",
+    "content_and_mtime_unchanged": "pass",
+    "lap_telemetry_key_and_time_alignment": "pass",
+    "manifest_hashes": "pass",
+    "no_session_load_on_noop": "pass",
+    "row_column_byte_counts": "pass",
+    "same_frame_repeated_writes": "pass"
+  },
+  "conditions": {
+    "fresh_online_download_verified": false,
+    "git_commit": "30b9c93affad046da4201174018702e7ce729f42",
+    "source": "existing FastF1 cache; initial command logged DNS failures and cached fallbacks",
+    "versions": {
+      "apexpinn": "0.1.0",
+      "fastf1": "3.9.0",
+      "pandas": "2.3.3",
+      "pyarrow": "26.0.0"
+    }
+  },
+  "evidence": "Observed",
+  "file_snapshot_after": {
+    "lap_telemetry.parquet": {
+      "mtime_ns": 1793637608230160200,
+      "sha256": "37a3180d089e123b4d6edafe273320817390908a2b634a172cca42607197470d"
+    },
+    "laps.parquet": {
+      "mtime_ns": 1793637608185098200,
+      "sha256": "8315d67ad7b7f5ccdae06d494ed0d375488e42a17cf883a3635774175f351c26"
+    },
+    "manifest.json": {
+      "mtime_ns": 1793637608276405900,
+      "sha256": "1c20492761bc5da2652ec4076fd664ae6fb5618a0af9849cd907c836c8ab25ec"
+    },
+    "weather.parquet": {
+      "mtime_ns": 1793637608206315100,
+      "sha256": "899ff17f543bc7800c3037b380f1e4ebd622c941ee1422e3d4f588f0be69033d"
+    }
+  },
+  "file_snapshot_before": {
+    "lap_telemetry.parquet": {
+      "mtime_ns": 1793637608230160200,
+      "sha256": "37a3180d089e123b4d6edafe273320817390908a2b634a172cca42607197470d"
+    },
+    "laps.parquet": {
+      "mtime_ns": 1793637608185098200,
+      "sha256": "8315d67ad7b7f5ccdae06d494ed0d375488e42a17cf883a3635774175f351c26"
+    },
+    "manifest.json": {
+      "mtime_ns": 1793637608276405900,
+      "sha256": "1c20492761bc5da2652ec4076fd664ae6fb5618a0af9849cd907c836c8ab25ec"
+    },
+    "weather.parquet": {
+      "mtime_ns": 1793637608206315100,
+      "sha256": "899ff17f543bc7800c3037b380f1e4ebd622c941ee1422e3d4f588f0be69033d"
+    }
+  },
+  "instrument": "project uv Python; existing extract/manifest APIs; pandas/numpy assertions; actual CLI rerun",
+  "limits": [
+    "One development race only",
+    "Fresh network download not verified",
+    "No Silver/Gold build or forecasting evaluation",
+    "Per-lap-only sample dependency checked by the existing offline suite, not by this static real-data inspection"
+  ],
+  "manifest": {
+    "circuit": "bahrain",
+    "downloaded_utc": "2026-11-02T16:40:05Z",
+    "drivers_without_car_data": [],
+    "drivers_without_pos_data": [],
+    "event_date": "2024-03-02 00:00:00",
+    "event_id": "2024_bahrain",
+    "event_name": "Bahrain Grand Prix",
+    "files": {
+      "lap_telemetry.parquet": {
+        "bytes": 79701,
+        "columns": [
+          "DriverNumber",
+          "Driver",
+          "LapNumber",
+          "lap_start_s",
+          "lap_end_s",
+          "n_car",
+          "n_pos",
+          "car_coverage",
+          "pos_coverage",
+          "telemetry_missing",
+          "speed_mean_kmh",
+          "brake_fraction",
+          "brake_fraction_weighted",
+          "energy_index"
+        ],
+        "rows": 1129,
+        "sha256": "37a3180d089e123b4d6edafe273320817390908a2b634a172cca42607197470d"
+      },
+      "laps.parquet": {
+        "bytes": 85460,
+        "columns": [
+          "Time_s",
+          "Driver",
+          "DriverNumber",
+          "LapTime_s",
+          "LapNumber",
+          "Stint",
+          "PitOutTime_s",
+          "PitInTime_s",
+          "Sector1Time_s",
+          "Sector2Time_s",
+          "Sector3Time_s",
+          "Sector1SessionTime_s",
+          "Sector2SessionTime_s",
+          "Sector3SessionTime_s",
+          "SpeedI1",
+          "SpeedI2",
+          "SpeedFL",
+          "SpeedST",
+          "IsPersonalBest",
+          "Compound",
+          "TyreLife",
+          "FreshTyre",
+          "Team",
+          "LapStartTime_s",
+          "LapStartDate",
+          "TrackStatus",
+          "Position",
+          "Deleted",
+          "DeletedReason",
+          "FastF1Generated",
+          "IsAccurate"
+        ],
+        "rows": 1129,
+        "sha256": "8315d67ad7b7f5ccdae06d494ed0d375488e42a17cf883a3635774175f351c26"
+      },
+      "weather.parquet": {
+        "bytes": 7400,
+        "columns": [
+          "Time_s",
+          "AirTemp",
+          "Humidity",
+          "Pressure",
+          "Rainfall",
+          "TrackTemp",
+          "WindDirection",
+          "WindSpeed"
+        ],
+        "rows": 157,
+        "sha256": "899ff17f543bc7800c3037b380f1e4ebd622c941ee1422e3d4f588f0be69033d"
+      }
+    },
+    "grand_prix_query": "Bahrain Grand Prix",
+    "location": "Sakhir",
+    "schema": "apexpinn.bronze_manifest/v1",
+    "season": 2024,
+    "session": "R",
+    "versions": {
+      "apexpinn": "0.1.0",
+      "fastf1": "3.9.0",
+      "pandas": "2.3.3",
+      "pyarrow": "26.0.0"
+    }
+  },
+  "population": {
+    "event_id": "2024_bahrain",
+    "lap_rows": 1129,
+    "session": "R"
+  },
+  "quality": {
+    "drivers": 20,
+    "dry_compound_counts": {
+      "HARD": 791,
+      "SOFT": 338
+    },
+    "lap_rows": 1129,
+    "nonfinite_energy_index_rows": 0,
+    "telemetry_missing_rows": 0,
+    "telemetry_missing_share": 0.0,
+    "telemetry_rows": 1129,
+    "total_parquet_bytes": 172561,
+    "weather_rows": 157,
+    "wet_compound_laps": 0
+  },
+  "quantity": "Bronze integrity, schema/row alignment, no-op rerun, same-frame serialization and quality counts",
+  "rerun": {
+    "returncode": 0,
+    "stderr": "D:\\self-learning\\portfolio\\apexpinn\\.venv\\Lib\\site-packages\\fastf1\\req.py:251: FutureWarning: `.enable_cache` is deprecated and will be removed in a future version. Use `.configure` instead.\n  warnings.warn(\"`.enable_cache` is deprecated and will be removed in a \"\nINFO apexpinn.extract: 2024_bahrain: Bronze extract exists and verifies, skipping (use --force to redo)\nINFO apexpinn.extract: written 0, skipped 1, failed 0\n",
+    "stdout": ""
+  },
+  "same_frame_sha256": {
+    "lap_telemetry.parquet": "37a3180d089e123b4d6edafe273320817390908a2b634a172cca42607197470d",
+    "laps.parquet": "8315d67ad7b7f5ccdae06d494ed0d375488e42a17cf883a3635774175f351c26",
+    "weather.parquet": "899ff17f543bc7800c3037b380f1e4ebd622c941ee1422e3d4f588f0be69033d"
+  },
+  "schema": "apexpinn.bronze_verification/v1",
+  "source_hashes": {
+    "src/apexpinn/data/extract.py": "f560c81cfc543c760718f3d9f695b05e8c7423e4c9d2ce40ec4c13bf1ecea9e8",
+    "src/apexpinn/data/manifest.py": "85cfafb6a4e4d56911298ea2f86e72614129e3f6384ed53814dd379c2861d659",
+    "src/apexpinn/data/probe.py": "2b5b96db78cc2195d2c756e3d578235c2718c3f73598779365d6544935f03dd7"
+  },
+  "status": "ok",
+  "verified_utc": "2026-11-02T16:43:21.145442+00:00"
+}

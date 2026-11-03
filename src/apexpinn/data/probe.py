@@ -91,8 +91,8 @@ def exclusion_reason(laps: pd.DataFrame, traffic_gap_threshold_s: float) -> pd.S
         ("in_lap", col("pit_in_s", np.nan).notna()),
         ("out_lap", col("pit_out_s", np.nan).notna()),
         ("not_green", ~col("TrackStatus", "1").map(is_green).astype(bool)),
-        ("inaccurate", ~col("IsAccurate", True).eq(True)),  # missing counts as inaccurate
-        ("deleted", col("Deleted", False).eq(True)),
+        ("inaccurate", ~col("IsAccurate", True).eq(True).fillna(False)),  # missing counts as inaccurate
+        ("deleted", col("Deleted", False).eq(True).fillna(False)),
         ("wet_compound", col("Compound", "").astype(str).str.upper().isin(WET_COMPOUNDS)),
         ("traffic", col("gap_ahead_s", np.nan).lt(traffic_gap_threshold_s)),
     ]

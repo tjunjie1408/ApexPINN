@@ -1,0 +1,483 @@
+{
+  "bronze_payload_sha256_before_and_after": {
+    "data\\bronze_fresh\\20261103-005216\\2024_bahrain\\lap_telemetry.parquet": "37a3180d089e123b4d6edafe273320817390908a2b634a172cca42607197470d",
+    "data\\bronze_fresh\\20261103-005216\\2024_bahrain\\laps.parquet": "8315d67ad7b7f5ccdae06d494ed0d375488e42a17cf883a3635774175f351c26",
+    "data\\bronze_fresh\\20261103-005216\\2024_bahrain\\manifest.json": "a59ffeeaa23beae3fa2a90a801922b19b9571a077d94084279146b5b10134a6b",
+    "data\\bronze_fresh\\20261103-005216\\2024_bahrain\\weather.parquet": "899ff17f543bc7800c3037b380f1e4ebd622c941ee1422e3d4f588f0be69033d"
+  },
+  "bronze_unchanged": true,
+  "captured_cli_output": [
+    "{\"output\": \"D:\\\\self-learning\\\\portfolio\\\\apexpinn\\\\data\\\\silver_t9\\\\2024_bahrain\\\\phi_high\", \"rows\": 1129, \"scored_laps\": 818, \"sha256\": \"c348cf53236c96602736a2410ed48a275db2c1730450164259bfacf696f90a39\"}",
+    "{\"output\": \"D:\\\\self-learning\\\\portfolio\\\\apexpinn\\\\data\\\\silver_t9\\\\2024_bahrain\\\\phi_high\", \"rows\": 1129, \"scored_laps\": 818, \"sha256\": \"c348cf53236c96602736a2410ed48a275db2c1730450164259bfacf696f90a39\"}",
+    "{\"output\": \"D:\\\\self-learning\\\\portfolio\\\\apexpinn\\\\data\\\\silver_t9\\\\2024_bahrain\\\\phi_low\", \"rows\": 1129, \"scored_laps\": 818, \"sha256\": \"2e837db430fc2e84ea26cb460ab0722120c448401a6767a183a888efe1b971ec\"}",
+    "{\"output\": \"D:\\\\self-learning\\\\portfolio\\\\apexpinn\\\\data\\\\silver_t9\\\\2024_bahrain\\\\phi_low\", \"rows\": 1129, \"scored_laps\": 818, \"sha256\": \"2e837db430fc2e84ea26cb460ab0722120c448401a6767a183a888efe1b971ec\"}",
+    "{\"output\": \"D:\\\\self-learning\\\\portfolio\\\\apexpinn\\\\data\\\\silver_t9\\\\2024_bahrain\\\\phi_mid\", \"rows\": 1129, \"scored_laps\": 818, \"sha256\": \"d6ffb9e7da29bd4fcdc7a3c91c329f25ae5d1e3d6ad6032719d37a94bc3cc4e1\"}",
+    "{\"output\": \"D:\\\\self-learning\\\\portfolio\\\\apexpinn\\\\data\\\\silver_t9\\\\2024_bahrain\\\\phi_mid\", \"rows\": 1129, \"scored_laps\": 818, \"sha256\": \"d6ffb9e7da29bd4fcdc7a3c91c329f25ae5d1e3d6ad6032719d37a94bc3cc4e1\"}"
+  ],
+  "conditions": {
+    "bulk_extraction": "NOT RUN",
+    "forecasting_evaluation": "NOT RUN",
+    "horizons": [
+      1,
+      3,
+      5,
+      10
+    ],
+    "k_min": 3,
+    "normalization": "NOT FITTED",
+    "phi_settings": [
+      "low",
+      "mid",
+      "high"
+    ],
+    "real_forecasting_inputs": "NOT BUILT; await T10 Gold proxy_q_heat"
+  },
+  "date": "2026-11-03",
+  "evidence": "Observed",
+  "instrument": {
+    "checks": [
+      "verified Bronze manifest before reading",
+      "CLI twice per phi",
+      "SHA equality of rebuilt parquet and manifest",
+      "unique actual primary keys",
+      "target equals declared formula",
+      "all raw rows retained",
+      "source hashes unchanged",
+      "population-only audit via guards.audit_origins"
+    ],
+    "pandas": "2.3.3",
+    "revision": "30b9c93affad046da4201174018702e7ce729f42",
+    "runtime": "project uv --no-cache run --no-sync python",
+    "source_sha256": {
+      "configs/compound_allocation.yaml": "0cb39dc1e578e1b1d13965ba1e66663a4a046c8f9b76b807e7b633f96ac3e56f",
+      "configs/decisions_v1.yaml": "dde0bf17bd0da20f2ba3b32d310fd236763d3a7a0952919412181363503010df",
+      "src/apexpinn/data/guards.py": "5468b4e96b25cb9e831c3b9bb3f00b4e2c85626ab08482ceccf733ff8baeb359",
+      "src/apexpinn/data/probe.py": "e027c44fc82775c14de340ebf2983a81817e8f55da9870e900cec8d0019f32f4",
+      "src/apexpinn/data/silver.py": "6edb71cb181e8749590dfa02459f14b3e4c3d2566174b3f46dea73e04bb791d6",
+      "tests/test_silver_guards.py": "d9c6aad98a5dffa446bdc2ea4179a533b6b0a89f12959de470ae6865b6d41741"
+    },
+    "working_tree_sources": true
+  },
+  "limits": [
+    "One development event only; no holdout evaluated.",
+    "Origin audit checks population eligibility only, not model-input quality or predictive accuracy.",
+    "Guard model inputs and perturbation invariance are tested on explicit normalized fixtures; real normalized inputs await T10.",
+    "Traffic gap inherits same-race-lap timing-line approximation; lapped-car traffic may be undercounted.",
+    "No synthetic records were rerun or modified."
+  ],
+  "origin_audit_denominator": "each original t0 from k_min through max_stint_lap-horizon, per stint; includes filtered origins and missing internal rows",
+  "population": "2024 Bahrain development race from verified user fresh-cache Bronze output",
+  "quantity": "Silver population, deterministic serialization and original-lap origin eligibility",
+  "runs": {
+    "high": {
+      "drivers": 20,
+      "manifest": {
+        "allocations_sha256": "0cb39dc1e578e1b1d13965ba1e66663a4a046c8f9b76b807e7b633f96ac3e56f",
+        "bronze_manifest_sha256": "a59ffeeaa23beae3fa2a90a801922b19b9571a077d94084279146b5b10134a6b",
+        "config_sha256": "dde0bf17bd0da20f2ba3b32d310fd236763d3a7a0952919412181363503010df",
+        "event_id": "2024_bahrain",
+        "exclusion_counts": {
+          "": 818,
+          "deleted": 18,
+          "in_lap": 42,
+          "no_lap_time": 1,
+          "not_green": 18,
+          "out_lap": 42,
+          "race_lap_1": 20,
+          "traffic": 170
+        },
+        "files": {
+          "laps.parquet": {
+            "bytes": 122172,
+            "columns": [
+              "session_id",
+              "season",
+              "circuit_id",
+              "driver_id",
+              "stint_id",
+              "lap_number",
+              "race_lap",
+              "race_length",
+              "split_fold",
+              "dataset_split",
+              "event_is_dry",
+              "compound_c",
+              "source_version",
+              "phi",
+              "exclusion_reason",
+              "is_scored_lap",
+              "stint_lap",
+              "obs_lap_time_s",
+              "obs_lap_start_s",
+              "obs_lap_end_s",
+              "obs_pit_in_s",
+              "obs_pit_out_s",
+              "obs_track_status",
+              "obs_is_accurate",
+              "obs_deleted",
+              "obs_compound",
+              "obs_tyre_life",
+              "obs_fresh_tyre",
+              "obs_speed_i1_kmh",
+              "obs_speed_i2_kmh",
+              "obs_speed_fl_kmh",
+              "obs_speed_st_kmh",
+              "obs_gap_ahead_s",
+              "obs_track_temp_c",
+              "proxy_energy_index",
+              "proxy_brake_fraction",
+              "proxy_brake_fraction_weighted",
+              "proxy_telemetry_missing",
+              "proxy_n_car",
+              "proxy_n_pos",
+              "proxy_car_coverage",
+              "proxy_pos_coverage",
+              "proxy_speed_mean_kmh",
+              "proxy_y"
+            ],
+            "rows": 1129,
+            "sha256": "c348cf53236c96602736a2410ed48a275db2c1730450164259bfacf696f90a39"
+          }
+        },
+        "normalization": "NOT FITTED; proxy_q_heat is supplied by T10",
+        "phi": 0.09,
+        "schema": "apexpinn.silver_manifest/v1",
+        "scored_laps": 818,
+        "silver_source_sha256": "6edb71cb181e8749590dfa02459f14b3e4c3d2566174b3f46dea73e04bb791d6"
+      },
+      "manifest_sha256": "d3fd3f05c7b3807f5b3ed3226c1bcee8df6a104da2d4607159ecbe3e71b9d4f8",
+      "origin_population_audit": [
+        {
+          "candidates": 942,
+          "fold": "F1",
+          "history_rejected": 327,
+          "history_rejection_share": 0.3471337579617834,
+          "horizon": 1,
+          "population_eligible": 557,
+          "reasons": {
+            "": 557,
+            "history_not_consecutive_clean": 327,
+            "target_not_scored": 58
+          }
+        },
+        {
+          "candidates": 818,
+          "fold": "F1",
+          "history_rejected": 288,
+          "history_rejection_share": 0.35207823960880197,
+          "horizon": 3,
+          "population_eligible": 466,
+          "reasons": {
+            "": 466,
+            "history_not_consecutive_clean": 288,
+            "target_not_scored": 64
+          }
+        },
+        {
+          "candidates": 694,
+          "fold": "F1",
+          "history_rejected": 247,
+          "history_rejection_share": 0.3559077809798271,
+          "horizon": 5,
+          "population_eligible": 387,
+          "reasons": {
+            "": 387,
+            "history_not_consecutive_clean": 247,
+            "target_not_scored": 60
+          }
+        },
+        {
+          "candidates": 397,
+          "fold": "F1",
+          "history_rejected": 127,
+          "history_rejection_share": 0.3198992443324937,
+          "horizon": 10,
+          "population_eligible": 231,
+          "reasons": {
+            "": 231,
+            "history_not_consecutive_clean": 127,
+            "target_not_scored": 39
+          }
+        }
+      ],
+      "output": "data\\silver_t9\\2024_bahrain\\phi_high",
+      "phi": 0.09,
+      "rebuild_bitwise_equal": true,
+      "stints": 63
+    },
+    "low": {
+      "drivers": 20,
+      "manifest": {
+        "allocations_sha256": "0cb39dc1e578e1b1d13965ba1e66663a4a046c8f9b76b807e7b633f96ac3e56f",
+        "bronze_manifest_sha256": "a59ffeeaa23beae3fa2a90a801922b19b9571a077d94084279146b5b10134a6b",
+        "config_sha256": "dde0bf17bd0da20f2ba3b32d310fd236763d3a7a0952919412181363503010df",
+        "event_id": "2024_bahrain",
+        "exclusion_counts": {
+          "": 818,
+          "deleted": 18,
+          "in_lap": 42,
+          "no_lap_time": 1,
+          "not_green": 18,
+          "out_lap": 42,
+          "race_lap_1": 20,
+          "traffic": 170
+        },
+        "files": {
+          "laps.parquet": {
+            "bytes": 122257,
+            "columns": [
+              "session_id",
+              "season",
+              "circuit_id",
+              "driver_id",
+              "stint_id",
+              "lap_number",
+              "race_lap",
+              "race_length",
+              "split_fold",
+              "dataset_split",
+              "event_is_dry",
+              "compound_c",
+              "source_version",
+              "phi",
+              "exclusion_reason",
+              "is_scored_lap",
+              "stint_lap",
+              "obs_lap_time_s",
+              "obs_lap_start_s",
+              "obs_lap_end_s",
+              "obs_pit_in_s",
+              "obs_pit_out_s",
+              "obs_track_status",
+              "obs_is_accurate",
+              "obs_deleted",
+              "obs_compound",
+              "obs_tyre_life",
+              "obs_fresh_tyre",
+              "obs_speed_i1_kmh",
+              "obs_speed_i2_kmh",
+              "obs_speed_fl_kmh",
+              "obs_speed_st_kmh",
+              "obs_gap_ahead_s",
+              "obs_track_temp_c",
+              "proxy_energy_index",
+              "proxy_brake_fraction",
+              "proxy_brake_fraction_weighted",
+              "proxy_telemetry_missing",
+              "proxy_n_car",
+              "proxy_n_pos",
+              "proxy_car_coverage",
+              "proxy_pos_coverage",
+              "proxy_speed_mean_kmh",
+              "proxy_y"
+            ],
+            "rows": 1129,
+            "sha256": "2e837db430fc2e84ea26cb460ab0722120c448401a6767a183a888efe1b971ec"
+          }
+        },
+        "normalization": "NOT FITTED; proxy_q_heat is supplied by T10",
+        "phi": 0.03,
+        "schema": "apexpinn.silver_manifest/v1",
+        "scored_laps": 818,
+        "silver_source_sha256": "6edb71cb181e8749590dfa02459f14b3e4c3d2566174b3f46dea73e04bb791d6"
+      },
+      "manifest_sha256": "f17ec0e97888fb986f7f1578cb9a32d2cb5c42e7c99181726b9fdac249167e77",
+      "origin_population_audit": [
+        {
+          "candidates": 942,
+          "fold": "F1",
+          "history_rejected": 327,
+          "history_rejection_share": 0.3471337579617834,
+          "horizon": 1,
+          "population_eligible": 557,
+          "reasons": {
+            "": 557,
+            "history_not_consecutive_clean": 327,
+            "target_not_scored": 58
+          }
+        },
+        {
+          "candidates": 818,
+          "fold": "F1",
+          "history_rejected": 288,
+          "history_rejection_share": 0.35207823960880197,
+          "horizon": 3,
+          "population_eligible": 466,
+          "reasons": {
+            "": 466,
+            "history_not_consecutive_clean": 288,
+            "target_not_scored": 64
+          }
+        },
+        {
+          "candidates": 694,
+          "fold": "F1",
+          "history_rejected": 247,
+          "history_rejection_share": 0.3559077809798271,
+          "horizon": 5,
+          "population_eligible": 387,
+          "reasons": {
+            "": 387,
+            "history_not_consecutive_clean": 247,
+            "target_not_scored": 60
+          }
+        },
+        {
+          "candidates": 397,
+          "fold": "F1",
+          "history_rejected": 127,
+          "history_rejection_share": 0.3198992443324937,
+          "horizon": 10,
+          "population_eligible": 231,
+          "reasons": {
+            "": 231,
+            "history_not_consecutive_clean": 127,
+            "target_not_scored": 39
+          }
+        }
+      ],
+      "output": "data\\silver_t9\\2024_bahrain\\phi_low",
+      "phi": 0.03,
+      "rebuild_bitwise_equal": true,
+      "stints": 63
+    },
+    "mid": {
+      "drivers": 20,
+      "manifest": {
+        "allocations_sha256": "0cb39dc1e578e1b1d13965ba1e66663a4a046c8f9b76b807e7b633f96ac3e56f",
+        "bronze_manifest_sha256": "a59ffeeaa23beae3fa2a90a801922b19b9571a077d94084279146b5b10134a6b",
+        "config_sha256": "dde0bf17bd0da20f2ba3b32d310fd236763d3a7a0952919412181363503010df",
+        "event_id": "2024_bahrain",
+        "exclusion_counts": {
+          "": 818,
+          "deleted": 18,
+          "in_lap": 42,
+          "no_lap_time": 1,
+          "not_green": 18,
+          "out_lap": 42,
+          "race_lap_1": 20,
+          "traffic": 170
+        },
+        "files": {
+          "laps.parquet": {
+            "bytes": 122276,
+            "columns": [
+              "session_id",
+              "season",
+              "circuit_id",
+              "driver_id",
+              "stint_id",
+              "lap_number",
+              "race_lap",
+              "race_length",
+              "split_fold",
+              "dataset_split",
+              "event_is_dry",
+              "compound_c",
+              "source_version",
+              "phi",
+              "exclusion_reason",
+              "is_scored_lap",
+              "stint_lap",
+              "obs_lap_time_s",
+              "obs_lap_start_s",
+              "obs_lap_end_s",
+              "obs_pit_in_s",
+              "obs_pit_out_s",
+              "obs_track_status",
+              "obs_is_accurate",
+              "obs_deleted",
+              "obs_compound",
+              "obs_tyre_life",
+              "obs_fresh_tyre",
+              "obs_speed_i1_kmh",
+              "obs_speed_i2_kmh",
+              "obs_speed_fl_kmh",
+              "obs_speed_st_kmh",
+              "obs_gap_ahead_s",
+              "obs_track_temp_c",
+              "proxy_energy_index",
+              "proxy_brake_fraction",
+              "proxy_brake_fraction_weighted",
+              "proxy_telemetry_missing",
+              "proxy_n_car",
+              "proxy_n_pos",
+              "proxy_car_coverage",
+              "proxy_pos_coverage",
+              "proxy_speed_mean_kmh",
+              "proxy_y"
+            ],
+            "rows": 1129,
+            "sha256": "d6ffb9e7da29bd4fcdc7a3c91c329f25ae5d1e3d6ad6032719d37a94bc3cc4e1"
+          }
+        },
+        "normalization": "NOT FITTED; proxy_q_heat is supplied by T10",
+        "phi": 0.06,
+        "schema": "apexpinn.silver_manifest/v1",
+        "scored_laps": 818,
+        "silver_source_sha256": "6edb71cb181e8749590dfa02459f14b3e4c3d2566174b3f46dea73e04bb791d6"
+      },
+      "manifest_sha256": "5591f3d09078ba2f92e32972f728721852b6daa86e4927d55c63bb062d093238",
+      "origin_population_audit": [
+        {
+          "candidates": 942,
+          "fold": "F1",
+          "history_rejected": 327,
+          "history_rejection_share": 0.3471337579617834,
+          "horizon": 1,
+          "population_eligible": 557,
+          "reasons": {
+            "": 557,
+            "history_not_consecutive_clean": 327,
+            "target_not_scored": 58
+          }
+        },
+        {
+          "candidates": 818,
+          "fold": "F1",
+          "history_rejected": 288,
+          "history_rejection_share": 0.35207823960880197,
+          "horizon": 3,
+          "population_eligible": 466,
+          "reasons": {
+            "": 466,
+            "history_not_consecutive_clean": 288,
+            "target_not_scored": 64
+          }
+        },
+        {
+          "candidates": 694,
+          "fold": "F1",
+          "history_rejected": 247,
+          "history_rejection_share": 0.3559077809798271,
+          "horizon": 5,
+          "population_eligible": 387,
+          "reasons": {
+            "": 387,
+            "history_not_consecutive_clean": 247,
+            "target_not_scored": 60
+          }
+        },
+        {
+          "candidates": 397,
+          "fold": "F1",
+          "history_rejected": 127,
+          "history_rejection_share": 0.3198992443324937,
+          "horizon": 10,
+          "population_eligible": 231,
+          "reasons": {
+            "": 231,
+            "history_not_consecutive_clean": 127,
+            "target_not_scored": 39
+          }
+        }
+      ],
+      "output": "data\\silver_t9\\2024_bahrain\\phi_mid",
+      "phi": 0.06,
+      "rebuild_bitwise_equal": true,
+      "stints": 63
+    }
+  },
+  "schema": "apexpinn.silver_verification/v1",
+  "status": "ok"
+}

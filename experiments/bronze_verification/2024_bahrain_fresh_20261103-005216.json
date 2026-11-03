@@ -1,0 +1,147 @@
+{
+  "cache_artifact": {
+    "http_cache_bytes": 24154112,
+    "http_cache_exists": true
+  },
+  "checks": {
+    "actual_rows_columns_bytes": "pass",
+    "manifest_integrity": "pass",
+    "payload_hashes_match_original_cached_extract": "pass"
+  },
+  "conditions": {
+    "agent_executed_online_retrieval": false,
+    "cache_dir": ".fastf1_cache\\fresh-20261103-005216",
+    "execution_provenance": "User confirmed completion of the supplied dedicated fresh-cache/output command in their terminal; final log lines supplied in chat",
+    "output_dir": "data\\bronze_fresh\\20261103-005216\\2024_bahrain",
+    "versions": {
+      "apexpinn": "0.1.0",
+      "fastf1": "3.9.0",
+      "pandas": "2.3.3",
+      "pyarrow": "26.0.0"
+    }
+  },
+  "evidence": "Observed",
+  "instrument": "User CLI output plus agent local manifest/SHA-256/Parquet checks",
+  "limits": [
+    "Fresh online execution reported by the user; agent independently checked its local output artifacts",
+    "No claim that DNS inside the Codex execution environment is repaired",
+    "No bulk extraction or model evaluation"
+  ],
+  "manifest": {
+    "circuit": "bahrain",
+    "downloaded_utc": "2026-11-02T16:53:00Z",
+    "drivers_without_car_data": [],
+    "drivers_without_pos_data": [],
+    "event_date": "2024-03-02 00:00:00",
+    "event_id": "2024_bahrain",
+    "event_name": "Bahrain Grand Prix",
+    "files": {
+      "lap_telemetry.parquet": {
+        "bytes": 79701,
+        "columns": [
+          "DriverNumber",
+          "Driver",
+          "LapNumber",
+          "lap_start_s",
+          "lap_end_s",
+          "n_car",
+          "n_pos",
+          "car_coverage",
+          "pos_coverage",
+          "telemetry_missing",
+          "speed_mean_kmh",
+          "brake_fraction",
+          "brake_fraction_weighted",
+          "energy_index"
+        ],
+        "rows": 1129,
+        "sha256": "37a3180d089e123b4d6edafe273320817390908a2b634a172cca42607197470d"
+      },
+      "laps.parquet": {
+        "bytes": 85460,
+        "columns": [
+          "Time_s",
+          "Driver",
+          "DriverNumber",
+          "LapTime_s",
+          "LapNumber",
+          "Stint",
+          "PitOutTime_s",
+          "PitInTime_s",
+          "Sector1Time_s",
+          "Sector2Time_s",
+          "Sector3Time_s",
+          "Sector1SessionTime_s",
+          "Sector2SessionTime_s",
+          "Sector3SessionTime_s",
+          "SpeedI1",
+          "SpeedI2",
+          "SpeedFL",
+          "SpeedST",
+          "IsPersonalBest",
+          "Compound",
+          "TyreLife",
+          "FreshTyre",
+          "Team",
+          "LapStartTime_s",
+          "LapStartDate",
+          "TrackStatus",
+          "Position",
+          "Deleted",
+          "DeletedReason",
+          "FastF1Generated",
+          "IsAccurate"
+        ],
+        "rows": 1129,
+        "sha256": "8315d67ad7b7f5ccdae06d494ed0d375488e42a17cf883a3635774175f351c26"
+      },
+      "weather.parquet": {
+        "bytes": 7400,
+        "columns": [
+          "Time_s",
+          "AirTemp",
+          "Humidity",
+          "Pressure",
+          "Rainfall",
+          "TrackTemp",
+          "WindDirection",
+          "WindSpeed"
+        ],
+        "rows": 157,
+        "sha256": "899ff17f543bc7800c3037b380f1e4ebd622c941ee1422e3d4f588f0be69033d"
+      }
+    },
+    "grand_prix_query": "Bahrain Grand Prix",
+    "location": "Sakhir",
+    "schema": "apexpinn.bronze_manifest/v1",
+    "season": 2024,
+    "session": "R",
+    "versions": {
+      "apexpinn": "0.1.0",
+      "fastf1": "3.9.0",
+      "pandas": "2.3.3",
+      "pyarrow": "26.0.0"
+    }
+  },
+  "population": {
+    "drivers": 20,
+    "event_id": "2024_bahrain",
+    "rows": {
+      "lap_telemetry.parquet": 1129,
+      "laps.parquet": 1129,
+      "weather.parquet": 157
+    },
+    "session": "R"
+  },
+  "quantity": "User-operated fresh-cache extraction and independent local artifact checks",
+  "schema": "apexpinn.bronze_verification/v1",
+  "status": "ok",
+  "user_reported_summary": {
+    "drivers": 20,
+    "failed": 0,
+    "lap_rows": 1129,
+    "skipped": 0,
+    "written": 1
+  },
+  "verified_utc": "2026-11-02T16:55:05.929190+00:00"
+}
