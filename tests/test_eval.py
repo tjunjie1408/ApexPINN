@@ -131,7 +131,7 @@ class ToyForecaster:
         return PredictionOutput(mean, members, np.full(horizon, 0.2), None, None, **kwargs)
 
 
-def evaluation_fixture(*, model_name="toy"):
+def evaluation_fixture(*, model_name="toy", decisions=DECISIONS):
     from test_gold import silver_events
 
     from apexpinn.data.gold import build_gold, fit_normalization
@@ -157,10 +157,10 @@ def evaluation_fixture(*, model_name="toy"):
     silver = pd.concat(expanded, ignore_index=True)
     folds = {}
     for fold in ("F1", "F2"):
-        stats = fit_normalization(silver, DECISIONS, test_fold=fold)
-        gold = build_gold(silver, stats, DECISIONS)
+        stats = fit_normalization(silver, decisions, test_fold=fold)
+        gold = build_gold(silver, stats, decisions)
         folds[fold] = EvaluationFold(gold, stats, f"fixture-gold-{fold}", f"fixture-model-{fold}")
-    return folds, ProtocolConfig(DECISIONS, model_name, 0.06, validation_only=True)
+    return folds, ProtocolConfig(decisions, model_name, 0.06, validation_only=True)
 
 
 def test_shared_anchor_is_model_class_independent():
@@ -229,7 +229,7 @@ def test_probabilities_are_unknown_for_unidentified_ensemble_variance():
 def test_protocol_draft_gate_and_model_mapping_fail_closed():
     from apexpinn.eval.protocol import run_protocol
 
-    folds, cfg = evaluation_fixture()
+    folds, cfg = evaluation_fixture(decisions=replace(DECISIONS, status="draft"))
     with pytest.raises(ValueError, match="draft"):
         run_protocol(ToyForecaster(), {"F1": folds["F1"]}, replace(cfg, validation_only=False), audit=[])
     with pytest.raises(ValueError, match="fold-specific"):
@@ -238,6 +238,18 @@ def test_protocol_draft_gate_and_model_mapping_fail_closed():
     bad.gold["normalization_test_fold"] = "F2"
     with pytest.raises(ValueError, match="normalization_test_fold"):
         run_protocol(ToyForecaster(), {"F1": bad}, cfg, audit=[])
+
+
+def test_protocol_frozen_config_allows_development_execution():
+    from apexpinn.eval.protocol import run_protocol
+
+    folds, cfg = evaluation_fixture(decisions=replace(DECISIONS, status="frozen"))
+    records = run_protocol(
+        {fold: ToyForecaster() for fold in folds}, folds, replace(cfg, validation_only=False), audit=[]
+    )
+    assert records
+    assert all(r.conditions["config_status"] == "frozen" for r in records)
+    assert all(r.conditions["validation_only"] is False for r in records)
 
 
 def test_pairing_rejects_mismatched_population_instead_of_intersection():

@@ -8,12 +8,17 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
+import jax.numpy as jnp
 import numpy as np
 import pandas as pd
 
-from apexpinn.models.stints import Scenario, StintContext, StintHistory, validate_horizon
+from apexpinn.models.stints import Scenario, StintBatch, StintContext, StintHistory, validate_horizon
 from apexpinn.physics.residuals import COMPOUNDS
+
+if TYPE_CHECKING:
+    from apexpinn.data.gold import FoldNormalization
 
 
 class OriginRejected(ValueError):
@@ -191,4 +196,69 @@ def audit_origins(stints: pd.DataFrame, *, horizons: Sequence[int], k_min: int =
             "eligible",
             "reason",
         ],
+    )
+
+
+def batch_from_gold(gold: pd.DataFrame, normalization: FoldNormalization, *, k_min: int = 3) -> StintBatch:
+    """Training-only padded batch, preserving original lap counters and masking quality failures.
+
+    Stints with fewer than k_min usable rows do not enter training. Telemetry knots interpolate only
+    the supplied training stint; this function never includes outer/inner validation circuits or holdout.
+    """
+    if k_min < 3:
+        raise ValueError("training requires k_min >= 3")
+    if not gold.dataset_split.eq("development").all():
+        raise ValueError("holdout rows are forbidden in training data")
+    if (
+        not gold.normalization_test_fold.eq(normalization.test_fold).all()
+        or not gold.phi.eq(normalization.phi).all()
+    ):
+        raise ValueError("Gold does not match the supplied training normalization")
+    selected = gold[
+        gold.circuit_id.isin(normalization.training_circuits)
+        & gold.session_id.isin(normalization.training_events)
+    ]
+    stints = []
+    for _, group in selected.groupby("stint_id", sort=True):
+        ordered = _one_stint(group)
+        clean = ordered[ordered.is_scored_lap.eq(True) & ordered.is_model_input_lap.eq(True)]
+        if len(clean) < k_min:
+            continue
+        first = ordered.iloc[0]
+        compounds = ordered.compound_c.dropna().unique()
+        if first.stint_lap != 1 or len(compounds) != 1 or compounds[0] not in COMPOUNDS:
+            raise ValueError("unsupported compound or missing original stint-start context")
+        q = clean.proxy_q_heat.to_numpy(dtype=float)
+        y = clean.proxy_y.to_numpy(dtype=float)
+        if not np.isfinite(q).all() or not np.isfinite(y).all() or np.any((q < 0) | (q > 1)):
+            raise ValueError("usable training q/y must be finite and q in [0,1]")
+        if pd.isna(first.obs_fresh_tyre):
+            raise ValueError("missing fresh-tire context")
+        context = StintContext(
+            COMPOUNDS.index(compounds[0]),
+            float(first.obs_tyre_life),
+            bool(first.obs_fresh_tyre),
+            float(first.obs_track_temp_c),
+            normalization.context_q_mean(str(first.circuit_id)),
+        )
+        stints.append((ordered, clean, context))
+    if not stints:
+        raise ValueError("no training stints with enough usable original laps")
+    width = max(int(group.stint_lap.max()) for group, _, _ in stints)
+    y = np.zeros((len(stints), width))
+    mask = np.zeros_like(y, dtype=bool)
+    q = np.zeros((len(stints), width + 1))
+    for i, (_, clean, _) in enumerate(stints):
+        positions = clean.stint_lap.to_numpy(dtype=int)
+        y[i, positions - 1] = clean.proxy_y.to_numpy(dtype=float)
+        mask[i, positions - 1] = True
+        q[i] = np.interp(np.arange(width + 1), positions, clean.proxy_q_heat.to_numpy(dtype=float))
+    return StintBatch(
+        compound_idx=jnp.asarray([ctx.compound_idx for _, _, ctx in stints]),
+        ctx=jnp.stack([ctx.features() for _, _, ctx in stints]),
+        tau=jnp.arange(1, width + 1, dtype=float),
+        mask=jnp.asarray(mask),
+        y=jnp.asarray(y),
+        q=jnp.asarray(q),
+        n_laps=jnp.asarray([int(group.stint_lap.max()) for group, _, _ in stints]),
     )

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import asdict, dataclass, replace
 from typing import Any
 
@@ -41,6 +41,7 @@ class EvaluationFold:
     normalization: FoldNormalization
     gold_hash: str
     model_hash: str
+    inner_validation_fold: str | None = None
 
 
 @dataclass(frozen=True)
@@ -190,7 +191,15 @@ def _validate_fold(fold: str, data: EvaluationFold, cfg: ProtocolConfig) -> pd.D
             or not group.split_fold.eq(decisions.circuit_to_fold[circuit]).all()
         ):
             raise ValueError("event/circuit/fold metadata is inconsistent")
-    test = frame.loc[frame.split_fold.eq(fold)].copy()
+    evaluated_fold = fold
+    if data.inner_validation_fold is not None:
+        split = inner_circuit_split(decisions, fold)
+        if data.inner_validation_fold != split.validation_fold:
+            raise ValueError("inner validation fold differs from the declared fixed split")
+        if set(stats.training_circuits) & set(split.validation_circuits):
+            raise ValueError("inner validation circuits entered the normalization fit")
+        evaluated_fold = split.validation_fold
+    test = frame.loc[frame.split_fold.eq(evaluated_fold)].copy()
     if not test.ctx_q_mean_source.eq("global_training_fallback").all():
         raise ValueError("unseen test circuits must use the declared global training context fallback")
     if not test.ctx_circuit_q_mean.eq(stats.training_q_mean).all():
@@ -216,12 +225,14 @@ def _fields(
             "k_min": cfg.decisions.k_min,
             "validation_only": cfg.validation_only,
             "config_status": cfg.decisions.status,
+            "evaluation_stage": "inner_validation" if data.inner_validation_fold else "outer_test",
         },
         "instrument": {
-            "method": "rolling original-lap protocol/v1",
+            "method": "rolling original-lap protocol/v2",
             "gold_hash": data.gold_hash,
             "model_hash": data.model_hash,
             "normalization_hash": data.normalization.training_rows_sha256,
+            "evaluated_fold": data.inner_validation_fold or fold,
         },
     }
 
@@ -242,6 +253,7 @@ def run_protocol(
     cfg: ProtocolConfig,
     *,
     audit: list[OriginAudit],
+    horizons: Sequence[int] | None = None,
 ) -> list[ForecastRecord]:
     """Evaluate prepared development test rows, appending every candidate's decision to explicit audit.
 
@@ -263,6 +275,13 @@ def run_protocol(
         raise ValueError("draft config requires explicit validation_only=True; G0/freeze remain open")
     if not folds:
         raise ValueError("at least one prepared fold is required")
+    evaluated = cfg.decisions.horizons if horizons is None else horizons
+    if (
+        not evaluated
+        or len(set(evaluated)) != len(evaluated)
+        or not set(evaluated) <= set(cfg.decisions.horizons)
+    ):
+        raise ValueError("evaluated horizons must be a unique declared subset")
     if isinstance(forecaster, Mapping):
         if set(forecaster) != set(folds):
             raise ValueError("forecasters must match the fold-specific prepared data")
@@ -277,7 +296,7 @@ def run_protocol(
         if test.empty:
             continue
         groups = {str(key): group for key, group in test.groupby("stint_id", sort=True)}
-        candidates = audit_origins(test, horizons=cfg.decisions.horizons, k_min=cfg.decisions.k_min)
+        candidates = audit_origins(test, horizons=evaluated, k_min=cfg.decisions.k_min)
         for origin in candidates.itertuples(index=False):
             fields = _fields(
                 cfg, fold, folds[fold], origin.session_id, origin.stint_id, origin.t0, origin.horizon
@@ -416,6 +435,7 @@ def score_forecasts(records: list[ForecastRecord]) -> list[MetricRecord]:
         if any(r.conditions != group[0].conditions for r in group):
             raise ValueError("cannot pool forecasts with different protocol conditions")
         conditions = {
+            **group[0].conditions,
             "model": model,
             "phi": phi,
             "horizon_actual_laps": horizon,
