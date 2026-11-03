@@ -26,3 +26,6 @@ wheels/
 
 # Notebook checkpoints
 .ipynb_checkpoints/
+
+# New experiment artifacts stay local; existing tracked records remain in Git.
+/experiments/
