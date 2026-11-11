@@ -1,17 +1,22 @@
 {
-  "builder_sha256": "a25efbc2054ec249528fbb44d623eaeef621168c2d8a4050b36a806c02c2ff07",
+  "builder_sha256": "68f9856a9e44ee28611015f0d80f90522e8e5966ad2ce0f6fb5c2dc3bf81e310",
+  "export_policy": {
+    "formats": [
+      "png",
+      "svg"
+    ],
+    "pdf": "omitted",
+    "png_dpi": 300
+  },
   "model_execution": false,
   "output_sha256": {
-    "01_calibration_overview.pdf": "edd8659bc4323a52a25387aca1e27695c1012ef6ad3f0d2e314948a1eec407ee",
     "01_calibration_overview.png": "857fc81e1dc081c1c8053d72e0920f2ec1b00bf9c9d5b79c49f25308dde154cf",
-    "01_calibration_overview.svg": "a22320d8c01f29ae1b48c86ae75187e2704c770d5389ad9b8f941064fe9c9112",
-    "02_circuit_coverage.pdf": "e75df6a294413d2d6b5e2b6e9712f3066ae48a1b5e3a424953f7e94e2e73b1ee",
+    "01_calibration_overview.svg": "dccd976754c2ebab88a4438ad0e6d37c9f9ca9a7898d518c5fb046be55c9b111",
     "02_circuit_coverage.png": "2bad51d6c4794207f95ee872208b7de19daddc47892d8a4c99cb575d9cf2bd58",
-    "02_circuit_coverage.svg": "963fde4959b939aa35b57d1e275289d9e008f90b6c6f6c0d6ca0b0d7a7696bb7",
-    "03_original_accuracy.pdf": "31db56126e9417e08120dc076e1ff436cd5449cb8c9b74f4741b8eaff33ed4a2",
+    "02_circuit_coverage.svg": "2e94710672bcef453af37b6fd2c0b8fc66586dfb717e585c487b268b8ba76c37",
     "03_original_accuracy.png": "ebb789740c079cfc099f832f5fbd4eb816ce0cc2aba973a92b89a0fdcf3b284f",
-    "03_original_accuracy.svg": "a16e8199389de3595f0dfe078bf22ce17df80d83fbbfa221159fff3d336363fc",
-    "README.md": "6ea8e5d0439e68ade543aa75abdcbec58c2dbcfc6a36a9a47cc2bf6e2175cfb0",
+    "03_original_accuracy.svg": "d4374688645ac5460486243de591ad083c3e6c382bf5039c3cd708c6e0b0fb88",
+    "README.md": "63b37610754c8e4cfbc444787a6d7b48fc04f888d8f019b2e2ff2eac9b72c75d",
     "budget.json": "b74b0cca8c10996e521838ac10caa40da6d66c36eecad53108e09d5f8fe6b95f",
     "chart_data.json": "9f13a5ce99238ac0eb7a450ca5738e7b58222eba9251f1254c802f331d17395c"
   },
@@ -24,7 +29,7 @@
     "data/colab_imports/t13_m2_f3_mid_run01_verification_audit.json": "53298f81d14b7887110ab4697b94e9edee47edb2569408e3750c35eebdc622fe"
   },
   "style": "Independent Matplotlib implementation; no upstream code copied",
-  "style_adaptations": "Scoped rcParams, 15pt compact-panel text, wider panels, explicit sample/missing labels and shared 90%-centered diverging coverage scale",
+  "style_adaptations": "Scoped rcParams, 15pt compact-panel text, wider panels, explicit sample/missing labels and shared 90%-centered diverging coverage scale; PNG/SVG only per user export preference",
   "style_guides_read": [
     "https://github.com/ChenLiu-1996/figures4papers/blob/main/scientific-figure-making/SKILL.md",
     "https://github.com/ChenLiu-1996/figures4papers/blob/main/scientific-figure-making/references/design-theory.md",

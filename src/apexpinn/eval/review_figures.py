@@ -21,6 +21,7 @@ STYLE_GUIDES = [
     )
 ]
 HORIZONS = (1, 3, 5, 10)
+EXPORT_FORMATS = ("png", "svg")
 BLUE, GRAY = "#0F4D92", "#767676"
 
 
@@ -120,7 +121,7 @@ def _finish(fig, path, title, subtitle, note):
     fig.text(0.07, 0.915, subtitle, fontsize=12, color="#4D4D4D")
     fig.text(0.07, 0.025, note, fontsize=10, color="#4D4D4D", va="bottom")
     fig.subplots_adjust(left=0.075, right=0.97, bottom=0.20, top=0.80, wspace=0.35)
-    for suffix in ("png", "pdf", "svg"):
+    for suffix in EXPORT_FORMATS:
         fig.savefig(path.with_suffix("." + suffix), dpi=300, facecolor="white")
 
 
@@ -225,7 +226,7 @@ def plot_circuits(plt, data, out):
     fig.subplots_adjust(left=0.14, right=0.88, wspace=0.48)
     cax = fig.add_axes((0.91, 0.26, 0.015, 0.48))
     fig.colorbar(image, cax=cax, ticks=[80, 90, 100], label="Observed coverage (%)")
-    for suffix in ("png", "pdf", "svg"):
+    for suffix in EXPORT_FORMATS:
         fig.savefig((out / "02_circuit_coverage").with_suffix("." + suffix), dpi=300, facecolor="white")
     plt.close(fig)
 
@@ -299,7 +300,7 @@ def plot_accuracy(plt, data, out):
     fig.subplots_adjust(left=0.14, top=0.76, wspace=0.38)
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(handles, labels, ncols=5, fontsize=11, loc="upper left", bbox_to_anchor=(0.14, 0.89))
-    for suffix in ("png", "pdf", "svg"):
+    for suffix in EXPORT_FORMATS:
         fig.savefig((out / "03_original_accuracy").with_suffix("." + suffix), dpi=300, facecolor="white")
     plt.close(fig)
 
@@ -327,7 +328,6 @@ def build_review_figures(root: Path, out: Path) -> dict:
             "axes.linewidth": 2,
             "legend.frameon": False,
             "svg.fonttype": "none",
-            "pdf.fonttype": 42,
         }
     ):
         plot_calibration(plt, data, out)
@@ -357,7 +357,7 @@ def build_review_figures(root: Path, out: Path) -> dict:
         "2. Circuit coverage: each percentage has its endpoint count; Montreal is unavailable.",
         "3. Original v1 accuracy: M2/B0-B3 across F1-F3, with unfavorable M1/F1 retained separately.",
         "",
-        "Exports: PNG (300 dpi), PDF and editable-text SVG. Different experiments are not pooled.",
+        "Exports: PNG (300 dpi) and editable-text SVG. Different experiments are not pooled.",
         "No new confidence intervals or significance claims. See chart_data.json and sources.json.",
         "",
         "## Budget, not a runtime guarantee",
@@ -394,7 +394,9 @@ def build_review_figures(root: Path, out: Path) -> dict:
             "style_reference": REFERENCE,
             "style_guides_read": STYLE_GUIDES,
             "style_adaptations": "Scoped rcParams, 15pt compact-panel text, wider panels, "
-            "explicit sample/missing labels and shared 90%-centered diverging coverage scale",
+            "explicit sample/missing labels and shared 90%-centered diverging coverage scale; "
+            "PNG/SVG only per user export preference",
+            "export_policy": {"formats": list(EXPORT_FORMATS), "png_dpi": 300, "pdf": "omitted"},
             "style": "Independent Matplotlib implementation; no upstream code copied",
             "builder_sha256": digest(Path(__file__)),
             "model_execution": False,
@@ -404,7 +406,7 @@ def build_review_figures(root: Path, out: Path) -> dict:
     return {
         "status": "FIGURES_RENDERED",
         "figures": 3,
-        "formats": ["png", "pdf", "svg"],
+        "formats": list(EXPORT_FORMATS),
         "out": str(out),
         "model_execution": False,
         "budget": budget,

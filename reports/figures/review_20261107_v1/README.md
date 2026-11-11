@@ -8,7 +8,7 @@ Generated from verified saved records. No training, inference or new interval es
 2. Circuit coverage: each percentage has its endpoint count; Montreal is unavailable.
 3. Original v1 accuracy: M2/B0-B3 across F1-F3, with unfavorable M1/F1 retained separately.
 
-Exports: PNG (300 dpi), PDF and editable-text SVG. Different experiments are not pooled.
+Exports: PNG (300 dpi) and editable-text SVG. Different experiments are not pooled.
 No new confidence intervals or significance claims. See chart_data.json and sources.json.
 
 ## Budget, not a runtime guarantee
