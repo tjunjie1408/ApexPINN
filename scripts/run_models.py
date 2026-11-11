@@ -1,4 +1,4 @@
-"""T13 Colab runner. --plan and --report-only never fit; execution requires a verified remote GPU."""
+"""T13 remote runner. --plan and --report-only never fit; execution requires a verified remote GPU."""
 
 from __future__ import annotations
 
@@ -21,6 +21,8 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--plan", action="store_true")
     parser.add_argument("--report-only", action="store_true")
+    parser.add_argument("--recovered-review", action="append", type=Path, default=[])
+    parser.add_argument("--report-out", type=Path)
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args(argv)
     import jax
@@ -28,7 +30,7 @@ def main(argv: list[str] | None = None) -> int:
     jax.config.update("jax_enable_x64", True)
     from apexpinn.cloud.artifacts import digest, write_json
     from apexpinn.contracts import load_decisions
-    from apexpinn.train.cloud_checkpoint import require_colab_gpu
+    from apexpinn.train.cloud_checkpoint import require_remote_gpu
     from apexpinn.train.physics_study import VARIANTS, read_method
 
     method, decisions = read_method(args.method), load_decisions(args.config)
@@ -61,7 +63,7 @@ def main(argv: list[str] | None = None) -> int:
                     "tuning_trials": 20 * sum(v == "main" for _, _, _, v in jobs),
                     "calibration_fits": 5 * len(jobs),
                     "final_fits": 5 * len(jobs),
-                    "execution": "user-launched Colab GPU only",
+                    "execution": method["training_location"],
                     "resume": "same output path and unchanged identity",
                 },
                 indent=2,
@@ -71,8 +73,21 @@ def main(argv: list[str] | None = None) -> int:
     if args.report_only:
         from apexpinn.eval.physics_report import collect_results
 
-        return collect_results(args.out)
-    require_colab_gpu()
+        return collect_results(
+            args.out, recovered_reviews=tuple(args.recovered_review), output=args.report_out
+        )
+    require_remote_gpu()
+    import os
+
+    expected_runtime = {
+        "apexpinn.t13_cloud/v1": "colab",
+        "apexpinn.t13_sagemaker/v1": "sagemaker",
+        "apexpinn.t13_studio/v1": "studio",
+        "apexpinn.t13_ec2/v1": "ec2",
+        "apexpinn.t13_kaggle/v1": "kaggle",
+    }[method["method_id"]]
+    if os.environ.get("APEXPINN_REMOTE_RUNTIME") != expected_runtime:
+        raise ValueError("declared method and actual remote runtime differ")
     if args.self_test:
         from apexpinn.train.cloud_selftest import checkpoint_selftest
 
@@ -170,7 +185,7 @@ def main(argv: list[str] | None = None) -> int:
     from apexpinn.eval.physics_report import collect_results
 
     # A shard remains a valid completed shard; completeness is reported without claiming G2.
-    collect_results(args.out)
+    collect_results(args.out, recovered_reviews=tuple(args.recovered_review), output=args.report_out)
     return 0
 
 

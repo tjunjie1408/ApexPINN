@@ -54,7 +54,13 @@ def job_diagnostics(ensemble, gold, records, method) -> dict:
     checks = []
     for stint, origin in representatives.items():
         group = lookup[stint]
-        history, _, _ = slice_at_origin(group, origin.t0, 5)
+        history, _, _ = slice_at_origin(
+            group,
+            origin.t0,
+            5,
+            circuit_q_mean=float(group.ctx_circuit_q_mean.iloc[0]),
+            k_min=origin.conditions["k_min"],
+        )
         grid = np.linspace(0, origin.t0 + 5, method["diagnostics"]["grid_points"])
         clean = group[group.is_scored_lap.eq(True)].sort_values("stint_lap")
         minimum = clean.loc[clean.proxy_y.idxmin()]
@@ -134,9 +140,59 @@ def job_diagnostics(ensemble, gold, records, method) -> dict:
     }
 
 
-def collect_results(root: Path) -> int:
+def collect_results(
+    root: Path, *, recovered_reviews: tuple[Path, ...] = (), output: Path | None = None
+) -> int:
     declaration = json.loads((root / "declaration.json").read_text())
     jobs = [json.loads(p.read_text()) for p in sorted((root / "jobs").glob("*/job.json"))]
+    recovered = []
+    for path in recovered_reviews:
+        record = json.loads(path.read_text())
+        if (
+            record.get("schema") != "apexpinn.t13_recovery_report/v1"
+            or record.get("status") != "RECOVERED_EVALUATION_COMPLETE"
+            or record["provenance"]["method_sha256"] != declaration["identity"]["method_sha256"]
+            or record["provenance"].get("config_sha256") != declaration["identity"]["config_sha256"]
+        ):
+            raise ValueError("recovered review is incomplete or has a different method/config")
+        sources = record["provenance"].get("numerical_source_sha256", {})
+        if not sources or any(
+            declaration["identity"]["source_sha256"].get(name) != sha for name, sha in sources.items()
+        ):
+            raise ValueError("recovered evaluation used different numerical source")
+        scope = record["scope"]
+        phi_label = {0.03: "low", 0.06: "mid", 0.09: "high"}[scope["phi"]]
+        key = (scope["model"], scope["fold"], phi_label, scope["variant"])
+        if (
+            record["job"] != "_".join(key)
+            or record["provenance"]["gold_sha256"]
+            != (declaration["identity"]["gold_sha256"][f"{phi_label}/{scope['fold']}"])
+        ):
+            raise ValueError("recovered review population/Gold identity differs")
+        if any(row["conditions"]["model"] != scope["model"] for row in record["metrics"]):
+            raise ValueError("recovered metric model differs")
+        forecasts_path = path.parent / "forecasts.jsonl"
+        if digest(forecasts_path) != record["provenance"]["forecast_sha256"]:
+            raise ValueError("recovered forecast file differs from its review")
+        counts = record["execution"]["recorded_stage_timings"]
+        tuning = counts["tuning"]["status_counts"]
+        if any(
+            counts[name]["status_counts"] != {"finished": n} for name, n in (("calibration", 5), ("final", 5))
+        ) or (
+            set(tuning) - {"finished", "failed"} or sum(tuning.values()) != 20 or not tuning.get("finished")
+        ):
+            raise ValueError("recovered evaluation has incomplete fit budgets")
+        if not record.get("s4_recovery", {}).get("diagnostics", {}).get("representative_stints"):
+            raise ValueError("recovered physics diagnostics are missing")
+        recovered.append(
+            {
+                "key": key,
+                "source": str(path),
+                "sha256": digest(path),
+                "forecasts": str(forecasts_path),
+                "review": record,
+            }
+        )
     required = {
         (m, f"F{fold}", p, v)
         for m in ("M1", "M2")
@@ -154,6 +210,10 @@ def collect_results(root: Path) -> int:
         )
         for j in jobs
     }
+    for record in recovered:
+        if record["key"] not in required or record["key"] in actual:
+            raise ValueError("recovered job is unsupported or duplicates an existing job")
+        actual.add(record["key"])
     gaps = [str(k) for k in sorted(required - actual)]
     for job in jobs:
         if job["run_identity"] != declaration["identity"]:
@@ -169,13 +229,20 @@ def collect_results(root: Path) -> int:
         for file, sha in job["files"].items():
             if digest(root / "jobs" / name / file) != sha:
                 raise ValueError("job forecast/audit hash mismatch")
-    metrics, comparisons = [], []
+    metrics = [metric for job in jobs for metric in job["metrics"]]
+    metrics += [metric for item in recovered for metric in item["review"]["metrics"]]
+    comparisons = []
     if not gaps:
+        metrics = []
         baseline_review = json.loads(Path("experiments/g1_real_20261103/review.json").read_text())
         for label in ("low", "mid", "high"):
             forecasts = []
             for path in sorted((root / "jobs").glob(f"*_{label}_*/forecasts.jsonl")):
                 forecasts.extend(ForecastRecord(**json.loads(line)) for line in path.open())
+            for item in recovered:
+                if item["key"][2] == label:
+                    with Path(item["forecasts"]).open() as stream:
+                        forecasts.extend(ForecastRecord(**json.loads(line)) for line in stream)
             baseline = Path("data/cloud_baselines") / f"phi_{label}.parquet"
             if not baseline.exists():
                 gaps.append(f"missing baseline forecasts: {baseline}")
@@ -228,7 +295,12 @@ def collect_results(root: Path) -> int:
             "G2": "NOT ESTABLISHED: remote restart evidence, H2 and scientific review remain separate",
             "P2": "USER DECISION PENDING",
         },
-        "population": {"completed_jobs": len(jobs), "required_jobs": len(required)},
+        "population": {
+            "completed_jobs": len(actual),
+            "recovered_jobs": len(recovered),
+            "required_jobs": len(required),
+        },
+        "recovered_evaluations": recovered,
         "instrument": {"declaration_sha256": digest(root / "declaration.json")},
         "gaps": gaps,
         "metrics": metrics,
@@ -238,13 +310,17 @@ def collect_results(root: Path) -> int:
             "Cloud restart oracle and complete result review must be checked before G2 acceptance",
         ],
     }
-    write_json(root / "review.json", review)
+    destination = root if output is None else output
+    if output is not None:
+        destination.mkdir(parents=True, exist_ok=False)
+    write_json(destination / "review.json", review)
     lines = [
         "# Physics evaluation report",
         "",
         "Generated by apexpinn.eval.physics_report; do not edit by hand.",
         "",
-        f"Source: `{root / 'review.json'}`. Observed completed jobs: {len(jobs)}/{len(required)}.",
+        f"Source: `{destination / 'review.json'}`. Observed completed jobs: {len(actual)}/{len(required)}.",
+        f"Recovered evaluations included: {len(recovered)}. Source receipts are in review.json.",
         f"G2: {review['conditions']['G2']}. P2 remains the user's decision.",
         "",
         "| Model | Fold | Phi | Variant | Trials | Calibration fits | Final fits |",
@@ -256,6 +332,11 @@ def collect_results(root: Path) -> int:
             f"| {c['model']} | {j['population']['fold']} | {c['phi']} | {c['variant']} | "
             f"{len(j['trials'])} | {len(j['calibration_fits'])} | {len(j['final_fits'])} |"
         )
+    for item in recovered:
+        model, fold, phi_label, variant = item["key"]
+        counts = item["review"]["execution"]["recorded_stage_timings"]
+        n = [sum(counts[stage]["status_counts"].values()) for stage in ("tuning", "calibration", "final")]
+        lines.append(f"| {model} (recovered) | {fold} | {phi_label} | {variant} | {n[0]} | {n[1]} | {n[2]} |")
     lines += ["", "| Model | Phi | Horizon | Metric | Value |", "| :--- | ---: | ---: | :--- | ---: |"]
     for m in metrics:
         c = m["conditions"]
@@ -302,5 +383,5 @@ def collect_results(root: Path) -> int:
         "",
     ]
     lines += [f"- Missing/incomparable: {g}" for g in gaps]
-    (root / "eval_physics.md").write_text("\n".join(lines), encoding="utf-8")
+    (destination / "eval_physics.md").write_text("\n".join(lines), encoding="utf-8")
     return int(bool(gaps))

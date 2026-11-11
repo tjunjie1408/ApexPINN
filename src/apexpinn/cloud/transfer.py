@@ -12,7 +12,20 @@ from pathlib import Path, PurePosixPath
 
 from apexpinn.cloud.artifacts import digest, write_json
 
+# Preserve legacy input reads; apply the stricter local-document boundary to new exports.
 PRIVATE_DOCS = {"PROJECT.md", "PRD.md", "PLAN.md", "GLOSSARY.md"}
+PRIVATE_EXPORT_DOCS = {
+    "agents.md",
+    "record.md",
+    "project.md",
+    "prd.md",
+    "plan.md",
+    "glossary.md",
+    "experimental_blueprint.md",
+    "experiment_blueprint.md",
+    "decisions_review.md",
+    "decision_review.md",
+}
 
 
 def safe_name(name: str) -> str:
@@ -51,6 +64,8 @@ def pack(root: Path, paths: list[Path], output: Path, *, kind: str) -> dict:
         if path.is_symlink() or not path.is_file():
             raise ValueError(f"not an ordinary artifact file: {path}")
         name = safe_name(path.resolve().relative_to(root).as_posix())
+        if Path(name).name.casefold() in PRIVATE_EXPORT_DOCS:
+            raise ValueError(f"private local document cannot be exported: {name}")
         if name.casefold() in {p.casefold() for p in members}:
             raise ValueError("duplicate archive member")
         members[name] = {"sha256": digest(path), "bytes": path.stat().st_size}
@@ -105,7 +120,7 @@ def unpack(archive_path: Path, destination: Path, *, expected_sha256: str, kind:
 
 
 def input_paths(root: Path) -> list[Path]:
-    paths = [root / n for n in ("pyproject.toml", "uv.lock", "README.md", "AGENTS.md")]
+    paths = [root / n for n in ("pyproject.toml", "uv.lock", "README.md")]
     paths += [root / "notebooks/colab/README.md"]
     for directory, pattern in (
         ("src", "*.py"),

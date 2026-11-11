@@ -1,4 +1,4 @@
-"""User-executed Colab-only restart oracle. Never invoked by local tests."""
+"""User-executed remote-GPU restart oracle. Never invoked by local tests."""
 
 from __future__ import annotations
 
@@ -14,12 +14,12 @@ from apexpinn.cloud.artifacts import digest, write_json
 from apexpinn.models.ode_model import ODEModel
 from apexpinn.models.pinn import PINN
 from apexpinn.models.stints import StintBatch, ctx_features
-from apexpinn.train.cloud_checkpoint import require_colab_gpu, train_remote
+from apexpinn.train.cloud_checkpoint import require_remote_gpu, train_remote
 from apexpinn.train.trainer import TrainConfig
 
 
 def checkpoint_selftest(out: Path) -> None:
-    require_colab_gpu()
+    require_remote_gpu()
     if (out / "selftest.json").exists():
         raise FileExistsError("successful self-test receipt exists; inspect it instead of rerunning")
     sources = {

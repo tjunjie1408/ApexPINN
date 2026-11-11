@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import time
 from dataclasses import asdict, dataclass, replace
+from pathlib import Path
 
 import numpy as np
 
@@ -89,6 +90,7 @@ def run_prepared(
     *,
     audit: list[OriginAudit],
     horizons: tuple[int, ...] | None = None,
+    checkpoint_dir: Path | None = None,
 ) -> list[ForecastRecord]:
     """Replay identical inputs/endpoint labels; optional declared horizon subset is for inner tuning."""
     if _identity(data, cfg) != prepared.identity:
@@ -109,6 +111,23 @@ def run_prepared(
         if origin.eligible:
             key = (origin.fold, origin.event_id, origin.stint_id, origin.t0, origin.horizon, cfg.phi)
             template, history, scenario = prepared.inputs[key]
+            cached = None
+            cache_path = None
+            if checkpoint_dir is not None:
+                from apexpinn.cloud.artifacts import identity
+                from apexpinn.cloud.session import check_session
+
+                check_session()
+                cache_key = identity([key, data.model_hash, prepared.identity, cfg.model_name])
+                cache_path = checkpoint_dir / f"{cache_key}.json"
+                if cache_path.exists():
+                    cached = json.loads(cache_path.read_text())
+                    if cached["key"] != cache_key or identity(cached["record"]) != cached["sha256"]:
+                        raise ValueError("forecast checkpoint identity/payload mismatch")
+            if cached is not None:
+                records.append(ForecastRecord(**cached["record"]))
+                audit.append(replace(origin, conditions=conditions, instrument=instrument))
+                continue
             output = forecaster.forecast(history, origin.horizon, scenario)
             if not isinstance(output, PredictionOutput) or output.mean_s.shape != (origin.horizon,):
                 raise ValueError("forecaster returned an invalid PredictionOutput/horizon")
@@ -124,5 +143,10 @@ def run_prepared(
                     instrument=instrument,
                 )
             )
+            if cache_path is not None:
+                from apexpinn.cloud.artifacts import write_json
+
+                row = asdict(records[-1])
+                write_json(cache_path, {"key": cache_key, "record": row, "sha256": identity(row)})
         audit.append(replace(origin, conditions=conditions, instrument=instrument))
     return records

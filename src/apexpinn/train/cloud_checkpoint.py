@@ -17,6 +17,7 @@ import jax.numpy as jnp
 import numpy as np
 
 from apexpinn.cloud.artifacts import digest, identity, write_json
+from apexpinn.cloud.session import check_session, pause_due
 from apexpinn.train import trainer as core
 
 
@@ -34,6 +35,41 @@ def require_colab_gpu() -> None:
         raise RuntimeError("Training is Colab-only. Open notebooks/colab/train_folds.ipynb on Colab.")
     if not jax.config.x64_enabled or jax.default_backend() != "gpu":
         raise RuntimeError("A remote Colab GPU and jax_enable_x64=True are required; no CPU fallback.")
+
+
+def require_remote_gpu() -> None:
+    """Keep Colab checks and validate explicitly supported remote GPU contexts."""
+    runtime = os.environ.get("APEXPINN_REMOTE_RUNTIME")
+    if runtime not in {"sagemaker", "studio", "ec2", "kaggle"}:
+        require_colab_gpu()
+        return
+    from apexpinn.cloud.runtime import (
+        require_ec2_environment,
+        require_kaggle_environment,
+        require_sagemaker_environment,
+        require_studio_environment,
+    )
+
+    if runtime == "kaggle":
+        require_kaggle_environment()
+    elif runtime == "ec2":
+        require_ec2_environment()
+    elif runtime == "studio":
+        require_studio_environment()
+    else:
+        require_sagemaker_environment()
+    devices = jax.devices()
+    if (
+        platform.python_version_tuple()[:2] != ("3", "12")
+        or not jax.config.x64_enabled
+        or jax.default_backend() != "gpu"
+        or len(devices) != 1
+        or ("T4" if runtime == "kaggle" else "L4") not in devices[0].device_kind
+    ):
+        device_kind = "T4" if runtime == "kaggle" else "L4"
+        raise RuntimeError(
+            f"Remote execution requires Python 3.12, one {device_kind} GPU and float64; no CPU fallback"
+        )
 
 
 def save_state(folder: Path, tree: Any, metadata: dict) -> Path:
@@ -93,7 +129,8 @@ def train_remote(
     stop_after: int | None = None,
 ) -> tuple[Any, dict]:
     """Use the original update/normalization/curriculum functions; no fitting occurs before the guard."""
-    require_colab_gpu()
+    require_remote_gpu()
+    check_session()
     cfg, weights = model.train_cfg, model.weights
     if checkpoint_every < 1 or weights.state != 0 or batch.h_true is not None:
         raise ValueError("real-data cloud training requires positive checkpoint interval and no true states")
@@ -171,7 +208,8 @@ def train_remote(
         if step % cfg.log_every == 0 or step == cfg.n_steps - 1:
             metadata["trace"][-1]["objective_before_update"] = float(value)
             metadata["trace"][-1]["curriculum"] = float(core.curriculum_scale(step, cfg.n_warm, cfg.n_ramp))
-        if (step + 1) % checkpoint_every == 0 or step + 1 == end:
+        paused = pause_due()
+        if (step + 1) % checkpoint_every == 0 or step + 1 == end or paused:
             if not np.isfinite(float(jax.block_until_ready(value))):
                 raise ValueError("nonfinite training objective; this attempt counts as failed")
             metadata.update(step=step + 1, recorded_elapsed_s=prior_elapsed + time.perf_counter() - started)
@@ -184,6 +222,9 @@ def train_remote(
                     "recorded_elapsed_s": metadata["recorded_elapsed_s"],
                 },
             )
+            print(json.dumps({"fit": str(folder), "step": step + 1, "total": cfg.n_steps}), flush=True)
+            if paused:
+                check_session()
     fitted, b_train = eqx.combine(params, static)
     if end == cfg.n_steps:
         raw, _ = core._evaluate(params, static, batch, k_colloc, jnp.asarray(end), spec)

@@ -14,7 +14,7 @@ import numpy as np
 import pytest
 
 from apexpinn.cloud.artifacts import digest
-from apexpinn.cloud.transfer import pack, safe_name, unpack
+from apexpinn.cloud.transfer import input_paths, pack, safe_name, unpack
 from apexpinn.contracts import PredictionOutput, load_decisions
 from apexpinn.models.ensemble import PhysicsEnsemble, PhysicsMember
 from apexpinn.models.stints import Scenario, StintContext, StintHistory
@@ -44,6 +44,54 @@ def test_bundle_round_trip_checks_every_payload_and_refuses_overwrite(tmp_path):
 def test_transport_rejects_paths_and_private_planning_documents(name):
     with pytest.raises(ValueError):
         safe_name(name)
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "AGENTS.md",
+        "record.md",
+        "EXPERIMENTAL_BLUEPRINT.md",
+        "experiment_blueprint.md",
+        "DECISIONS_REVIEW.md",
+        "decision_review.md",
+        "nested/agents.MD",
+    ],
+)
+def test_new_exports_reject_private_local_documents(tmp_path, name):
+    source = tmp_path / name
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text("private local instructions")
+    output = tmp_path / "must-not-exist.zip"
+    with pytest.raises(ValueError, match="private"):
+        pack(tmp_path, [source], output, kind="input")
+    assert not output.exists()
+
+
+def test_default_input_allowlist_excludes_local_instructions(tmp_path):
+    (tmp_path / "AGENTS.md").write_text("local only")
+    assert tmp_path / "AGENTS.md" not in input_paths(tmp_path)
+
+
+def test_verified_legacy_input_can_still_be_imported_without_republishing_private_docs(tmp_path):
+    import hashlib
+
+    # Historical, hash-pinned cloud bundles included AGENTS.md. Preserve read compatibility.
+    payload = b"historical local instructions"
+    manifest = {
+        "schema": "apexpinn.cloud_bundle/v1",
+        "kind": "input",
+        "files": {"AGENTS.md": {"sha256": hashlib.sha256(payload).hexdigest(), "bytes": len(payload)}},
+    }
+    archive = tmp_path / "legacy.zip"
+    with zipfile.ZipFile(archive, "x") as stream:
+        stream.writestr("AGENTS.md", payload)
+        stream.writestr("bundle_manifest.json", json.dumps(manifest))
+    destination = tmp_path / "legacy"
+    unpack(archive, destination, expected_sha256=digest(archive), kind="input")
+    assert (destination / "AGENTS.md").read_bytes() == payload
+    with pytest.raises(ValueError, match="private"):
+        pack(destination, [destination / "AGENTS.md"], tmp_path / "new.zip", kind="input")
 
 
 def test_malicious_archive_is_not_partially_published(tmp_path):
@@ -173,7 +221,7 @@ def test_fake_fit_orchestration_counts_trials_calibration_and_final_separately(t
         raise AssertionError("local optimization must never execute")
 
     monkeypatch.setattr(trainer, "_update", forbidden)
-    monkeypatch.setattr(study, "require_colab_gpu", lambda: None)
+    monkeypatch.setattr(study, "require_remote_gpu", lambda: None)
     attempts = []
 
     def fake_fit(method, name, parameters, variant, seed, batch, folder, run_id):

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import time
 from dataclasses import asdict, replace
 from pathlib import Path
@@ -15,6 +16,7 @@ import pandas as pd
 import yaml
 
 from apexpinn.cloud.artifacts import digest, identity, write_json
+from apexpinn.cloud.session import check_session
 from apexpinn.contracts import Decisions
 from apexpinn.data.gold import build_gold, fit_normalization
 from apexpinn.data.guards import batch_from_gold
@@ -32,7 +34,7 @@ from apexpinn.models.ode_model import ODEModel
 from apexpinn.models.pinn import PINN
 from apexpinn.physics.identifiability import sample_prior_physics
 from apexpinn.train.baseline_study import frame_digest
-from apexpinn.train.cloud_checkpoint import CheckpointError, require_colab_gpu, train_remote, tree_digest
+from apexpinn.train.cloud_checkpoint import CheckpointError, require_remote_gpu, train_remote, tree_digest
 from apexpinn.train.run_meta import run_metadata
 from apexpinn.train.trainer import LossWeights, TrainConfig
 
@@ -108,7 +110,8 @@ def fit_once(
     method: dict, name: str, parameters: dict, variant: str, seed: int, batch, folder: Path, run_id: dict
 ):
     """Resume only this fit's full state; failed/completed slots are immutable."""
-    require_colab_gpu()
+    require_remote_gpu()
+    check_session()
     template = make_model(method, name, parameters, variant, seed)
     expected = {
         **run_id,
@@ -185,6 +188,7 @@ def save_jsonl(path: Path, rows: list) -> None:
 
 
 def evaluate_member(model, gold, stats, prepared, cfg, constant_q):
+    check_session()
     member = PhysicsMember(model, constant_q)
     data = EvaluationFold(gold, stats, frame_digest(gold), member.state_digest(), prepared[0])
     return run_prepared(member, data, cfg, prepared[1], audit=[], horizons=(5,))
@@ -201,7 +205,7 @@ def run_job(
     variant: str,
     run_id: dict,
 ) -> dict:
-    require_colab_gpu()
+    require_remote_gpu()
     job = root / "jobs" / f"{name}_{fold}_{phi_label}_{variant}"
     result_path = job / "job.json"
     if result_path.exists():
@@ -352,12 +356,23 @@ def run_job(
     data = EvaluationFold(outer_gold, outer_stats, frame_digest(outer_gold), ensemble.state_digest())
     plan = prepare_evaluation(fold, replace(data, model_hash="input-preparation"), cfg)
     audit = []
-    records = run_prepared(ensemble, data, cfg, plan, audit=audit)
+    check_session()
+    records = run_prepared(
+        ensemble,
+        data,
+        cfg,
+        plan,
+        audit=audit,
+        checkpoint_dir=job / "forecast_checkpoints"
+        if os.environ.get("APEXPINN_REMOTE_RUNTIME") == "kaggle"
+        else None,
+    )
     metrics = score_forecasts(records)
     save_jsonl(job / "forecasts.jsonl", records)
     save_jsonl(job / "origin_audit.jsonl", audit)
     from apexpinn.eval.physics_report import job_diagnostics
 
+    check_session()
     diagnostics = job_diagnostics(ensemble, outer_gold, records, method)
     result = {
         "schema": "apexpinn.t13_job/v1",
@@ -404,12 +419,18 @@ def run_job(
 def read_method(path: Path) -> dict:
     method = yaml.safe_load(path.read_text())
     if (
-        method["method_id"] != "apexpinn.t13_cloud/v1"
+        (method["method_id"], method["training_location"])
+        not in (
+            ("apexpinn.t13_cloud/v1", "colab_gpu_only"),
+            ("apexpinn.t13_sagemaker/v1", "sagemaker_l4_training_job_only"),
+            ("apexpinn.t13_studio/v1", "sagemaker_studio_l4_only"),
+            ("apexpinn.t13_ec2/v1", "ec2_l4_only"),
+            ("apexpinn.t13_kaggle/v1", "kaggle_single_t4_only"),
+        )
         or method["ensemble_members"] != 5
         or method["tuning_trials"] != 20
         or method["horizons"] != [1, 3, 5, 10]
         or method["primary_horizon"] != 5
-        or method["training_location"] != "colab_gpu_only"
         or method["float64"] is not True
         or method["uncertainty"] != "exact_equal_weight_Gaussian_mixture_no_maximum_noise_floor"
     ):

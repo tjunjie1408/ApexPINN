@@ -158,7 +158,10 @@ between the last checkpoint and interruption is reported as unknown, rather than
 
 Keep this notebook open according to Colab's usage terms. Session lifetime, GPU availability and memory
 are not guaranteed. If interrupted, repeat setup and rerun with the same unchanged identity.""")
-    code("""subprocess.run(command, cwd=WORKSPACE, check=True)
+    code("""LOG_ROOT = DRIVE_ROOT / 'logs' / RUN_ID / 'training'
+subprocess.run(
+    [str(PYTHON), '-m', 'apexpinn.cloud.process', '--cwd', str(WORKSPACE),
+     '--logs', str(LOG_ROOT), '--', *command], check=True)
 """)
     markdown("""## 8. Read saved status and export results
 
