@@ -1,0 +1,91 @@
+#!/bin/bash
+set -euo pipefail
+umask 077
+export AWS_DEFAULT_REGION=ap-southeast-2
+export AWS_RETRY_MODE=standard
+export AWS_MAX_ATTEMPTS=10
+mkdir -p /opt/apexpinn /var/log/journal
+exec > >(tee -a /var/log/apexpinn-bootstrap.log) 2>&1
+
+finish() {
+  code=$?
+  trap - EXIT
+  printf 'Bootstrap exit code: %s. Training NOT RUN.\n' "$code"
+  aws s3 cp /var/log/apexpinn-bootstrap.log \
+    s3://apexpinn-m2-f6-985882743884-ap-southeast-2/ec2-runs/m2-f6-mid-v1/bootstrap/latest.log \
+    --sse AES256 || true
+  shutdown -h now
+}
+trap finish EXIT
+
+cat >/etc/systemd/system/apexpinn-poweroff.service <<'UNIT'
+[Unit]
+Description=Stop the ApexPINN EC2 host
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/shutdown -h now
+UNIT
+cat >/etc/systemd/system/apexpinn-maximum-boot.timer <<'UNIT'
+[Unit]
+Description=Stop EC2 after a maximum boot interval
+[Timer]
+OnBootSec=26h
+Unit=apexpinn-poweroff.service
+[Install]
+WantedBy=timers.target
+UNIT
+systemctl daemon-reload
+systemctl enable --now apexpinn-maximum-boot.timer
+
+test "$(findmnt -n -o TARGET -T /opt/apexpinn)" = /
+command -v aws
+systemctl enable --now snap.amazon-ssm-agent.amazon-ssm-agent.service || systemctl enable --now amazon-ssm-agent
+apt-get update -qq
+DEBIAN_FRONTEND=noninteractive apt-get install -y python3-venv libgomp1
+aws s3 cp 's3://apexpinn-m2-f6-985882743884-ap-southeast-2/${control_key}' /opt/apexpinn/control.zip
+echo '${control_sha256}  /opt/apexpinn/control.zip' | sha256sum -c -
+python3 - <<'PY'
+import hashlib, json, pathlib, zipfile
+root = pathlib.Path('/opt/apexpinn/handoff')
+root.mkdir(exist_ok=True)
+with zipfile.ZipFile('/opt/apexpinn/control.zip') as z:
+    manifest = json.loads(z.read('bundle_manifest.json'))['files']
+    assert set(z.namelist()) == set(manifest) | {'bundle_manifest.json'}
+    for name, record in manifest.items():
+        path = pathlib.PurePosixPath(name)
+        assert not path.is_absolute() and all(p not in ('.', '..') for p in name.split('/'))
+        data = z.read(name)
+        assert len(data) == record['bytes'] and hashlib.sha256(data).hexdigest() == record['sha256']
+        target = root / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        assert not target.exists() or target.read_bytes() == data
+        target.write_bytes(data)
+PY
+python3 -m venv /opt/apexpinn/controlenv
+/opt/apexpinn/controlenv/bin/pip install --disable-pip-version-check -r /opt/apexpinn/handoff/requirements-control.txt
+
+cat >/etc/systemd/system/apexpinn-train.service <<'UNIT'
+[Unit]
+Description=ApexPINN user-launched M2 F6 training
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/opt/apexpinn/setup.json
+[Service]
+Type=simple
+Environment=APEXPINN_REMOTE_RUNTIME=ec2
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONPATH=/opt/apexpinn/handoff/control
+Environment=PATH=/opt/apexpinn/controlenv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=/opt/apexpinn/controlenv/bin/python -m apexpinn.cloud.ec2_runner run --spec /opt/apexpinn/handoff/launch_spec.json
+ExecStopPost=/usr/sbin/shutdown -h now
+RuntimeMaxSec=24h
+TimeoutStopSec=300
+KillMode=mixed
+Restart=no
+UNIT
+systemctl daemon-reload
+# Deliberately do not enable/start the training service.
+export PYTHONPATH=/opt/apexpinn/handoff/control
+export PATH=/opt/apexpinn/controlenv/bin:$PATH
+/opt/apexpinn/controlenv/bin/python -m apexpinn.cloud.ec2_runner setup --spec /opt/apexpinn/handoff/launch_spec.json
+echo 'SETUP COMPLETE. GPU checked. Training NOT RUN. Host will stop; EBS remains.'
