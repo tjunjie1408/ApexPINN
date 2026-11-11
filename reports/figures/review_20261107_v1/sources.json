@@ -1,0 +1,35 @@
+{
+  "builder_sha256": "a25efbc2054ec249528fbb44d623eaeef621168c2d8a4050b36a806c02c2ff07",
+  "model_execution": false,
+  "output_sha256": {
+    "01_calibration_overview.pdf": "edd8659bc4323a52a25387aca1e27695c1012ef6ad3f0d2e314948a1eec407ee",
+    "01_calibration_overview.png": "857fc81e1dc081c1c8053d72e0920f2ec1b00bf9c9d5b79c49f25308dde154cf",
+    "01_calibration_overview.svg": "a22320d8c01f29ae1b48c86ae75187e2704c770d5389ad9b8f941064fe9c9112",
+    "02_circuit_coverage.pdf": "e75df6a294413d2d6b5e2b6e9712f3066ae48a1b5e3a424953f7e94e2e73b1ee",
+    "02_circuit_coverage.png": "2bad51d6c4794207f95ee872208b7de19daddc47892d8a4c99cb575d9cf2bd58",
+    "02_circuit_coverage.svg": "963fde4959b939aa35b57d1e275289d9e008f90b6c6f6c0d6ca0b0d7a7696bb7",
+    "03_original_accuracy.pdf": "31db56126e9417e08120dc076e1ff436cd5449cb8c9b74f4741b8eaff33ed4a2",
+    "03_original_accuracy.png": "ebb789740c079cfc099f832f5fbd4eb816ce0cc2aba973a92b89a0fdcf3b284f",
+    "03_original_accuracy.svg": "a16e8199389de3595f0dfe078bf22ce17df80d83fbbfa221159fff3d336363fc",
+    "README.md": "6ea8e5d0439e68ade543aa75abdcbec58c2dbcfc6a36a9a47cc2bf6e2175cfb0",
+    "budget.json": "b74b0cca8c10996e521838ac10caa40da6d66c36eecad53108e09d5f8fe6b95f",
+    "chart_data.json": "9f13a5ce99238ac0eb7a450ca5738e7b58222eba9251f1254c802f331d17395c"
+  },
+  "source_sha256": {
+    "data/colab_exports/t13_mid_three_job_review_v1/review.json": "eae49b543bf9c3f1f9c798e18d41deeb10fb2f45ac2ab0dc5e29107e52b087f8",
+    "data/colab_imports/calib_clean_m2_f3_mid_v1_checkpoint_01/evaluation.json": "261b74423a1ab11583c301f08f143db6ad3659ace95f416c5e1bb5cfb227157c",
+    "data/colab_imports/calib_clean_m2_f3_mid_v1_completion_check.json": "d1db381bfca1e220178e240675b9e4b3038f1b3b68e0fdb26c896d6df1901721",
+    "data/colab_imports/t13_m2_f2_mid_run01_completion_check.json": "ae6ce2049aee0dcf3e3be996bb3b7e7dc74765c1fdca90c564c635eac9cb597c",
+    "data/colab_imports/t13_m2_f3_mid_run01_completion_check.json": "0d43bcef3f192fc8d300ffb27e2ce1ba0c0fd4f9cc9b500d5a8e65d0a1bac2d2",
+    "data/colab_imports/t13_m2_f3_mid_run01_verification_audit.json": "53298f81d14b7887110ab4697b94e9edee47edb2569408e3750c35eebdc622fe"
+  },
+  "style": "Independent Matplotlib implementation; no upstream code copied",
+  "style_adaptations": "Scoped rcParams, 15pt compact-panel text, wider panels, explicit sample/missing labels and shared 90%-centered diverging coverage scale",
+  "style_guides_read": [
+    "https://github.com/ChenLiu-1996/figures4papers/blob/main/scientific-figure-making/SKILL.md",
+    "https://github.com/ChenLiu-1996/figures4papers/blob/main/scientific-figure-making/references/design-theory.md",
+    "https://github.com/ChenLiu-1996/figures4papers/blob/main/scientific-figure-making/references/api.md",
+    "https://github.com/ChenLiu-1996/figures4papers/blob/main/scientific-figure-making/references/common-patterns.md"
+  ],
+  "style_reference": "https://github.com/ChenLiu-1996/figures4papers"
+}

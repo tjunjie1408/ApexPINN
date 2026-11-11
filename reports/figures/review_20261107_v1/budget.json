@@ -1,0 +1,44 @@
+{
+  "balance_units": 100,
+  "evidence": "Assumed user-reported balance/rate; inferred arithmetic; not live billing",
+  "hours_above_reserve": 41.23711340206186,
+  "limits": "Assumed scenarios, not bounds or confidence intervals. Compilation, fold size, interruptions, installation and idle allocated time can add cost. Refresh balance before each job.",
+  "observed_runtime_context": {
+    "F2_v1_complete_process_hours": 9.112652539449167,
+    "F3_v1_successful_attempt_hours": 5.609945923159166,
+    "F3_v1_timing_limit": "Earlier attempt incomplete; successful attempt is not total study time",
+    "clean_pilot_limit": "25 fits and different training population; not a v1 runtime benchmark",
+    "clean_pilot_successful_attempt_hours": 10.584451100128334
+  },
+  "reserve_is": "Editable operating assumption, not a research setting or spending cap",
+  "reserve_units": 20,
+  "scenarios": [
+    {
+      "hours": 24,
+      "hours_per_job": 8,
+      "jobs": 3,
+      "preserves_reserve": true,
+      "remaining_units": 53.44,
+      "units": 46.56
+    },
+    {
+      "hours": 36,
+      "hours_per_job": 12,
+      "jobs": 3,
+      "preserves_reserve": true,
+      "remaining_units": 30.159999999999997,
+      "units": 69.84
+    },
+    {
+      "hours": 48,
+      "hours_per_job": 16,
+      "jobs": 3,
+      "preserves_reserve": false,
+      "remaining_units": 6.8799999999999955,
+      "units": 93.12
+    }
+  ],
+  "scope": "Three remaining M2/mid jobs F4-F6, one at a time; not the full 104-job matrix",
+  "total_hours": 51.54639175257732,
+  "units_per_hour": 1.94
+}
