@@ -1,5 +1,42 @@
 # Colab training and result handoff
 
+## Current selection
+
+The pending selected job is M2/F6/mid/main. M2/mid artifacts through F5 are already imported and
+reviewed locally. Use the [notebook index](../README.md) to choose the current route. Kaggle is the
+latest prepared alternative; the Colab L4/Drive route remains available if explicitly selected.
+Do not rerun completed folds or the clean-calibration pilot as routine notebook setup.
+
+## Historical M1/F1 handoff and recovered M2/F1 result
+
+The recorded M1/F1 handoff used `train_next_m1_v4.ipynb`, `apexpinn_t13_code_update_v4.zip` and its receipt in
+Drive `apexpinn/inputs`. It reuses the original input ZIP parts. The notebook verifies both archives,
+restores into a new workspace and selects M1/F1/mid/main with run ID `t13_m1_f1_mid_patch01`.
+This describes the earlier handoff, not an instruction to launch another M1/F1 run.
+
+The update contains the existing recovered M2/F1/mid evaluation and its original forecasts. The
+collector accepts it through `--recovered-review` after checking method/config/Gold, numerical source,
+fit budgets, diagnostics and forecast identity. Repeated job identities are rejected. The original
+failed subprocess and the recovered evaluation keep their separate provenance.
+
+Training and restart commands use `apexpinn.cloud.process` to preserve stdout/stderr and per-attempt
+exit records in `MyDrive/apexpinn/logs/RUN_ID/`. Checkpoint steps also appear in this log. A failed
+command prints its process-record path. Each invocation receives new log files.
+
+Prepare a separately versioned update from saved artifacts with a small file-packaging command:
+
+```powershell
+uv --no-cache run --no-sync python scripts/prepare_colab_patch.py `
+  --recovery data/colab_imports/t13_run01_checkpoint_01_report_with_s4/review.json `
+  --original-run data/colab_imports/t13_cloud_v1_run01_checkpoint_01 `
+  --out data/colab_exports/NEW_HANDOFF --tag NEW_VERSION
+```
+
+Use lowercase letters, digits, underscore or hyphen for the version. Existing handoff directories
+are refused. Upload the generated notebook, update ZIP and receipt to Drive inputs. This command
+copies source and saved forecasts. Model execution and long compute tasks require Colab and a
+separate user order. H2 and the remaining scientific T13 work follow the recorded project plan.
+
 Use [train_folds.ipynb](train_folds.ipynb) on a Google-hosted GPU. The agent prepares code and reviews
 returned artifacts locally. The user launches every training cell. No local CPU/GPU/WSL fitting,
 fitting tests, local-runtime connection or notebook execution is authorized.
@@ -118,3 +155,91 @@ Notebook schema, cell syntax, transport, guard behavior, serialization and mocke
 checked locally. No local fitting test is allowed. Remote installation/GPU behavior, real optimizer
 continuation parity, actual T13 forecasts and Drive transfer remain NOT RUN until user execution.
 Original research records and local planning documents must remain unchanged.
+
+## Remaining M2/mid folds with a compute-unit budget
+
+`train_m2_remaining_mid.ipynb` defaults to F4 and launches exactly one original T13 v1 job.
+After exporting/reviewing that fold, select F5 and then F6 in separate executions. Each has its own
+run ID and 20 tuning trials, five calibration fits and five final members. It reuses the existing
+v4 input overlay and source-matched restart receipt; no new restart fits or training-source changes.
+
+Refresh AVAILABLE_UNITS from your account before each new fold. The user-reported 100 units at
+1.94 units/hour is 51.55 L4 hours. A 12-hour-per-fold planning assumption gives 69.84 units for
+three folds, leaving 30.16; 8/16-hour scenarios give 46.56/93.12 units. These are assumptions,
+not runtime bounds. The editable 20-unit reserve is an operating preference, not a billing cap.
+Setup, compilation, interruptions and idle allocated time can add cost. The full 104-job remainder
+is not scheduled by this notebook. See `reports/figures/review_20261107_v1/budget.json`.
+
+The launch cell skips an existing completed job and uses a same-VM Linux `flock` to reject a
+concurrent launch of that run ID. It cannot coordinate separate VMs. Use one runtime per run ID.
+Training, checkpointing and logging remain on Colab/Drive. Export validation checks the selected
+job before packing. Release the runtime manually after the export is safe; no automatic next job
+or runtime action is performed. Local checks are structural/AST and mocked no-fit execution only.
+
+## Separate clean M2 calibration pilot
+
+`calibration_clean_v1.ipynb` prepares a post-hoc, separately versioned experiment declared in
+`configs/calibration_clean_v1.yaml` and explained in `docs/calibration_clean_v1.md`. Leave the current
+M2/F3/mid T13 v1 run unchanged. The new notebook refuses to launch training until that run's completed
+job record exists. Its code ZIP must be present in `MyDrive/apexpinn/inputs` before setup.
+
+The default pilot reserves F3 for testing, F4 for tuning validation and F5 for independent calibration.
+It requires 20 new tuning trials and five final fits, each with 1000 updates, on user-launched Colab
+L4/float64/Python 3.12. The same five final models predict calibration and test data; no refit follows
+calibration. Four horizon-specific factors transform the entire mixture around its unchanged mean.
+Compare raw/calibrated coverage, width and CRPS by circuit and horizon. No coverage guarantee or
+T13 v1/G2 completion is implied. Real execution and empirical effectiveness remain **NOT RUN**.
+
+The runner checkpoints fits and reuses hash-verified forecast bundles. Numerical evaluation is saved
+before plotting; `scripts/run_calibration.py --out RUN_DIRECTORY --report-only` rebuilds the saved-score
+report without loading models. Restore any missing or corrupted source artifact before recovery.
+Use a new output directory when method, source, data or environment identity changes.
+
+## Saved M1 offset and shape diagnostic
+
+`diagnose_m1_offsets.ipynb` is a prepared, unexecuted notebook for the completed
+`t13_m1_f1_mid_patch01` run. Open it on a hosted L4 GPU. It reuses the approved input parts and
+the separate `apexpinn_m1_diagnostic_v1.zip` code update in `MyDrive/apexpinn/inputs`.
+The user launches it; the agent does not allocate a runtime or execute models.
+
+The notebook calls `scripts/diagnose_m1.py`. It loads the five calibration and five final model
+checkpoints and their training offsets, verifies source/package/data/state identities, and compares
+the existing training residuals with residuals after closed-form offset profiling. Optimizer state
+is deserialized as data; no gradients or optimizer updates are executed. Plots show the offset-error
+decomposition and a fixed training-curve example. Profiled training errors use all training labels
+and must not replace held-out forecasts or be reported as new fitted models.
+
+Reports, per-member JSON, plots and the completion receipt go to a new folder under
+`MyDrive/apexpinn/diagnostics/m1_offsets_f1_mid_v1`. Original checkpoints and scores remain intact.
+The final cell exports only this diagnostic and its process logs. Source or package mismatches stop
+the command; do not respond by rerunning training. If all ten per-member JSON files exist and only
+plotting failed, recover the report from those files instead of repeating model inference.
+
+Rebuild a handoff locally without model execution:
+
+```powershell
+uv run --no-sync python scripts/prepare_m1_diagnostic.py --out data/colab_exports/NEW_DIAGNOSTIC_HANDOFF
+```
+
+Local verification covers pure offset arithmetic, guard ordering, notebook syntax and payload hashes.
+Saved-model restoration, GPU inference and chart rendering remain **NOT RUN** until user execution.
+
+The original v1 handoff completed its ten numerical checks on 2026-11-05, then failed while importing
+Matplotlib because Colab exported an inline backend into the isolated environment. That historical
+handoff is preserved. The current renderer sets `MPLBACKEND=Agg` before importing Matplotlib and
+writes numerical evidence separately from plot completion. Regenerate a new handoff before future
+model diagnostics; the already-uploaded v1 ZIP retains its original bytes.
+
+To recover a plotting-only failure, download all ten member JSON files and the original process exit
+receipt. From the current checkout, run this **artifact-only** command, which imports no JAX and
+does not load models or checkpoints:
+
+```powershell
+uv run --no-sync python scripts/diagnose_m1.py --render-only `
+  --saved PATH_TO_SAVED_MEMBER_JSONS --run PATH_TO_IMPORTED_COMPLETED_M1_RUN `
+  --out NEW_REPORT_DIRECTORY --process-status PATH_TO_ORIGINAL_EXIT_RECEIPT
+```
+
+Recovery verifies each fit/batch identity and the offset/shape arithmetic before rendering. Its
+`RECOVERED_DIAGNOSTIC_COMPLETE` receipt retains the original failed exit. It does not convert that
+process into a successful execution or replace any forecast score.
