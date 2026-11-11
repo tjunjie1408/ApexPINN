@@ -1,0 +1,37 @@
+method_id: apexpinn.calibration_clean/v1
+status: declared_before_calibration_pilot_results
+motivation: post_hoc_extension_after_T13_v1_F1_F2_coverage_review
+base_training_method: configs/t13_cloud_v1.yaml
+base_method_sha256: e4f5b25d811d1f395008dbf948d04c17d99ee58302fd8d340ad01a1ce5f1e485
+scope: M2_only_separate_from_T13_v1_job_budget
+training_location: colab_gpu_only
+float64: true
+model: M2
+default_outer_fold: F3
+default_phi: mid
+horizons: [1, 3, 5, 10]
+primary_horizon: 5
+ensemble_members: 5
+tuning_trials: 20
+final_fits: 5
+extra_calibration_fits: 0
+seed: 0
+split: outer_i_tuning_validation_i_plus_1_calibration_i_plus_2_cyclic
+normalization: refit_on_each_stage_training_circuits_only
+selection: minimum_inner_h5_RMSE_then_trial_index
+raw_noise: final_member_training_residual_RMSE
+refit_after_calibration: false
+calibrator:
+  estimator: weighted_empirical_90pct_interval_ratio
+  target_level: 0.9
+  weighting: equal_event_then_equal_origin_within_horizon
+  minimum_events_per_horizon: 2
+  factor_floor: 0.000001
+  transform: affine_entire_equal_weight_mixture_about_unchanged_mean
+  context_dependence: none_in_v1
+report:
+  intervals: [0.5, 0.9]
+  strata: circuit_and_horizon
+  raw_and_calibrated: same_five_models_same_targets
+  baseline_comparison: not_a_physics_only_effect_training_population_differs_from_T13_v1
+  coverage_guarantee: none_under_circuit_shift_and_dependent_lap_origins
